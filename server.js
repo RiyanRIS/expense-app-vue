@@ -4,7 +4,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 
-const Note = require("./models/Note");
+const Expense = require("./models/Expense");
+const Category = require("./models/Category");
+const PaymentSource = require("./models/PaymentSource");
 
 const app = express();
 app.use(cors());
@@ -14,7 +16,7 @@ app.use(express.static(path.join(__dirname, "public")));
 const DB_USERNAME = process.env.DB_USERNAME;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_CLUSTER = process.env.DB_CLUSTER;
-const DB_NAME = process.env.DB_NAME || "catatanbelanja.780207093";
+const DB_NAME = process.env.DB_NAME || "riyanris";
 const PORT = process.env.PORT || 3000;
 
 const mongoUri = `mongodb+srv://${DB_USERNAME}:${encodeURIComponent(
@@ -30,45 +32,43 @@ mongoose
   });
 
 // API routes
-app.get("/api/notes", async (req, res) => {
+app.get("/api/expenses", async (req, res) => {
   try {
-    const notes = await Note.find().sort({ _id: -1 }).limit(200);
-    res.json(notes);
+    const expenses = await Expense.find().sort({ _id: -1 }).limit(200);
+    res.json(expenses);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get("/api/notes/:id", async (req, res) => {
+app.get("/api/expenses/:id", async (req, res) => {
   try {
-    const note = await Note.findById(req.params.id);
-    if (!note) return res.status(404).json({ error: "Not found" });
-    res.json(note);
+    const expense = await Expense.findById(req.params.id);
+    if (!expense) return res.status(404).json({ error: "Not found" });
+    res.json(expense);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post("/api/notes", async (req, res) => {
+app.post("/api/expenses", async (req, res) => {
   try {
     const payload = req.body;
-    if (payload["Input Date"] || payload["Input Time"]) {
-      payload.InputDate = payload["Input Date"];
-      payload.InputTime = payload["Input Time"];
-      delete payload["Input Date"];
-      delete payload["Input Time"];
-    }
-    const note = new Note(payload);
-    await note.save();
-    res.status(201).json(note);
+    const now = new Date();
+    const gmt7 = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    payload.input_date = payload.input_date || gmt7.toISOString().split('T')[0];
+    payload.input_time = payload.input_time || gmt7.toISOString().split('T')[1].split('.')[0];
+    const expense = new Expense(payload);
+    await expense.save();
+    res.status(201).json(expense);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-app.put("/api/notes/:id", async (req, res) => {
+app.put("/api/expenses/:id", async (req, res) => {
   try {
-    const updated = await Note.findByIdAndUpdate(req.params.id, req.body, {
+    const updated = await Expense.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
     if (!updated) return res.status(404).json({ error: "Not found" });
@@ -78,10 +78,82 @@ app.put("/api/notes/:id", async (req, res) => {
   }
 });
 
-app.delete("/api/notes/:id", async (req, res) => {
+app.delete("/api/expenses/:id", async (req, res) => {
   try {
-    const deleted = await Note.findByIdAndDelete(req.params.id);
+    const deleted = await Expense.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: "Not found" });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/categories", async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/payment-sources", async (req, res) => {
+  try {
+    const paymentSources = await PaymentSource.find();
+    res.json(paymentSources);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/categories", async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Category name is required" });
+    }
+    const newCategory = new Category({ name });
+    await newCategory.save();
+    res.status(201).json(newCategory);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete("/api/categories/:name", async (req, res) => {
+  try {
+    const { name } = req.params;
+    const deleted = await Category.findOneAndDelete({ name });
+    if (!deleted) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/payment-sources", async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Payment source name is required" });
+    }
+    const newPaymentSource = new PaymentSource({ name });
+    await newPaymentSource.save();
+    res.status(201).json(newPaymentSource);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete("/api/payment-sources/:name", async (req, res) => {
+  try {
+    const { name } = req.params;
+    const deleted = await PaymentSource.findOneAndDelete({ name });
+    if (!deleted) {
+      return res.status(404).json({ error: "Payment source not found" });
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

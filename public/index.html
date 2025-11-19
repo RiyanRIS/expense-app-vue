@@ -4,63 +4,123 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Expense View</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="plugins/tailwindcss/tailwindcss.js"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class',
-      }
+        darkMode: "class",
+      };
     </script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="plugins/vue/vue.global.js"></script>
+    <link
+      rel="stylesheet"
+      href="plugins/fontawesome/css/all.min.css"
+    />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#4F46E5" />
   </head>
   <body>
     <div id="app" class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div class="max-w-xl mx-auto p-4">
         <header class="mb-4 flex items-center justify-between">
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Expense View</h1>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Expense View
+          </h1>
           <div class="flex items-center gap-2">
-            <i @click="toggleDark" :class="[darkMode ? 'fas fa-sun text-white' : 'fas fa-moon', 'text-lg cursor-pointer']"></i>
+            <i
+              @click="toggleDark"
+              :class="[darkMode ? 'fas fa-sun text-white' : 'fas fa-moon', 'text-lg cursor-pointer']"
+            ></i>
           </div>
         </header>
 
         <main v-if="currentTab==='home'" class="space-y-4">
           <section class="grid grid-cols-2 gap-3">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-              <div class="text-xs text-gray-500 dark:text-gray-400">Total Hari Ini</div>
-              <div class="text-xl font-semibold text-gray-900 dark:text-gray-100">Rp {{ formatNumber(totalToday) }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Total Hari Ini
+              </div>
+              <div
+                class="text-xl font-semibold text-gray-900 dark:text-gray-100"
+              >
+                Rp {{ formatNumber(totalToday) }}
+              </div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-              <div class="text-xs text-gray-500 dark:text-gray-400">Total Bulan Ini</div>
-              <div class="text-xl font-semibold text-gray-900 dark:text-gray-100">Rp {{ formatNumber(totalMonth) }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Total Bulan Ini
+              </div>
+              <div
+                class="text-xl font-semibold text-gray-900 dark:text-gray-100"
+              >
+                Rp {{ formatNumber(totalMonth) }}
+              </div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-              <div class="text-xs text-gray-500 dark:text-gray-400">Kategori Paling Sering</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ topCategory }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Kategori Paling Sering
+              </div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ topCategory }}
+              </div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-              <div class="text-xs text-gray-500 dark:text-gray-400">Sumber Dana Paling Sering</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ topSource }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Sumber Dana Paling Sering
+              </div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ topSource }}
+              </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow col-span-2">
-              <div class="text-xs text-gray-500 dark:text-gray-400">Toko Paling Sering</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ topStore }}</div>
+            <div
+              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow col-span-2"
+            >
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Toko Paling Sering
+              </div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ topStore }}
+              </div>
             </div>
           </section>
 
           <section class="bg-white dark:bg-gray-800 rounded-xl shadow">
             <div class="flex items-center justify-between p-4">
-              <h2 class="font-semibold text-gray-900 dark:text-gray-100">Transaksi Terbaru</h2>
-              <button @click="manualRefresh" :class="['rounded text-white', accentBgClass]"><i class="fas fa-sync-alt p-2"></i></button>
+              <h2 class="font-semibold text-gray-900 dark:text-gray-100">
+                Transaksi Terbaru
+              </h2>
+              <button
+                @click="manualRefresh"
+                :class="['rounded text-gray-900 dark:text-white']"
+              >
+                <i class="fas fa-sync-alt"></i>
+              </button>
             </div>
             <ul class="divide-y divide-gray-100 dark:divide-gray-700">
-              <li v-for="t in latestTen" :key="t._id" @click="showDetail(t._id)" class="p-4 flex items-center justify-between cursor-pointer">
+              <li
+                v-for="t in latestTen"
+                :key="t._id"
+                @click="showDetail(t._id)"
+                class="p-4 flex items-center justify-between cursor-pointer"
+              >
                 <div>
-                  <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ t.Item }}</div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">{{ t.Store }} • {{ t.Category }} • {{ t["Payment Source"] }}</div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">{{ timeAgo(t["Input Date"] || t.Date, t["Input Time"]) }}</div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ t.item }}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t.store }} • {{ t.category }} • {{ t.payment_source }}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ timeAgo(t.input_date || t.Date, t.input_time) }}
+                  </div>
                 </div>
                 <div class="text-right">
-                  <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">Rp {{ formatNumber(toNumber(t.Amount)) }}</div>
+                  <div
+                    class="text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap"
+                  >
+                    Rp {{ formatNumber(toNumber(t.amount)) }}
+                  </div>
                 </div>
               </li>
             </ul>
@@ -71,130 +131,273 @@
           <section class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
             <form @submit.prevent="submitNew" class="space-y-3">
               <div class="grid grid-cols-2 gap-2">
-                <input v-model="newForm.Date" type="date" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100" />
-                <input v-model="newForm.Amount" type="number" placeholder="Jumlah" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100" />
+                <input
+                  v-model="newForm.date"
+                  type="date"
+                  required
+                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                />
+                <input
+                  v-model="newForm.amount"
+                  type="number"
+                  placeholder="Jumlah"
+                  required
+                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                />
               </div>
-              <input v-model="newForm.Store" placeholder="Toko" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100" />
-              <input v-model="newForm.Item" placeholder="Item" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100" />
+              <input
+                v-model="newForm.store"
+                placeholder="Toko"
+                required
+                class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+              />
+              <input
+                v-model="newForm.item"
+                placeholder="Item"
+                required
+                class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+              />
               <div class="grid grid-cols-2 gap-2">
-                <select v-model="newForm.Category" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
-                  <option>Makanan & Minuman</option>
-                  <option>Transportasi</option>
-                  <option>Belanja Bulanan</option>
-                  <option>Hiburan</option>
-                  <option>Lain-lain</option>
+                <select
+                  v-model="newForm.category"
+                  required
+                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                >
+                  <option v-for="category in categories" :key="category">
+                    {{ category }}
+                  </option>
                 </select>
-                <select v-model="newForm.payment_source" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
-                  <option>Bank JAGO</option>
-                  <option>Tunai</option>
-                  <option>OVO</option>
-                  <option>Gopay</option>
-                  <option>DANA</option>
+                <select
+                  v-model="newForm.payment_source"
+                  required
+                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                >
+                  <option v-for="source in paymentSources" :key="source">
+                    {{ source }}
+                  </option>
                 </select>
               </div>
-              <button :class="['w-full py-2 rounded text-white', accentBgClass]">Simpan</button>
+              <button
+                :class="['w-full py-2 rounded text-white', accentBgClass]"
+              >
+                Simpan
+              </button>
             </form>
           </section>
         </main>
 
         <main v-if="currentTab==='detail'" class="space-y-4">
-          <section v-if="selectedExpense" class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3">
+          <section
+            v-if="selectedExpense"
+            class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+          >
             <div class="flex items-center justify-between">
-              <h2 class="font-semibold text-gray-900 dark:text-gray-100">Detail Pengeluaran</h2>
-              <button @click="currentTab = 'home'" class="text-gray-500 dark:text-gray-400"><i class="fas fa-times"></i></button>
+              <h2 class="font-semibold text-gray-900 dark:text-gray-100">
+                Detail Pengeluaran
+              </h2>
+              <button
+                @click="currentTab = 'home'"
+                class="text-gray-500 dark:text-gray-400"
+              >
+                <i class="fas fa-times"></i>
+              </button>
             </div>
             <div>
               <div class="text-xs text-gray-500 dark:text-gray-400">Item</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedExpense.Item }}</div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedExpense.item }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-500 dark:text-gray-400">Jumlah</div>
-              <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Rp {{ formatNumber(toNumber(selectedExpense.Amount)) }}</div>
+              <div
+                class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+              >
+                Rp {{ formatNumber(toNumber(selectedExpense.amount)) }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-500 dark:text-gray-400">Toko</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedExpense.Store }}</div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedExpense.store }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">Kategori</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedExpense.Category }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Kategori
+              </div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedExpense.category }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">Sumber Pembayaran</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedExpense['Payment Source'] }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Sumber Pembayaran
+              </div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedExpense.payment_source }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">Tanggal</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedExpense.Date }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Tanggal
+              </div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedExpense.input_date }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">Waktu Input</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ timeAgo(selectedExpense['Input Date'] || selectedExpense.Date, selectedExpense['Input Time']) }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Waktu Input
+              </div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedExpense.input_time }}
+              </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
-              <button @click="editExpense(selectedExpense)" :class="['w-full py-2 rounded text-white', accentBgClass]">Edit</button>
-              <button @click="deleteExpense(selectedExpense._id.$oid)" class="w-full py-2 rounded bg-red-600 text-white">Hapus</button>
+              <button
+                @click="editExpense(selectedExpense)"
+                :class="['w-full py-2 rounded text-white', accentBgClass]"
+              >
+                Edit
+              </button>
+              <button
+                @click="deleteExpense(selectedExpense._id.$oid)"
+                class="w-full py-2 rounded bg-red-600 text-white"
+              >
+                Hapus
+              </button>
             </div>
           </section>
+
+          <div v-else class="text-center text-gray-500 dark:text-gray-400 pt-4">
+            Tidak ada pengeluaran yang sedang dipilih.
+          </div>
         </main>
 
         <main v-if="currentTab==='edit'" class="space-y-4">
-          <section v-if="editedExpense" class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+          <section
+            v-if="editedExpense"
+            class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow"
+          >
             <form @submit.prevent="submitEdit" class="space-y-3">
               <div class="flex items-center justify-between">
-                <h2 class="font-semibold text-gray-900 dark:text-gray-100">Edit Pengeluaran</h2>
-                <button @click="currentTab = 'detail'" class="text-gray-500 dark:text-gray-400"><i class="fas fa-times"></i></button>
+                <h2 class="font-semibold text-gray-900 dark:text-gray-100">
+                  Edit Pengeluaran
+                </h2>
+                <button
+                  @click="currentTab = 'detail'"
+                  class="text-gray-500 dark:text-gray-400"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
               </div>
               <div class="grid grid-cols-2 gap-2">
-                <input v-model="editedExpense.Date" type="date" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100" />
-                <input v-model="editedExpense.Amount" type="number" placeholder="Jumlah" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100" />
+                <input
+                  v-model="editedExpense.date"
+                  type="date"
+                  required
+                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                />
+                <input
+                  v-model="editedExpense.amount"
+                  type="number"
+                  placeholder="Jumlah"
+                  required
+                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                />
               </div>
-              <input v-model="editedExpense.Store" placeholder="Toko" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100" />
-              <input v-model="editedExpense.Item" placeholder="Item" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100" />
+              <input
+                v-model="editedExpense.store"
+                placeholder="Toko"
+                required
+                class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+              />
+              <input
+                v-model="editedExpense.item"
+                placeholder="Item"
+                required
+                class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+              />
               <div class="grid grid-cols-2 gap-2">
-                <select v-model="editedExpense.Category" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
-                  <option>Makanan & Minuman</option>
-                  <option>Transportasi</option>
-                  <option>Belanja Bulanan</option>
-                  <option>Hiburan</option>
-                  <option>Lain-lain</option>
+                <select
+                  v-model="editedExpense.category"
+                  required
+                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                >
+                  <option v-for="category in categories" :key="category">
+                    {{ category }}
+                  </option>
                 </select>
-                <select v-model="editedExpense['Payment Source']" required class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
-                  <option>Bank JAGO</option>
-                  <option>Tunai</option>
-                  <option>OVO</option>
-                  <option>Gopay</option>
-                  <option>DANA</option>
+                <select
+                  v-model="editedExpense.payment_source"
+                  required
+                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                >
+                  <option v-for="source in paymentSources" :key="source">
+                    {{ source }}
+                  </option>
                 </select>
               </div>
-              <button :class="['w-full py-2 rounded text-white', accentBgClass]">Simpan Perubahan</button>
+              <button
+                :class="['w-full py-2 rounded text-white', accentBgClass]"
+              >
+                Simpan Perubahan
+              </button>
             </form>
           </section>
+          <div v-else class="text-center text-gray-500 dark:text-gray-400 pt-4">
+            Tidak ada pengeluaran yang sedang diedit.
+          </div>
         </main>
 
         <main v-if="currentTab==='settings'" class="space-y-4">
-          <section class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3">
+          <section
+            class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+          >
             <div class="flex items-center gap-3">
-              <img :src="user.photo" alt="user" class="w-12 h-12 rounded-full object-cover" />
+              <img
+                :src="user.photo"
+                alt="user"
+                class="w-12 h-12 rounded-full object-cover"
+              />
               <div>
-                <div class="font-semibold text-gray-900 dark:text-gray-100">{{ user.name }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">Level {{ user.level }}</div>
+                <div class="font-semibold text-gray-900 dark:text-gray-100">
+                  {{ user.name }}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  Level {{ user.level }}
+                </div>
               </div>
             </div>
           </section>
-          
-          <section class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4">
+
+          <section
+            class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
+          >
             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
               <li class="flex items-center justify-between py-3">
                 <span class="text-gray-900 dark:text-gray-100">Tema Gelap</span>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" v-model="darkMode" @change="toggleDark" class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                  <input
+                    type="checkbox"
+                    v-model="darkMode"
+                    @change="toggleDark"
+                    class="sr-only peer"
+                  />
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                  ></div>
                 </label>
               </li>
               <li class="flex items-center justify-between py-3">
-                <span class="text-gray-900 dark:text-gray-100">Warna Aksen</span>
-                <select v-model="tone" :class="['px-1.5 py-1 border rounded text-white', accentBgClass]">
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Warna Aksen</span
+                >
+                <select
+                  v-model="tone"
+                  :class="['px-1.5 py-1 border rounded text-white', accentBgClass]"
+                >
                   <option value="indigo">Indigo</option>
                   <option value="blue">Blue</option>
                   <option value="green">Green</option>
@@ -202,33 +405,201 @@
                   <option value="amber">Amber</option>
                 </select>
               </li>
-              <li class="flex items-center justify-between py-3" @click="action('profil')">
-                <span class="text-gray-900 dark:text-gray-100">Atur Profil</span>
-                <i class="fas fa-chevron-right text-gray-400"></i>
-              </li>
-              <li class="flex items-center justify-between py-3" @click="action('lupa')">
-                <span class="text-gray-900 dark:text-gray-100">Lupa Password</span>
+              <li
+                class="flex items-center justify-between py-3"
+                @click="clearCacheAndReload"
+              >
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Hapus Cache</span
+                > 
                 <i class="fas fa-chevron-right text-gray-400"></i>
               </li>
             </ul>
           </section>
 
-          <section class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4">
+          <section
+            class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
+          >
             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-              <li class="flex items-center justify-between py-3" @click="action('logout')">
-                <span class="text-gray-900 dark:text-gray-100">Logout</span>
+              <li
+                class="flex items-center justify-between py-3"
+                @click="changeTab('category')"
+              >
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Atur Kategori</span
+                >
+                <i class="fas fa-chevron-right text-gray-400"></i>
+              </li>
+              <li
+                class="flex items-center justify-between py-3"
+                @click="changeTab('payment-source')"
+              >
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Atur Sumber Dana</span
+                >
+                <i class="fas fa-chevron-right text-gray-400"></i>
+              </li>
+            </ul>
+          </section>
+
+          <section
+            class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
+          >
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+              <li
+                class="flex items-center justify-between py-3"
+                @click="action('profil')"
+              >
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Atur Profil</span
+                >
+                <i class="fas fa-chevron-right text-gray-400"></i>
+              </li>
+              <li
+                class="flex items-center justify-between py-3"
+                @click="action('lupa')"
+              >
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Lupa Password</span
+                >
+                <i class="fas fa-chevron-right text-gray-400"></i>
+              </li>
+              <li
+                class="flex items-center justify-between py-3"
+                @click="action('logout')"
+              >
+                <span class="text-red-600 hover:underline dark:text-red-400"
+                  >Logout</span
+                >
                 <i class="fas fa-chevron-right text-gray-400"></i>
               </li>
             </ul>
           </section>
         </main>
+
+        <main v-if="currentTab==='category'" class="space-y-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
+            <h3
+              class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+            >
+              Tambah Kategori Baru
+            </h3>
+            <form @submit.prevent="addCategory" class="flex space-x-2">
+              <input
+                type="text"
+                v-model="newCategoryName"
+                placeholder="Nama Kategori Baru"
+                required
+                class="flex-grow p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+              />
+              <button
+                type="submit"
+                :class="['py-2', 'px-4', 'border', 'border-transparent', 'rounded-md', 'shadow-sm', 'text-white', 'font-semibold', accentBgClass, 'hover:opacity-90', 'focus:outline-none', 'focus:ring-2', 'focus:ring-offset-2', accentBgClass]"
+              >
+                Tambah
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <h3
+              class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+            >
+              Daftar Kategori
+            </h3>
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+              <li
+                v-for="category in categories"
+                :key="category"
+                class="flex items-center justify-between py-2"
+              >
+                <span class="text-gray-900 dark:text-gray-100"
+                  >{{ category }}</span
+                >
+                <button
+                  @click="deleteCategory(category)"
+                  class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600"
+                >
+                  Hapus
+                </button>
+              </li>
+            </ul>
+          </div>
+        </main>
+
+        <main v-if="currentTab==='payment-source'" class="space-y-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
+            <h3
+              class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+            >
+              Tambah Sumber Dana Baru
+            </h3>
+            <form @submit.prevent="addPaymentSource" class="flex space-x-2">
+              <input
+                type="text"
+                v-model="newPaymentSourceName"
+                placeholder="Nama Sumber Dana Baru"
+                required
+                class="flex-grow p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+              />
+              <button
+                type="submit"
+                :class="['py-2', 'px-4', 'border', 'border-transparent', 'rounded-md', 'shadow-sm', 'text-white', 'font-semibold', accentBgClass, 'hover:opacity-90', 'focus:outline-none', 'focus:ring-2', 'focus:ring-offset-2', accentBgClass]"
+              >
+                Tambah
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <h3
+              class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+            >
+              Daftar Sumber Dana
+            </h3>
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+              <li
+                v-for="source in paymentSources"
+                :key="source"
+                class="flex items-center justify-between py-2"
+              >
+                <span class="text-gray-900 dark:text-gray-100"
+                  >{{ source }}</span
+                >
+                <button
+                  @click="deletePaymentSource(source)"
+                  class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600"
+                >
+                  Hapus
+                </button>
+              </li>
+            </ul>
+          </div>
+        </main>
       </div>
 
-      <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <nav
+        class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+      >
         <div class="max-w-xl mx-auto grid grid-cols-3">
-          <button @click="changeTab('home', false)" :class="['py-3 text-sm flex flex-col items-center', currentTab==='home' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"><i class="fas fa-home text-lg"></i><span>Home</span></button>
-          <button @click="changeTab('create', false)" :class="['py-3 text-sm flex flex-col items-center', currentTab==='create' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"><i class="fas fa-plus-circle text-lg"></i><span>Create New</span></button>
-          <button @click="changeTab('settings', false)" :class="['py-3 text-sm flex flex-col items-center', currentTab==='settings' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"><i class="fas fa-cog text-lg"></i><span>Setting</span></button>
+          <button
+            @click="changeTab('home', false)"
+            :class="['py-3 text-sm flex flex-col items-center', currentTab==='home' || currentTab==='detail' || currentTab==='edit' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
+          >
+            <i class="fas fa-home text-lg"></i><span>Home</span>
+          </button>
+          <button
+            @click="changeTab('create', false)"
+            :class="['py-3 text-sm flex flex-col items-center', currentTab==='create' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
+          >
+            <i class="fas fa-plus-circle text-lg"></i><span>Create New</span>
+          </button>
+          <button
+            @click="changeTab('settings', false)"
+            :class="['py-3 text-sm flex flex-col items-center', currentTab==='settings' || currentTab==='payment-source' || currentTab==='category'   ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
+          >
+            <i class="fas fa-cog text-lg"></i><span>Setting</span>
+          </button>
         </div>
       </nav>
     </div>

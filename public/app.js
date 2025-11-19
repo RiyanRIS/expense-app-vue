@@ -15,13 +15,17 @@ createApp({
       selectedExpense: null,
       editedExpense: null,
       newForm: {
-        Date: "",
-        Store: "",
-        Item: "",
-        Amount: "",
-        Category: "Makanan & Minuman",
-        "Payment Source": "Bank JAGO",
+        date: "",
+        store: "",
+        item: "",
+        amount: "",
+        category: "",
+        payment_source: "",
       },
+      categories: [], // Add categories array
+      paymentSources: [], // Add paymentSources array
+      newCategoryName: "", // Add newCategoryName for category input
+      newPaymentSourceName: "", // Add newPaymentSourceName for payment source input
     };
   },
   computed: {
@@ -52,29 +56,29 @@ createApp({
     totalToday() {
       const today = new Date().toISOString().slice(0, 10);
       return this.expenses
-        .filter((e) => e.Date === today)
-        .reduce((s, e) => s + this.toNumber(e.Amount), 0);
+        .filter((e) => e.input_date === today)
+        .reduce((s, e) => s + this.toNumber(e.amount), 0);
     },
     totalMonth() {
       const ym = new Date().toISOString().slice(0, 7);
       return this.expenses
-        .filter((e) => (e.Date || "").slice(0, 7) === ym)
-        .reduce((s, e) => s + this.toNumber(e.Amount), 0);
+        .filter((e) => (e.input_date || "").slice(0, 7) === ym)
+        .reduce((s, e) => s + this.toNumber(e.amount), 0);
     },
     topCategory() {
-      return this.topByKey("Category");
+      return this.topByKey("category");
     },
     topSource() {
-      return this.topByKey("Payment Source");
+      return this.topByKey("payment_source");
     },
     topStore() {
-      return this.topByKey("Store");
+      return this.topByKey("store");
     },
   },
   methods: {
     async fetchExpenses() {
       try {
-        const response = await fetch("/api/notes");
+        const response = await fetch("/api/expenses");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -82,6 +86,103 @@ createApp({
         this.expenses = data;
       } catch (error) {
         console.error("Error fetching expenses:", error);
+        this.showToast("Gagal mengambil pengeluaran.", "error");
+      }
+    },
+    async fetchCategories() {
+      try {
+        const response = await fetch("/api/categories");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        this.categories = data.map((cat) => cat.name);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    },
+    async fetchPaymentSources() {
+      try {
+        const response = await fetch("/api/payment-sources");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        this.paymentSources = data.map((ps) => ps.name);
+      } catch (error) {
+        console.error("Error fetching payment sources:", error);
+      }
+    },
+    async addCategory() {
+      try {
+        if (!this.newCategoryName) return;
+        const response = await fetch("/api/categories", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: this.newCategoryName }),
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        this.newCategoryName = "";
+        await this.fetchCategories();
+        this.showToast("Kategori berhasil ditambahkan!", "success");
+      } catch (error) {
+        console.error("Error adding category:", error);
+        this.showToast("Gagal menambahkan kategori.", "error");
+      }
+    },
+    async deleteCategory(categoryName) {
+      try {
+        const response = await fetch(`/api/categories/${categoryName}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        await this.fetchCategories();
+        this.showToast("Kategori berhasil dihapus!", "success");
+      } catch (error) {
+        console.error("Error deleting category:", error);
+        this.showToast("Gagal menghapus kategori.", "error");
+      }
+    },
+    async addPaymentSource() {
+      try {
+        if (!this.newPaymentSourceName) return;
+        const response = await fetch("/api/payment-sources", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: this.newPaymentSourceName }),
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        this.newPaymentSourceName = "";
+        await this.fetchPaymentSources();
+        this.showToast("Sumber dana berhasil ditambahkan!", "success");
+      } catch (error) {
+        console.error("Error adding payment source:", error);
+        this.showToast("Gagal menambahkan sumber dana.", "error");
+      }
+    },
+    async deletePaymentSource(sourceName) {
+      try {
+        const response = await fetch(`/api/payment-sources/${sourceName}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        await this.fetchPaymentSources();
+        this.showToast("Sumber dana berhasil dihapus!", "success");
+      } catch (error) {
+        console.error("Error deleting payment source:", error);
+        this.showToast("Gagal menghapus sumber dana.", "error");
       }
     },
     toNumber(v) {
@@ -97,8 +198,8 @@ createApp({
       return (n || 0).toLocaleString("id-ID");
     },
     timeAgo(dateString, timeString) {
-      if (!dateString) return '';
-      const dateTimeString = `${dateString} ${timeString || '00:00:00'}`;
+      if (!dateString) return "";
+      const dateTimeString = `${dateString} ${timeString || "00:00:00"}`;
       const date = new Date(dateTimeString);
       const now = new Date();
       const seconds = Math.floor((now - date) / 1000);
@@ -136,11 +237,12 @@ createApp({
     },
     manualRefresh() {
       this.fetchExpenses();
+      this.showToast("Pengeluaran berhasil diambil!", "success");
     },
     changeTab(tabName, pushState = true) {
       this.currentTab = tabName;
       if (pushState) {
-        history.pushState({ tab: tabName }, '', `#${tabName}`);
+        history.pushState({ tab: tabName }, "", `#${tabName}`);
       }
       if (navigator.vibrate) {
         navigator.vibrate(50);
@@ -148,51 +250,58 @@ createApp({
     },
     async showDetail(expenseId) {
       try {
-        const response = await fetch(`/api/notes/${expenseId}`);
+        const response = await fetch(`/api/expenses/${expenseId}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         this.selectedExpense = data;
-        this.changeTab('detail');
+        this.changeTab("detail");
       } catch (error) {
         console.error("Error fetching expense detail:", error);
       }
     },
     editExpense(expense) {
       this.editedExpense = { ...expense };
-      this.changeTab('edit');
+      this.changeTab("edit");
     },
     async submitEdit() {
       try {
-        const response = await fetch(`/api/notes/${this.editedExpense._id.$oid}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(this.editedExpense),
-        });
+        const response = await fetch(
+          `/api/expenses/${this.editedExpense._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(this.editedExpense),
+          }
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         await this.fetchExpenses();
-        this.changeTab('detail', false);
+        this.showDetail(this.editedExpense._id);
+        this.showToast("Pengeluaran berhasil diperbarui!", "success");
       } catch (error) {
         console.error("Error updating expense:", error);
+        this.showToast("Gagal memperbarui pengeluaran.", "error");
       }
     },
     async deleteExpense(expenseId) {
       try {
-        const response = await fetch(`/api/notes/${expenseId}`, {
-          method: 'DELETE',
+        const response = await fetch(`/api/expenses/${expenseId}`, {
+          method: "DELETE",
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         await this.fetchExpenses();
-        this.changeTab('home', false);
+        this.showToast("Pengeluaran berhasil dihapus!", "success");
+        this.changeTab("home", false);
       } catch (error) {
         console.error("Error deleting expense:", error);
+        this.showToast("Gagal menghapus pengeluaran.", "error");
       }
     },
     topByKey(k) {
@@ -212,37 +321,118 @@ createApp({
       }
       return best || "-";
     },
-    submitNew() {
-      const now = new Date();
-      const oid = Math.random().toString(16).slice(2) + Date.now().toString(16);
-      const rec = {
-        _id: { $oid: oid },
-        Date: this.newForm.Date,
-        Store: this.newForm.Store,
-        Item: this.newForm.Item,
-        Amount: String(this.newForm.Amount),
-        Category: this.newForm.Category,
-        "Payment Source": this.newForm["Payment Source"],
-        "Input Date": now.toISOString().slice(0, 10),
-        "Input Time": now.toTimeString().slice(0, 8),
-      };
-      this.expenses.unshift(rec);
-      this.newForm = {
-        Date: "",
-        Store: "",
-        Item: "",
-        Amount: "",
-        Category: "Makanan & Minuman",
-        "Payment Source": "Bank JAGO",
-      };
-      this.currentTab = "home";
+    async submitNew() {
+      try {
+        const response = await fetch(
+          `/api/expenses`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(this.newForm),
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        await this.fetchExpenses();
+        this.showToast("Pengeluaran berhasil ditambahkan!", "success");
+        this.changeTab("home");
+      } catch (error) {
+        console.error("Error adding expense:", error);
+        this.showToast("Gagal menambahkan pengeluaran.", "error");
+      }
     },
     action(t) {
       if (t === "logout") {
         this.user = { ...this.user };
-        this.currentTab = "settings";
+        this.changeTab("settings");
+      } else if (t === "kategori") {
+        this.changeTab("category");
+      } else if (t === "sumber-dana") {
+        this.changeTab("payment-source");
       }
     },
+    // Simple Toast Notification System
+    showToast(message, type = "info") {
+      const toastContainer =
+        document.getElementById("toast-container") ||
+        (() => {
+          const div = document.createElement("div");
+          div.id = "toast-container";
+          Object.assign(div.style, {
+            position: "fixed",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: "1000",
+            display: "flex",
+            flexDirection: "column-reverse",
+            gap: "10px",
+            pointerEvents: "none",
+            width: "max-content",
+            maxWidth: "90%",
+          });
+          document.body.appendChild(div);
+          return div;
+        })();
+
+      const toast = document.createElement("div");
+      Object.assign(toast.style, {
+        backgroundColor:
+          type === "success"
+            ? "#4CAF50"
+            : type === "error"
+            ? "#F44336"
+            : "#2196F3",
+        color: "white",
+        padding: "10px 20px",
+        borderRadius: "5px",
+        textAlign: "center",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+        opacity: "0",
+        transition: "opacity 0.5s ease-in-out, transform 0.5s ease-in-out",
+        transform: "translateY(20px)",
+        pointerEvents: "auto",
+      });
+      toast.textContent = message;
+
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = "1";
+        toast.style.transform = "translateY(0)";
+      }, 10);
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(20px)";
+        toast.addEventListener("transitionend", () => toast.remove());
+      }, 3500);
+    },
+    async clearCacheAndReload() {
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map(cacheName => caches.delete(cacheName))
+      );
+      console.log('All caches cleared.');
+    }
+
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(
+        registrations.map(registration => registration.unregister())
+      );
+      console.log('All service workers unregistered.');
+    }
+
+    this.showToast("Cache berhasil dihapus dan halaman akan dimuat ulang.", "success");
+    setTimeout(() => {
+      window.location.reload(true);
+    }, 2500);
+  },
   },
   mounted() {
     this.darkMode = localStorage.getItem("darkMode") === "true";
@@ -256,12 +446,28 @@ createApp({
       (window.location.hash || "").replace("#", "") || this.currentTab;
     this.currentTab = initial;
     this.fetchExpenses();
+    this.fetchCategories(); // Fetch categories on mount
+    this.fetchPaymentSources(); // Fetch payment sources on mount
+    this.changeTab(this.currentTab, false); // Load initial tab content
 
-    window.addEventListener('popstate', (event) => {
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registered: ', registration);
+          })
+          .catch(error => {
+            console.error('ServiceWorker registration failed: ', error);
+          });
+      });
+    }
+
+    window.addEventListener("popstate", (event) => {
       if (event.state && event.state.tab) {
-        this.currentTab = event.state.tab;
+        this.changeTab(event.state.tab, false);
       } else {
-        this.currentTab = 'home';
+        this.changeTab("settings", false);
       }
     });
   },

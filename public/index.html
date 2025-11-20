@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="/icons/icon-32x32.svg" />
     <title>Expense View</title>
     <script src="plugins/tailwindcss/tailwindcss.js"></script>
     <script>
@@ -11,10 +12,7 @@
       };
     </script>
     <script src="plugins/vue/vue.global.js"></script>
-    <link
-      rel="stylesheet"
-      href="plugins/fontawesome/css/all.min.css"
-    />
+    <link rel="stylesheet" href="plugins/fontawesome/css/all.min.css" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#4F46E5" />
   </head>
@@ -130,52 +128,159 @@
         <main v-if="currentTab==='create'" class="space-y-4">
           <section class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
             <form @submit.prevent="submitNew" class="space-y-3">
-              <div class="grid grid-cols-2 gap-2">
-                <input
-                  v-model="newForm.date"
-                  type="date"
-                  required
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                />
-                <input
-                  v-model="newForm.amount"
-                  type="number"
-                  placeholder="Jumlah"
-                  required
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                />
+              <div class="flex justify-between items-center mb-2">
+                <button
+                  type="button"
+                  @click="currentMonth--"
+                  class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                >
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <span
+                  class="font-semibold text-lg text-gray-500 dark:text-gray-400"
+                  >{{ monthName }} {{ currentYear }}</span
+                >
+                <button
+                  type="button"
+                  @click="currentMonth++"
+                  class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                >
+                  <i class="fas fa-chevron-right"></i>
+                </button>
               </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                <div class="text-gray-500 dark:text-gray-400">Min</div>
+                <div class="text-gray-500 dark:text-gray-400">Sen</div>
+                <div class="text-gray-500 dark:text-gray-400">Sel</div>
+                <div class="text-gray-500 dark:text-gray-400">Rab</div>
+                <div class="text-gray-500 dark:text-gray-400">Kam</div>
+                <div class="text-gray-500 dark:text-gray-400">Jum</div>
+                <div class="text-gray-500 dark:text-gray-400">Sab</div>
+                <template v-for="day in calendarDays">
+                  <div
+                    v-if="day"
+                    :key="`${currentYear}-${currentMonth}-${day}`"
+                    @click="selectDay(day)"
+                    :class="[
+                        'p-2 rounded-full cursor-pointer',
+                        newForm.date === new Date(currentYear, currentMonth, day).toISOString().slice(0, 10)
+                          ? accentBgClass + ' text-white'
+                          : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400',
+                      ]"
+                  >
+                    {{ day }}
+                  </div>
+                  <div v-else class="p-2"></div>
+                </template>
+              </div>
+              <div class="relative">
+                <input
+                  v-model="newForm.item"
+                  placeholder="Nama Barang*"
+                  :class="[
+                    'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100',
+                    itemError ? 'border-red-500 ring-1 ring-red-500' : '',
+                  ]"
+                />
+                <div
+                  v-if="itemError"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                >
+                  <svg
+                    class="h-5 w-5 text-red-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p v-if="itemError" class="text-red-500 text-xs mt-1">
+                Nama barang tidak boleh kosong.
+              </p>
+              <div class="relative">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-eventsa_none"
+                >
+                  <span class="text-gray-500 dark:text-gray-400">Rp</span>
+                </div>
+                <input
+                  v-model="newForm.displayAmount"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="1.000.000*"
+                  @input="handleAmountInput"
+                  :class="[
+                    'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10',
+                    amountError ? 'border-red-500 ring-1 ring-red-500' : '',
+                  ]"
+                />
+                <div
+                  v-if="amountError"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                >
+                  <svg
+                    class="h-5 w-5 text-red-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p v-if="amountError" class="text-red-500 text-xs mt-1">
+                Harga tidak boleh kosong.
+              </p>
               <input
                 v-model="newForm.store"
                 placeholder="Toko"
-                required
                 class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
               />
-              <input
-                v-model="newForm.item"
-                placeholder="Item"
-                required
-                class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-              />
-              <div class="grid grid-cols-2 gap-2">
-                <select
-                  v-model="newForm.category"
-                  required
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+              <div class="text-xs text-gray-500 dark:text-gray-400">Kategori</div>
+              <div class="flex flex-wrap gap-2 items-center">
+                <label
+                  v-for="category in categories"
+                  :key="category"
+                  class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 >
-                  <option v-for="category in categories" :key="category">
-                    {{ category }}
-                  </option>
-                </select>
-                <select
-                  v-model="newForm.payment_source"
-                  required
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  <input
+                    type="radio"
+                    name="category"
+                    :value="category"
+                    v-model="newForm.category"
+                    class=""
+                  />
+                  <span class="text-sm">{{ category }}</span>
+                </label>
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Sumber Pembayaran</div>
+              <div class="flex flex-wrap gap-2 items-center">
+                <label
+                  v-for="source in paymentSources"
+                  :key="source"
+                  class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 >
-                  <option v-for="source in paymentSources" :key="source">
-                    {{ source }}
-                  </option>
-                </select>
+                  <input
+                    type="radio"
+                    name="payment_source"
+                    :value="source"
+                    v-model="newForm.payment_source"
+                    class=""
+                  />
+                  <span class="text-sm">{{ source }}</span>
+                </label>
               </div>
               <button
                 :class="['w-full py-2 rounded text-white', accentBgClass]"
@@ -411,7 +516,7 @@
               >
                 <span class="text-gray-900 dark:text-gray-100"
                   >Hapus Cache</span
-                > 
+                >
                 <i class="fas fa-chevron-right text-gray-400"></i>
               </li>
             </ul>

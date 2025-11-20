@@ -58,6 +58,7 @@ app.post("/api/expenses", async (req, res) => {
     const gmt7 = new Date(now.getTime() + (7 * 60 * 60 * 1000));
     payload.input_date = payload.input_date || gmt7.toISOString().split('T')[0];
     payload.input_time = payload.input_time || gmt7.toISOString().split('T')[1].split('.')[0];
+    delete payload.displayAmount;
     const expense = new Expense(payload);
     await expense.save();
     res.status(201).json(expense);

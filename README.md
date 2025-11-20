@@ -145,3 +145,176 @@ Setiap catatan pengeluaran memiliki properti berikut:
 -   `category`: Kategori pengeluaran (String).
 -   `payment_source`: Sumber pembayaran (String).
 -   `input_time`: Waktu input (String).
+
+UPDATE FITUR (v2)
+---
+## 1. Push Notification (Reminder & Alert Budget)
+
+Gunanya misalnya:
+
+* Reminder harian: “Jangan lupa catat pengeluaran hari ini”
+* Reminder tanggal gajian
+* Alert kalau pengeluaran kategori X lewat batas bulanan
+
+**Teknis singkat:**
+
+* Butuh:
+
+  * Service Worker (kamu sudah punya 💪)
+  * Push subscription (Web Push)
+  * Endpoint di backend buat kirim notifikasi
+
+Contoh skenario:
+
+* User aktifkan “Reminder harian jam 21:00” → kamu simpan preferensi di DB → cron job di backend kirim web push ke semua subscription yang aktif.
+
+---
+
+## 2. Background Sync (Catatan Tetap Aman Walau Offline)
+
+Ini cocok banget sama use case kamu:
+
+> User input pengeluaran di tempat yang sinyalnya jelek.
+
+Flow-nya:
+
+1. Saat offline, simpan pengeluaran di **IndexedDB** di browser.
+2. Daftarkan **Background Sync** di service worker.
+3. Begitu device online, service worker otomatis sync data ke backend (Express API).
+
+Benefit:
+User merasa app selalu “jalan terus”, nggak peduli sinyal.
+
+---
+
+## 3. Web Share API (Share Ringkasan ke WA/Telegram)
+
+Misalnya user mau share:
+
+* Ringkasan pengeluaran harian ke pasangan
+* Laporan bulanan ke grup keluarga 😆
+
+Kamu bisa bikin tombol **“Share Bulanan”**:
+
+```js
+if (navigator.share) {
+  navigator.share({
+    title: 'Laporan Pengeluaran - November',
+    text: 'Total: Rp 2.500.000\nMakan: Rp 800.000\nTransport: Rp 400.000',
+    url: window.location.href
+  });
+}
+```
+
+Ini akan buka **native share sheet** (WhatsApp, Telegram, email, dll).
+
+---
+
+## 4. Web Share Target (Terima Share dari App Lain)
+
+Level berikutnya: app kamu bisa muncul di **menu “Share to…”** dari browser atau app lain.
+
+Contoh:
+
+* User buka internet banking → export mutasi → share ke “Expense App” → app kamu terima file/text & tawarkan import.
+
+Ini diatur lewat `manifest.json` dengan `share_target`.
+
+---
+
+## 5. File & Data: Import/Export (CSV/JSON)
+
+Biar user merasa data **punya mereka**, kamu bisa:
+
+* Export semua pengeluaran ke:
+
+  * CSV → dibuka di Excel/Google Sheets
+  * JSON → untuk backup
+* Import CSV/JSON → pindah device gampang.
+
+Kamu bisa pakai:
+
+* `<input type="file">` + FileReader API
+* Atau File System Access API (kalau mau UX advanced di Chrome)
+
+---
+
+## 6. Clipboard API (Copy Cepat)
+
+Hal kecil tapi enak:
+
+* Tombol **“Copy ringkasan bulan ini”** → langsung ke clipboard.
+
+```js
+if (navigator.clipboard) {
+  navigator.clipboard.writeText(reportText);
+}
+```
+
+Cocok buat user yang suka tempel ringkasan di catatan lain.
+
+---
+
+## 7. App Shortcuts (Quick Action dari Icon)
+
+Di `manifest.json`, kamu bisa tambahin **shortcut** kaya:
+
+* “+ Pengeluaran Hari Ini”
+* “Lihat Laporan Bulanan”
+* “Tambah Kategori”
+
+Jadi kalau user *long-press* icon app di home screen, bisa langsung lompat ke halaman tertentu di app.
+
+---
+
+## 8. Theming & Sistem: Ikuti Tema HP
+
+Kamu sudah punya **dark mode**, bisa di-*upgrade*:
+
+* Deteksi `prefers-color-scheme: dark` → ikut setting OS user otomatis.
+* Simpan preferensi di localStorage, tapi default-nya ikut sistem.
+
+---
+
+## 9. Keamanan: WebAuthn / Passwordless Login
+
+Kalau nanti kamu tambah auth (multi user):
+
+* Bisa pakai **WebAuthn** buat:
+
+  * Login pakai fingerprint / face unlock / device PIN
+  * Tanpa password
+
+Ini bikin app keuangan kamu berasa **serius & aman**, walau cuma web app.
+
+---
+
+## 10. UX Kecil yang Berasa “Native”
+
+Beberapa hal lain yang bisa kamu kombinasikan:
+
+* **Getar halus** ketika:
+
+  * Pengeluaran berhasil tersimpan
+  * Pengeluaran gagal (beda durasi)
+* **Animasi transition** antar tab/page (Vue + Tailwind) biar smooth.
+* **Offline indicator**:
+
+  * Misal bar kecil di atas: “Mode offline, data akan disinkronkan saat online.”
+* **Skeleton loading** untuk list pengeluaran supaya terasa responsif.
+
+---
+
+## 11. Ide Fitur Khusus Buat Expense App Kamu
+
+Ngomongin **fungsi**, bukan cuma API:
+
+* **Budget per kategori** + progress bar
+* **Hari tanpa pengeluaran** → bisa jadi gamification (“Streak hemat 3 hari 🎯”)
+* **Quick add**:
+
+  * Tombol seperti: “+15k kopi”, “+10k parkir”, super cepat 1 tap.
+* **Filter pintar**:
+
+  * “Hari ini”, “Kemarin”, “Minggu ini”, “Bulan ini”
+  * “Dari Tarisa 💸” (kalau nanti joint account sama istri 🤭)

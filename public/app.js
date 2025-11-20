@@ -15,10 +15,11 @@ createApp({
       selectedExpense: null,
       editedExpense: null,
       newForm: {
-        date: "",
+        date: new Date().toISOString().slice(0, 10),
         store: "",
         item: "",
         amount: "",
+        displayAmount: "",
         category: "",
         payment_source: "",
       },
@@ -26,6 +27,10 @@ createApp({
       paymentSources: [], // Add paymentSources array
       newCategoryName: "", // Add newCategoryName for category input
       newPaymentSourceName: "", // Add newPaymentSourceName for payment source input
+      currentMonth: new Date().getMonth(),
+      currentYear: new Date().getFullYear(),
+      itemError: false,
+      amountError: false,
     };
   },
   computed: {
@@ -48,6 +53,26 @@ createApp({
         amber: "text-amber-600",
       };
       return m[this.tone] || m.indigo;
+    },
+    calendarDays() {
+      const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+      const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay();
+      const days = [];
+
+      // Add empty slots for days before the 1st of the month
+      for (let i = 0; i < firstDayOfMonth; i++) {
+        days.push(null);
+      }
+
+      // Add actual days
+      for (let i = 1; i <= daysInMonth; i++) {
+        days.push(i);
+      }
+      return days;
+    },
+    monthName() {
+      const date = new Date(this.currentYear, this.currentMonth);
+      return date.toLocaleString('id-ID', { month: 'long' });
     },
     latestTen() {
       const arr = [...this.expenses];
@@ -245,7 +270,7 @@ createApp({
         history.pushState({ tab: tabName }, "", `#${tabName}`);
       }
       if (navigator.vibrate) {
-        navigator.vibrate(50);
+        navigator.vibrate(30);
       }
     },
     async showDetail(expenseId) {
@@ -322,6 +347,22 @@ createApp({
       return best || "-";
     },
     async submitNew() {
+      this.itemError = false;
+      this.amountError = false;
+      let hasError = false;
+
+      if (!this.newForm.item) {
+        this.itemError = true;
+        hasError = true;
+      }
+      if (!this.newForm.amount) {
+        this.amountError = true;
+        hasError = true;
+      }
+      if (hasError) {
+        return;
+      }
+
       try {
         const response = await fetch(
           `/api/expenses`,
@@ -339,6 +380,7 @@ createApp({
         await this.fetchExpenses();
         this.showToast("Pengeluaran berhasil ditambahkan!", "success");
         this.changeTab("home");
+        this.resetNewForm();
       } catch (error) {
         console.error("Error adding expense:", error);
         this.showToast("Gagal menambahkan pengeluaran.", "error");
@@ -354,7 +396,35 @@ createApp({
         this.changeTab("payment-source");
       }
     },
-    // Simple Toast Notification System
+    resetNewForm() {
+      this.newForm.store = "";
+      this.newForm.item = "";
+      this.newForm.amount = "";
+      this.newForm.displayAmount = "";
+      this.newForm.category = "Makanan & Minuman";
+      this.newForm.payment_source = "Bank JAGO";
+      this.itemError = false;
+      this.amountError = false;
+    },
+    selectDay(day) {
+      if (day) {
+        const selectedDate = new Date(this.currentYear, this.currentMonth, day);
+        this.newForm.date = selectedDate.toISOString().slice(0, 10);
+      }
+    },
+    handleAmountInput(event) {
+      let value = event.target.value;
+      // Remove non-numeric characters and leading zeros
+      value = value.replace(/[^0-9]/g, '');
+      value = value.replace(/^0+/, '');
+
+      // Convert to number for internal storage
+      const numericValue = parseFloat(value) || 0;
+      this.newForm.amount = numericValue;
+
+      // Format for display with thousand separators
+      this.newForm.displayAmount = this.formatNumber(numericValue);
+    },
     showToast(message, type = "info") {
       const toastContainer =
         document.getElementById("toast-container") ||
@@ -412,27 +482,41 @@ createApp({
       }, 3500);
     },
     async clearCacheAndReload() {
-    if ('caches' in window) {
-      const cacheNames = await caches.keys();
-      await Promise.all(
-        cacheNames.map(cacheName => caches.delete(cacheName))
-      );
-      console.log('All caches cleared.');
-    }
+      let count = 0;
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+        console.log('All caches cleared.');
+        count += 1;
+      }
 
-    if ('serviceWorker' in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(
-        registrations.map(registration => registration.unregister())
-      );
-      console.log('All service workers unregistered.');
-    }
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(
+          registrations.map(registration => registration.unregister())
+        );
+        console.log('All service workers unregistered.');
+        count += 2;
+      }
 
-    this.showToast("Cache berhasil dihapus dan halaman akan dimuat ulang.", "success");
-    setTimeout(() => {
-      window.location.reload(true);
-    }, 2500);
+      this.showToast(`Cache berhasil dihapus dan halaman akan dimuat ulang. (${count})`);
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 2500);
+    },
   },
+  watch: {
+    currentMonth(newMonth, oldMonth) {
+      if (newMonth > 11) {
+        this.currentMonth = 0;
+        this.currentYear++;
+      } else if (newMonth < 0) {
+        this.currentMonth = 11;
+        this.currentYear--;
+      }
+    },
   },
   mounted() {
     this.darkMode = localStorage.getItem("darkMode") === "true";

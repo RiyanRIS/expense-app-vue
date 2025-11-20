@@ -32,6 +32,29 @@
         </header>
 
         <main v-if="currentTab==='home'" class="space-y-4">
+          <section
+            v-if="pendingCount > 0"
+            class="bg-yellow-50 dark:bg-yellow-900 rounded-xl p-4 shadow border border-yellow-200 dark:border-yellow-800"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-yellow-700 dark:text-yellow-200">
+                  Menunggu Sinkronisasi
+                </div>
+                <div
+                  class="text-sm font-medium text-yellow-800 dark:text-yellow-100"
+                >
+                  {{ pendingCount }} data akan dikirim saat online
+                </div>
+              </div>
+              <button
+                @click="triggerSync"
+                class="px-3 py-1 rounded bg-yellow-600 text-white text-sm"
+              >
+                Kirim Sekarang
+              </button>
+            </div>
+          </section>
           <section class="grid grid-cols-2 gap-3">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
               <div class="text-xs text-gray-500 dark:text-gray-400">
@@ -123,6 +146,33 @@
               </li>
             </ul>
           </section>
+        </main>
+
+        <main v-if="currentTab==='backup-restore'" class="space-y-4">
+          <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Backup & Restore</h2>
+              <button @click="changeTab('settings')" class="text-gray-500 dark:text-gray-400">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+              <div class="border rounded-lg p-4 dark:border-gray-700">
+                <div class="font-medium text-gray-800 dark:text-gray-200 mb-2">Backup Data</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Unduh semua data pengeluaran, kategori, dan sumber dana.</p>
+                <button @click="downloadBackup" :class="['py-2','px-4','rounded','text-white','font-semibold', accentBgClass]">Download Backup</button>
+              </div>
+              <div class="border rounded-lg p-4 dark:border-gray-700">
+                <div class="font-medium text-gray-800 dark:text-gray-200 mb-2">Restore Data</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Pilih file backup (.json) untuk mengembalikan data.</p>
+                <input type="file" accept="application/json" @change="handleRestoreFile" class="text-sm text-gray-700 dark:text-gray-200" />
+                <div class="mt-3 flex items-center gap-2">
+                  <button @click="restoreData" :disabled="!restoreFile" :class="['py-2','px-4','rounded','text-white','font-semibold', accentBgClass, !restoreFile ? 'opacity-50 cursor-not-allowed' : '']">Restore</button>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">{{ restoreStatus }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </main>
 
         <main v-if="currentTab==='create'" class="space-y-4">
@@ -248,7 +298,9 @@
                 placeholder="Toko"
                 class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
               />
-              <div class="text-xs text-gray-500 dark:text-gray-400">Kategori</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Kategori
+              </div>
               <div class="flex flex-wrap gap-2 items-center">
                 <label
                   v-for="category in categories"
@@ -265,7 +317,9 @@
                   <span class="text-sm">{{ category }}</span>
                 </label>
               </div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">Sumber Pembayaran</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Sumber Pembayaran
+              </div>
               <div class="flex flex-wrap gap-2 items-center">
                 <label
                   v-for="source in paymentSources"
@@ -301,7 +355,7 @@
                 Detail Pengeluaran
               </h2>
               <button
-                @click="currentTab = 'home'"
+                @click="changeTab('home')"
                 class="text-gray-500 dark:text-gray-400"
               >
                 <i class="fas fa-times"></i>
@@ -348,7 +402,7 @@
                 Tanggal
               </div>
               <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {{ selectedExpense.input_date }}
+                {{ selectedExpense.date }}
               </div>
             </div>
             <div>
@@ -356,7 +410,8 @@
                 Waktu Input
               </div>
               <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {{ selectedExpense.input_time }}
+                {{ selectedExpense.input_date }} {{ selectedExpense.input_time
+                }}
               </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
@@ -367,7 +422,7 @@
                 Edit
               </button>
               <button
-                @click="deleteExpense(selectedExpense._id.$oid)"
+                @click="deleteExpense(selectedExpense._id)"
                 class="w-full py-2 rounded bg-red-600 text-white"
               >
                 Hapus
@@ -382,7 +437,7 @@
 
         <main v-if="currentTab==='edit'" class="space-y-4">
           <section
-            v-if="editedExpense"
+            v-if="selectedExpense"
             class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow"
           >
             <form @submit.prevent="submitEdit" class="space-y-3">
@@ -391,58 +446,169 @@
                   Edit Pengeluaran
                 </h2>
                 <button
-                  @click="currentTab = 'detail'"
+                  @click="changeTab('detail')"
                   class="text-gray-500 dark:text-gray-400"
                 >
                   <i class="fas fa-times"></i>
                 </button>
               </div>
-              <div class="grid grid-cols-2 gap-2">
-                <input
-                  v-model="editedExpense.date"
-                  type="date"
-                  required
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                />
-                <input
-                  v-model="editedExpense.amount"
-                  type="number"
-                  placeholder="Jumlah"
-                  required
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                />
+              <div class="flex justify-between items-center mb-2">
+                <button
+                  type="button"
+                  @click="currentMonth--"
+                  class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                >
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <span
+                  class="font-semibold text-lg text-gray-500 dark:text-gray-400"
+                  >{{ monthName }} {{ currentYear }}</span
+                >
+                <button
+                  type="button"
+                  @click="currentMonth++"
+                  class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                >
+                  <i class="fas fa-chevron-right"></i>
+                </button>
               </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                <div class="text-gray-500 dark:text-gray-400">Min</div>
+                <div class="text-gray-500 dark:text-gray-400">Sen</div>
+                <div class="text-gray-500 dark:text-gray-400">Sel</div>
+                <div class="text-gray-500 dark:text-gray-400">Rab</div>
+                <div class="text-gray-500 dark:text-gray-400">Kam</div>
+                <div class="text-gray-500 dark:text-gray-400">Jum</div>
+                <div class="text-gray-500 dark:text-gray-400">Sab</div>
+                <template v-for="day in calendarDays">
+                  <div
+                    v-if="day"
+                    :key="`${currentYear}-${currentMonth}-${day}`"
+                    @click="selectDayEdit(day)"
+                    :class="[
+                        'p-2 rounded-full cursor-pointer',
+                        selectedExpense.date === new Date(currentYear, currentMonth, day).toISOString().slice(0, 10)
+                          ? accentBgClass + ' text-white'
+                          : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400',
+                      ]"
+                  >
+                    {{ day }}
+                  </div>
+                  <div v-else class="p-2"></div>
+                </template>
+              </div>
+              <div class="relative">
+                <input
+                  v-model="selectedExpense.item"
+                  placeholder="Nama Barang*"
+                  :class="[
+                    'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100',
+                    itemError ? 'border-red-500 ring-1 ring-red-500' : '',
+                  ]"
+                />
+                <div
+                  v-if="itemError"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                >
+                  <svg
+                    class="h-5 w-5 text-red-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p v-if="itemError" class="text-red-500 text-xs mt-1">
+                Nama barang tidak boleh kosong.
+              </p>
+              <div class="relative">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-eventsa_none"
+                >
+                  <span class="text-gray-500 dark:text-gray-400">Rp</span>
+                </div>
+                <input
+                  v-model="selectedExpense.displayAmount"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="1.000.000*"
+                  @input="handleEditAmountInput"
+                  :class="[
+                    'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10',
+                    amountError ? 'border-red-500 ring-1 ring-red-500' : '',
+                  ]"
+                />
+                <div
+                  v-if="amountError"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                >
+                  <svg
+                    class="h-5 w-5 text-red-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p v-if="amountError" class="text-red-500 text-xs mt-1">
+                Harga tidak boleh kosong.
+              </p>
               <input
-                v-model="editedExpense.store"
+                v-model="selectedExpense.store"
                 placeholder="Toko"
-                required
                 class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
               />
-              <input
-                v-model="editedExpense.item"
-                placeholder="Item"
-                required
-                class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-              />
-              <div class="grid grid-cols-2 gap-2">
-                <select
-                  v-model="editedExpense.category"
-                  required
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Kategori
+              </div>
+              <div class="flex flex-wrap gap-2 items-center">
+                <label
+                  v-for="category in categories"
+                  :key="category"
+                  class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 >
-                  <option v-for="category in categories" :key="category">
-                    {{ category }}
-                  </option>
-                </select>
-                <select
-                  v-model="editedExpense.payment_source"
-                  required
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  <input
+                    type="radio"
+                    name="category"
+                    :value="category"
+                    v-model="selectedExpense.category"
+                    class=""
+                  />
+                  <span class="text-sm">{{ category }}</span>
+                </label>
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Sumber Pembayaran
+              </div>
+              <div class="flex flex-wrap gap-2 items-center">
+                <label
+                  v-for="source in paymentSources"
+                  :key="source"
+                  class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 >
-                  <option v-for="source in paymentSources" :key="source">
-                    {{ source }}
-                  </option>
-                </select>
+                  <input
+                    type="radio"
+                    name="payment_source"
+                    :value="source"
+                    v-model="selectedExpense.payment_source"
+                    class=""
+                  />
+                  <span class="text-sm">{{ source }}</span>
+                </label>
               </div>
               <button
                 :class="['w-full py-2 rounded text-white', accentBgClass]"
@@ -482,7 +648,7 @@
           >
             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
               <li class="flex items-center justify-between py-3">
-                <span class="text-gray-900 dark:text-gray-100">Tema Gelap</span>
+                <span class="text-gray-900 dark:text-gray-100">Tema Aplikasi</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -491,6 +657,7 @@
                     class="sr-only peer"
                   />
                   <div
+                    @click="toggleDark"
                     class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
                   ></div>
                 </label>
@@ -519,6 +686,15 @@
                 >
                 <i class="fas fa-chevron-right text-gray-400"></i>
               </li>
+              <li
+                class="flex items-center justify-between py-3"
+                @click="changeTab('backup-restore')"
+              >
+                <span class="text-gray-900 dark:text-gray-100"
+                  >Backup & Restore</span
+                >
+                <i class="fas fa-chevron-right text-gray-400"></i>
+              </li>
             </ul>
           </section>
 
@@ -531,7 +707,7 @@
                 @click="changeTab('category')"
               >
                 <span class="text-gray-900 dark:text-gray-100"
-                  >Atur Kategori</span
+                  >Kategori Pengeluaran</span
                 >
                 <i class="fas fa-chevron-right text-gray-400"></i>
               </li>
@@ -540,7 +716,7 @@
                 @click="changeTab('payment-source')"
               >
                 <span class="text-gray-900 dark:text-gray-100"
-                  >Atur Sumber Dana</span
+                  >Sumber Dana</span
                 >
                 <i class="fas fa-chevron-right text-gray-400"></i>
               </li>
@@ -556,7 +732,7 @@
                 @click="action('profil')"
               >
                 <span class="text-gray-900 dark:text-gray-100"
-                  >Atur Profil</span
+                  >Manajemen Profil</span
                 >
                 <i class="fas fa-chevron-right text-gray-400"></i>
               </li>
@@ -583,47 +759,57 @@
         </main>
 
         <main v-if="currentTab==='category'" class="space-y-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
-            <h3
-              class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
-            >
-              Tambah Kategori Baru
-            </h3>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+          >
+            <div class="flex items-center justify-between">
+              <h2
+                class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+              >
+                Atur Kategori
+              </h2>
+              <button
+                @click="changeTab('settings')"
+                class="text-gray-500 dark:text-gray-400"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
             <form @submit.prevent="addCategory" class="flex space-x-2">
               <input
                 type="text"
                 v-model="newCategoryName"
                 placeholder="Nama Kategori Baru"
                 required
-                class="flex-grow p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                class="text-sm flex-grow p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
               />
               <button
                 type="submit"
-                :class="['py-2', 'px-4', 'border', 'border-transparent', 'rounded-md', 'shadow-sm', 'text-white', 'font-semibold', accentBgClass, 'hover:opacity-90', 'focus:outline-none', 'focus:ring-2', 'focus:ring-offset-2', accentBgClass]"
+                :class="['py-2', 'text-sm', 'px-4', 'border', 'border-transparent', 'rounded-md', 'shadow-sm', 'text-white', 'font-semibold', accentBgClass, 'hover:opacity-90', 'focus:outline-none', 'focus:ring-2', 'focus:ring-offset-2', accentBgClass]"
               >
                 Tambah
               </button>
             </form>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <h3
+          <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3">
+            <h2
               class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
             >
               Daftar Kategori
-            </h3>
+            </h2>
             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
               <li
                 v-for="category in categories"
                 :key="category"
                 class="flex items-center justify-between py-2"
               >
-                <span class="text-gray-900 dark:text-gray-100"
+                <span class="text-sm text-gray-900 dark:text-gray-100"
                   >{{ category }}</span
                 >
                 <button
                   @click="deleteCategory(category)"
-                  class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600"
+                  class="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600"
                 >
                   Hapus
                 </button>
@@ -633,47 +819,55 @@
         </main>
 
         <main v-if="currentTab==='payment-source'" class="space-y-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
-            <h3
+          <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3 mb-6">
+            <div class="flex items-center justify-between">
+            <h2
               class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
             >
               Tambah Sumber Dana Baru
-            </h3>
+            </h2>
+            <button
+                @click="changeTab('settings')"
+                class="text-gray-500 dark:text-gray-400"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
             <form @submit.prevent="addPaymentSource" class="flex space-x-2">
               <input
                 type="text"
                 v-model="newPaymentSourceName"
                 placeholder="Nama Sumber Dana Baru"
                 required
-                class="flex-grow p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                class="text-sm flex-grow p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
               />
               <button
                 type="submit"
-                :class="['py-2', 'px-4', 'border', 'border-transparent', 'rounded-md', 'shadow-sm', 'text-white', 'font-semibold', accentBgClass, 'hover:opacity-90', 'focus:outline-none', 'focus:ring-2', 'focus:ring-offset-2', accentBgClass]"
+                :class="['py-2', 'text-sm', 'px-4', 'border', 'border-transparent', 'rounded-md', 'shadow-sm', 'text-white', 'font-semibold', accentBgClass, 'hover:opacity-90', 'focus:outline-none', 'focus:ring-2', 'focus:ring-offset-2', accentBgClass]"
               >
                 Tambah
               </button>
             </form>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <h3
+          <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3">
+            <h2
               class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
             >
               Daftar Sumber Dana
-            </h3>
+            </h2>
             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
               <li
                 v-for="source in paymentSources"
                 :key="source"
                 class="flex items-center justify-between py-2"
               >
-                <span class="text-gray-900 dark:text-gray-100"
+                <span class="text-sm text-gray-900 dark:text-gray-100"
                   >{{ source }}</span
                 >
                 <button
                   @click="deletePaymentSource(source)"
-                  class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600"
+                  class="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600"
                 >
                   Hapus
                 </button>
@@ -701,7 +895,7 @@
           </button>
           <button
             @click="changeTab('settings', false)"
-            :class="['py-3 text-sm flex flex-col items-center', currentTab==='settings' || currentTab==='payment-source' || currentTab==='category'   ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
+            :class="['py-3 text-sm flex flex-col items-center', currentTab==='settings' || currentTab==='payment-source' || currentTab==='category' || currentTab==='backup-restore'   ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
           >
             <i class="fas fa-cog text-lg"></i><span>Setting</span>
           </button>

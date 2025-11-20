@@ -11,17 +11,9 @@ createApp({
         photo: "https://i.pravatar.cc/100?img=5",
       },
       expenses: [],
-      refreshTick: 0,
       selectedExpense: null,
-      editedExpense: null,
       newForm: {
         date: new Date().toISOString().slice(0, 10),
-        store: "",
-        item: "",
-        amount: "",
-        displayAmount: "",
-        category: "",
-        payment_source: "",
       },
       categories: [], // Add categories array
       paymentSources: [], // Add paymentSources array
@@ -29,6 +21,11 @@ createApp({
       newPaymentSourceName: "", // Add newPaymentSourceName for payment source input
       currentMonth: new Date().getMonth(),
       currentYear: new Date().getFullYear(),
+      backPressCount: 0,
+      pendingCount: 0,
+      pendingExpenses: [],
+      restoreFile: null,
+      restoreStatus: "",
       itemError: false,
       amountError: false,
     };
@@ -55,8 +52,16 @@ createApp({
       return m[this.tone] || m.indigo;
     },
     calendarDays() {
-      const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
-      const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay();
+      const daysInMonth = new Date(
+        this.currentYear,
+        this.currentMonth + 1,
+        0
+      ).getDate();
+      const firstDayOfMonth = new Date(
+        this.currentYear,
+        this.currentMonth,
+        1
+      ).getDay();
       const days = [];
 
       // Add empty slots for days before the 1st of the month
@@ -72,7 +77,7 @@ createApp({
     },
     monthName() {
       const date = new Date(this.currentYear, this.currentMonth);
-      return date.toLocaleString('id-ID', { month: 'long' });
+      return date.toLocaleString("id-ID", { month: "long" });
     },
     latestTen() {
       const arr = [...this.expenses];
@@ -101,6 +106,59 @@ createApp({
     },
   },
   methods: {
+    openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("expense_view_db", 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains("pending-expenses")) {
+            db.createObjectStore("pending-expenses", { keyPath: "id", autoIncrement: true });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    },
+    async addPendingExpense(data) {
+      const db = await this.openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction("pending-expenses", "readwrite");
+        const store = tx.objectStore("pending-expenses");
+        const toSave = { ...data, _local: true, createdAt: Date.now() };
+        const req = store.add(toSave);
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => reject(req.error);
+      });
+    },
+    async getPendingExpenses() {
+      try {
+        const db = await this.openDB();
+        const items = await new Promise((resolve, reject) => {
+          const tx = db.transaction("pending-expenses", "readonly");
+          const store = tx.objectStore("pending-expenses");
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => reject(req.error);
+        });
+        this.pendingExpenses = items;
+        this.pendingCount = items.length;
+      } catch (e) {
+        this.pendingExpenses = [];
+        this.pendingCount = 0;
+      }
+    },
+    async triggerSync() {
+      if ("serviceWorker" in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        if ("sync" in reg) {
+          try {
+            await reg.sync.register("sync-expenses");
+          } catch (e) {}
+        } else if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: "sync-expenses" });
+        }
+      }
+    },
     async fetchExpenses() {
       try {
         const response = await fetch("/api/expenses");
@@ -111,7 +169,6 @@ createApp({
         this.expenses = data;
       } catch (error) {
         console.error("Error fetching expenses:", error);
-        this.showToast("Gagal mengambil pengeluaran.", "error");
       }
     },
     async fetchCategories() {
@@ -262,7 +319,97 @@ createApp({
     },
     manualRefresh() {
       this.fetchExpenses();
-      this.showToast("Pengeluaran berhasil diambil!", "success");
+      if (navigator.vibrate) {
+        navigator.vibrate(30);
+      }
+    },
+    async downloadBackup() {
+      try {
+        const res = await fetch('/api/backup');
+        if (!res.ok) throw new Error('backup api unavailable');
+        const data = await res.json();
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const ts = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+        a.download = `backup-expense-view-${ts}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.showToast('Backup berhasil diunduh!', 'success');
+      } catch (e) {
+        const fallback = {
+          expenses: this.expenses,
+          categories: this.categories,
+          paymentSources: this.paymentSources,
+        };
+        const blob = new Blob([JSON.stringify(fallback)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const ts = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+        a.download = `backup-expense-view-local-${ts}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.showToast('Backup lokal berhasil diunduh!', 'success');
+      }
+    },
+    handleRestoreFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      this.restoreFile = f || null;
+      this.restoreStatus = this.restoreFile ? this.restoreFile.name : '';
+    },
+    async restoreData() {
+      if (!this.restoreFile) return;
+      this.restoreStatus = 'Memproses...';
+      try {
+        const text = await this.restoreFile.text();
+        const payload = JSON.parse(text);
+        const res = await fetch('/api/restore', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('restore api unavailable');
+        const out = await res.json();
+        this.restoreStatus = `Selesai: ${out.expensesInserted || 0} pengeluaran, ${out.categoriesUpserted || 0} kategori, ${out.paymentSourcesUpserted || 0} sumber dana.`;
+        await this.fetchExpenses();
+        await this.fetchCategories();
+        await this.fetchPaymentSources();
+        this.showToast('Restore berhasil!', 'success');
+      } catch (e) {
+        try {
+          const text = await this.restoreFile.text();
+          const data = JSON.parse(text);
+          const cats = Array.isArray(data.categories) ? data.categories : [];
+          const srcs = Array.isArray(data.paymentSources) ? data.paymentSources : [];
+          for (const name of cats) {
+            await fetch('/api/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+          }
+          for (const name of srcs) {
+            await fetch('/api/payment-sources', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+          }
+          const exps = Array.isArray(data.expenses) ? data.expenses : [];
+          let cnt = 0;
+          for (const exp of exps) {
+            await fetch('/api/expenses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(exp) });
+            cnt++;
+          }
+          this.restoreStatus = `Selesai: ${cnt} pengeluaran (fallback).`;
+          await this.fetchExpenses();
+          await this.fetchCategories();
+          await this.fetchPaymentSources();
+          this.showToast('Restore fallback berhasil!', 'success');
+        } catch (err) {
+          this.restoreStatus = 'Gagal memulihkan data';
+          this.showToast('Restore gagal.', 'error');
+        }
+      }
+      this.restoreFile = null;
     },
     changeTab(tabName, pushState = true) {
       this.currentTab = tabName;
@@ -287,27 +434,32 @@ createApp({
       }
     },
     editExpense(expense) {
-      this.editedExpense = { ...expense };
+      this.selectedExpense.displayAmount = this.formatNumber(
+        this.toNumber(this.selectedExpense.amount)
+      );
       this.changeTab("edit");
     },
     async submitEdit() {
       try {
         const response = await fetch(
-          `/api/expenses/${this.editedExpense._id}`,
+          `/api/expenses/${this.selectedExpense._id}`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(this.editedExpense),
+            body: JSON.stringify(this.selectedExpense),
           }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         await this.fetchExpenses();
-        this.showDetail(this.editedExpense._id);
+        this.showDetail(this.selectedExpense._id);
         this.showToast("Pengeluaran berhasil diperbarui!", "success");
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
       } catch (error) {
         console.error("Error updating expense:", error);
         this.showToast("Gagal memperbarui pengeluaran.", "error");
@@ -323,6 +475,9 @@ createApp({
         }
         await this.fetchExpenses();
         this.showToast("Pengeluaran berhasil dihapus!", "success");
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
         this.changeTab("home", false);
       } catch (error) {
         console.error("Error deleting expense:", error);
@@ -363,27 +518,42 @@ createApp({
         return;
       }
 
+      if (!navigator.onLine) {
+        await this.addPendingExpense(this.newForm);
+        this.showToast("Pengeluaran disimpan offline, akan tersinkron.", "success");
+        await this.triggerSync();
+        this.resetNewForm();
+        await this.getPendingExpenses();
+        return;
+      }
       try {
-        const response = await fetch(
-          `/api/expenses`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(this.newForm),
-          }
-        );
+        const response = await fetch(`/api/expenses`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(this.newForm),
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         await this.fetchExpenses();
         this.showToast("Pengeluaran berhasil ditambahkan!", "success");
-        this.changeTab("home");
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
         this.resetNewForm();
       } catch (error) {
         console.error("Error adding expense:", error);
-        this.showToast("Gagal menambahkan pengeluaran.", "error");
+        try {
+          await this.addPendingExpense(this.newForm);
+          this.showToast("Pengeluaran disimpan offline, akan tersinkron.", "success");
+          await this.triggerSync();
+          this.resetNewForm();
+          await this.getPendingExpenses();
+        } catch (e) {
+          this.showToast("Gagal menambahkan pengeluaran.", "error");
+        }
       }
     },
     action(t) {
@@ -401,8 +571,8 @@ createApp({
       this.newForm.item = "";
       this.newForm.amount = "";
       this.newForm.displayAmount = "";
-      this.newForm.category = "Makanan & Minuman";
-      this.newForm.payment_source = "Bank JAGO";
+      this.newForm.category = "";
+      this.newForm.payment_source = "";
       this.itemError = false;
       this.amountError = false;
     },
@@ -412,18 +582,27 @@ createApp({
         this.newForm.date = selectedDate.toISOString().slice(0, 10);
       }
     },
+    selectDayEdit(day) {
+      if (day) {
+        const selectedDate = new Date(this.currentYear, this.currentMonth, day);
+        this.selectedExpense.date = selectedDate.toISOString().slice(0, 10);
+      }
+    },
     handleAmountInput(event) {
       let value = event.target.value;
-      // Remove non-numeric characters and leading zeros
-      value = value.replace(/[^0-9]/g, '');
-      value = value.replace(/^0+/, '');
-
-      // Convert to number for internal storage
+      value = value.replace(/[^0-9]/g, "");
+      value = value.replace(/^0+/, "");
       const numericValue = parseFloat(value) || 0;
       this.newForm.amount = numericValue;
-
-      // Format for display with thousand separators
       this.newForm.displayAmount = this.formatNumber(numericValue);
+    },
+    handleEditAmountInput(event) {
+      let value = event.target.value;
+      value = value.replace(/[^0-9]/g, "");
+      value = value.replace(/^0+/, "");
+      const numericValue = parseFloat(value) || 0;
+      this.selectedExpense.amount = numericValue;
+      this.selectedExpense.displayAmount = this.formatNumber(numericValue);
     },
     showToast(message, type = "info") {
       const toastContainer =
@@ -483,28 +662,30 @@ createApp({
     },
     async clearCacheAndReload() {
       let count = 0;
-      if ('caches' in window) {
+      if ("caches" in window) {
         const cacheNames = await caches.keys();
         await Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
+          cacheNames.map((cacheName) => caches.delete(cacheName))
         );
-        console.log('All caches cleared.');
+        console.log("All caches cleared.");
         count += 1;
       }
 
-      if ('serviceWorker' in navigator) {
+      if ("serviceWorker" in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         await Promise.all(
-          registrations.map(registration => registration.unregister())
+          registrations.map((registration) => registration.unregister())
         );
-        console.log('All service workers unregistered.');
+        console.log("All service workers unregistered.");
         count += 2;
       }
 
-      this.showToast(`Cache berhasil dihapus dan halaman akan dimuat ulang. (${count})`);
+      this.showToast(
+        `Cache berhasil dihapus dan halaman akan dimuat ulang. (${count})`
+      );
       setTimeout(() => {
         window.location.reload(true);
-      }, 2500);
+      }, count * 1000);
     },
   },
   watch: {
@@ -524,35 +705,69 @@ createApp({
       document.documentElement.classList.add("dark");
     }
     setInterval(() => {
-      this.refreshTick++;
+      this.fetchExpenses();
     }, 10000);
-    const initial =
-      (window.location.hash || "").replace("#", "") || this.currentTab;
-    this.currentTab = initial;
     this.fetchExpenses();
-    this.fetchCategories(); // Fetch categories on mount
-    this.fetchPaymentSources(); // Fetch payment sources on mount
-    this.changeTab(this.currentTab, false); // Load initial tab content
+    this.fetchCategories();
+    this.fetchPaymentSources();
+    this.changeTab(this.currentTab);
+    this.getPendingExpenses();
 
     // Register service worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registered: ', registration);
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .then((registration) => {
+            console.log("ServiceWorker registered: ", registration);
           })
-          .catch(error => {
-            console.error('ServiceWorker registration failed: ', error);
+          .catch((error) => {
+            console.error("ServiceWorker registration failed: ", error);
           });
       });
     }
 
     window.addEventListener("popstate", (event) => {
-      if (event.state && event.state.tab) {
-        this.changeTab(event.state.tab, false);
-      } else {
-        this.changeTab("settings", false);
-      }
+        if (this.currentTab === "detail") {
+          this.changeTab("home");
+        } else if (this.currentTab === "edit") {
+          this.changeTab("detail");
+        } else if (
+          this.currentTab === "category" ||
+          this.currentTab === "payment-source"
+        ) {
+          this.changeTab("settings");
+        } else if (
+          this.currentTab === "home" ||
+          this.currentTab === "create" ||
+          this.currentTab === "settings"
+        ) {
+          this.backPressCount++;
+          if (this.backPressCount === 1) {
+            this.showToast("Tekan sekali lagi untuk keluar.", "info");
+            setTimeout(() => {
+              this.backPressCount = 0;
+            }, 2000);
+          } else if (this.backPressCount === 2) {
+            window.history.back();
+          }
+        } else {
+          this.changeTab("home");
+        }
+      // }
+    });
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data && event.data.type === "expenses-synced") {
+          this.fetchExpenses();
+          this.showToast("Data offline tersinkron!", "success");
+          this.getPendingExpenses();
+        }
+      });
+    }
+    window.addEventListener("online", () => {
+      this.triggerSync();
+      this.getPendingExpenses();
     });
   },
 }).mount("#app");

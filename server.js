@@ -58,7 +58,9 @@ app.post("/api/expenses", async (req, res) => {
     const gmt7 = new Date(now.getTime() + (7 * 60 * 60 * 1000));
     payload.input_date = payload.input_date || gmt7.toISOString().split('T')[0];
     payload.input_time = payload.input_time || gmt7.toISOString().split('T')[1].split('.')[0];
-    delete payload.displayAmount;
+    delete payload.id;
+    delete payload.createdAt;
+    delete payload._local;
     const expense = new Expense(payload);
     await expense.save();
     res.status(201).json(expense);
@@ -156,6 +158,66 @@ app.delete("/api/payment-sources/:name", async (req, res) => {
       return res.status(404).json({ error: "Payment source not found" });
     }
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/backup", async (req, res) => {
+  try {
+    const expenses = await Expense.find();
+    const categories = (await Category.find()).map((c) => c.name);
+    const paymentSources = (await PaymentSource.find()).map((p) => p.name);
+    res.json({ expenses, categories, paymentSources });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/restore", async (req, res) => {
+  try {
+    const { expenses = [], categories = [], paymentSources = [] } = req.body || {};
+
+    // Hapus semua data yang ada sebelum restore
+    await Expense.deleteMany({});
+    await Category.deleteMany({});
+    await PaymentSource.deleteMany({});
+
+    let categoriesUpserted = 0;
+    for (const name of categories) {
+      if (!name) continue;
+      const cat = new Category({ name });
+      await cat.save();
+      categoriesUpserted++;
+    }
+
+    let paymentSourcesUpserted = 0;
+    for (const name of paymentSources) {
+      if (!name) continue;
+      const ps = new PaymentSource({ name });
+      await ps.save();
+      paymentSourcesUpserted++;
+    }
+
+    const now = new Date();
+    const gmt7 = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const expensesToInsert = expenses.map((payload) => {
+      const copy = { ...payload };
+      delete copy._id;
+      delete copy.id;
+      delete copy.createdAt;
+      delete copy._local;
+      copy.input_date = copy.input_date || gmt7.toISOString().split("T")[0];
+      copy.input_time = copy.input_time || gmt7.toISOString().split("T")[1].split(".")[0];
+      return copy;
+    });
+    let expensesInserted = 0;
+    if (expensesToInsert.length) {
+      const inserted = await Expense.insertMany(expensesToInsert, { ordered: false });
+      expensesInserted = inserted.length;
+    }
+
+    res.json({ expensesInserted, categoriesUpserted, paymentSourcesUpserted });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

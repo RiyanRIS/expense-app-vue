@@ -3,6 +3,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+const webpush = require("web-push");
+const PushSubscription = require("./models/PushSubscription");
 
 const Expense = require("./models/Expense");
 const Category = require("./models/Category");
@@ -18,6 +20,15 @@ const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_CLUSTER = process.env.DB_CLUSTER;
 const DB_NAME = process.env.DB_NAME || "riyanris";
 const PORT = process.env.PORT || 3000;
+
+const publicVapidKey = process.env.VAPID_PUBLIC_KEY;
+const privateVapidKey = process.env.VAPID_PRIVATE_KEY;
+
+webpush.setVapidDetails(
+  "mailto:example@example.com",
+  publicVapidKey,
+  privateVapidKey
+);
 
 const mongoUri = `mongodb+srv://${DB_USERNAME}:${encodeURIComponent(
   DB_PASSWORD
@@ -55,9 +66,10 @@ app.post("/api/expenses", async (req, res) => {
   try {
     const payload = req.body;
     const now = new Date();
-    const gmt7 = new Date(now.getTime() + (7 * 60 * 60 * 1000));
-    payload.input_date = payload.input_date || gmt7.toISOString().split('T')[0];
-    payload.input_time = payload.input_time || gmt7.toISOString().split('T')[1].split('.')[0];
+    const gmt7 = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    payload.input_date = payload.input_date || gmt7.toISOString().split("T")[0];
+    payload.input_time =
+      payload.input_time || gmt7.toISOString().split("T")[1].split(".")[0];
     delete payload.id;
     delete payload.createdAt;
     delete payload._local;
@@ -123,6 +135,27 @@ app.post("/api/categories", async (req, res) => {
   }
 });
 
+app.put("/api/categories/:name", async (req, res) => {
+  try {
+    const { name } = req.params;
+    const { newName } = req.body;
+    if (!newName) {
+      return res.status(400).json({ error: "New category name is required" });
+    }
+    const updated = await Category.findOneAndUpdate(
+      { name },
+      { name: newName },
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 app.delete("/api/categories/:name", async (req, res) => {
   try {
     const { name } = req.params;
@@ -145,6 +178,29 @@ app.post("/api/payment-sources", async (req, res) => {
     const newPaymentSource = new PaymentSource({ name });
     await newPaymentSource.save();
     res.status(201).json(newPaymentSource);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put("/api/payment-sources/:name", async (req, res) => {
+  try {
+    const { name } = req.params;
+    const { newName } = req.body;
+    if (!newName) {
+      return res
+        .status(400)
+        .json({ error: "New payment source name is required" });
+    }
+    const updated = await PaymentSource.findOneAndUpdate(
+      { name },
+      { name: newName },
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ error: "Payment source not found" });
+    }
+    res.json(updated);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -176,7 +232,11 @@ app.get("/api/backup", async (req, res) => {
 
 app.post("/api/restore", async (req, res) => {
   try {
-    const { expenses = [], categories = [], paymentSources = [] } = req.body || {};
+    const {
+      expenses = [],
+      categories = [],
+      paymentSources = [],
+    } = req.body || {};
 
     // Hapus semua data yang ada sebelum restore
     await Expense.deleteMany({});
@@ -208,18 +268,88 @@ app.post("/api/restore", async (req, res) => {
       delete copy.createdAt;
       delete copy._local;
       copy.input_date = copy.input_date || gmt7.toISOString().split("T")[0];
-      copy.input_time = copy.input_time || gmt7.toISOString().split("T")[1].split(".")[0];
+      copy.input_time =
+        copy.input_time || gmt7.toISOString().split("T")[1].split(".")[0];
       return copy;
     });
     let expensesInserted = 0;
     if (expensesToInsert.length) {
-      const inserted = await Expense.insertMany(expensesToInsert, { ordered: false });
+      const inserted = await Expense.insertMany(expensesToInsert, {
+        ordered: false,
+      });
       expensesInserted = inserted.length;
     }
 
     res.json({ expensesInserted, categoriesUpserted, paymentSourcesUpserted });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/subscribe", async (req, res) => {
+  try {
+    const subscription = req.body;
+    const existingSubscription = await PushSubscription.findOne({
+      endpoint: subscription.endpoint,
+    });
+    if (existingSubscription) {
+      return res.status(200).json({ message: "Subscription already exists." });
+    }
+    const newSubscription = new PushSubscription(subscription);
+    await newSubscription.save();
+    res.status(201).json({ message: "Subscription saved." });
+  } catch (error) {
+    console.error("Error saving subscription:", error);
+    res.status(500).json({ error: "Failed to save subscription." });
+  }
+});
+
+app.post("/api/unsubscribe", async (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    const deleted = await PushSubscription.findOneAndDelete({ endpoint });
+    if (deleted) {
+      res.status(200).json({ message: "Subscription removed." });
+    } else {
+      res.status(404).json({ message: "Subscription not found." });
+    }
+  } catch (error) {
+    console.error("Error unsubscribing:", error);
+    res.status(500).json({ error: "Failed to unsubscribe." });
+  }
+});
+
+app.post("/api/push-notification", async (req, res) => {
+  try {
+    const { title, body } = req.body;
+    const subscriptions = await PushSubscription.find();
+
+    const notificationPayload = JSON.stringify({ title, body });
+
+    const pushPromises = subscriptions.map((sub) => {
+      const pushSubscription = {
+        endpoint: sub.endpoint,
+        expirationTime: sub.expirationTime,
+        keys: {
+          p256dh: sub.keys.p256dh,
+          auth: sub.keys.auth,
+        },
+      };
+      return webpush
+        .sendNotification(pushSubscription, notificationPayload)
+        .catch((error) => {
+          console.error("Error sending push notification:", error);
+          if (error.statusCode === 410) {
+            return PushSubscription.deleteOne({ endpoint: sub.endpoint });
+          }
+        });
+    });
+
+    await Promise.all(pushPromises);
+    res.status(200).json({ message: "Push notifications sent." });
+  } catch (error) {
+    console.error("Error sending push notifications:", error);
+    res.status(500).json({ error: "Failed to send push notifications." });
   }
 });
 

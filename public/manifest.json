@@ -17,5 +17,28 @@
       "sizes": "512x512",
       "type": "image/svg+xml"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "+ Pengeluaran Hari Ini",
+      "short_name": "+ Hari Ini",
+      "description": "Tambahkan pengeluaran untuk hari ini",
+      "url": "/?tab=create",
+      "icons": [{"src": "/icons/icon-192x192.svg", "sizes": "192x192"}]
+    },
+    {
+      "name": "Lihat Laporan Bulanan",
+      "short_name": "Laporan",
+      "description": "Lihat ringkasan pengeluaran bulanan",
+      "url": "/?tab=home",
+      "icons": [{"src": "/icons/icon-192x192.svg", "sizes": "192x192"}]
+    },
+    {
+      "name": "Tambah Kategori",
+      "short_name": "+ Kategori",
+      "description": "Tambahkan kategori pengeluaran baru",
+      "url": "/?tab=category",
+      "icons": [{"src": "/icons/icon-192x192.svg", "sizes": "192x192"}]
+    }
   ]
 }

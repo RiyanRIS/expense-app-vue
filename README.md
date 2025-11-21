@@ -5,16 +5,17 @@ Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun denga
 ## Fitur
 
 - **Pencatatan Pengeluaran**: Mencatat detail pengeluaran seperti tanggal, toko, item, jumlah, kategori, dan sumber pembayaran.
-- **Manajemen Kategori**: Menambah dan menghapus kategori pengeluaran.
-- **Manajemen Sumber Pembayaran**: Menambah dan menghapus sumber pembayaran.
+- **Manajemen Kategori**: Menambah, mengedit, dan menghapus kategori pengeluaran.
+- **Manajemen Sumber Pembayaran**: Menambah, mengedit, dan menghapus sumber pembayaran.
 - **CRUD API**: Menyediakan API untuk membuat, membaca, memperbarui, dan menghapus catatan pengeluaran, kategori, dan sumber pembayaran.
 - **Koneksi MongoDB**: Menggunakan MongoDB sebagai database untuk menyimpan data pengeluaran.
-- **Mode Gelap (Dark Mode)**: Opsi untuk beralih antara tema terang dan gelap.
+- **Mode Gelap (Dark Mode) Adaptif**: Secara otomatis mengikuti preferensi tema sistem operasi (`prefers-color-scheme: dark`) dan menyimpan preferensi pengguna di `localStorage` untuk pengalaman yang konsisten. Default tema akan mengikuti pengaturan sistem jika belum ada preferensi yang disimpan.
 - **Progressive Web App (PWA)**:
     - **Dapat Diinstal**: Aplikasi dapat diinstal ke layar utama perangkat seluler atau desktop.
     - **Dukungan Offline**: Konten aplikasi di-cache oleh Service Worker untuk akses offline.
     - **Manajemen Cache**: Fungsi untuk menghapus cache dan memuat ulang aplikasi secara manual.
 - **Tampilan Dinamis**: Konten tab dimuat secara dinamis dan dikompilasi oleh Vue.js.
+- **Quick Add**: Membuat template pengeluaran yang dapat disesuaikan oleh pengguna untuk entri pengeluaran satu ketukan, disimpan di `localStorage`.
 
 ## Teknologi yang Digunakan
 
@@ -129,10 +130,12 @@ Berikut adalah endpoint API yang tersedia:
 -   `DELETE /api/expenses/:id`: Menghapus catatan pengeluaran berdasarkan ID.
 -   `GET /api/categories`: Mengambil semua kategori.
 -   `POST /api/categories`: Membuat kategori baru.
--   `DELETE /api/categories/:name`: Menghapus kategori berdasarkan nama.
+- `DELETE /api/categories/:name`: Menghapus kategori berdasarkan nama.
+- `PUT /api/categories/:name`: Memperbarui nama kategori berdasarkan nama lama.
 -   `GET /api/payment-sources`: Mengambil semua sumber pembayaran.
 -   `POST /api/payment-sources`: Membuat sumber pembayaran baru.
--   `DELETE /api/payment-sources/:name`: Menghapus sumber pembayaran berdasarkan nama.
+- `DELETE /api/payment-sources/:name`: Menghapus sumber pembayaran berdasarkan nama.
+- `PUT /api/payment-sources/:name`: Memperbarui nama sumber pembayaran berdasarkan nama lama.
 
 ## Skema Pengeluaran (Expense Schema)
 
@@ -167,154 +170,3 @@ Gunanya misalnya:
 Contoh skenario:
 
 * User aktifkan “Reminder harian jam 21:00” → kamu simpan preferensi di DB → cron job di backend kirim web push ke semua subscription yang aktif.
-
----
-
-## 2. Background Sync (Catatan Tetap Aman Walau Offline)
-
-Ini cocok banget sama use case kamu:
-
-> User input pengeluaran di tempat yang sinyalnya jelek.
-
-Flow-nya:
-
-1. Saat offline, simpan pengeluaran di **IndexedDB** di browser.
-2. Daftarkan **Background Sync** di service worker.
-3. Begitu device online, service worker otomatis sync data ke backend (Express API).
-
-Benefit:
-User merasa app selalu “jalan terus”, nggak peduli sinyal.
-
----
-
-## 3. Web Share API (Share Ringkasan ke WA/Telegram)
-
-Misalnya user mau share:
-
-* Ringkasan pengeluaran harian ke pasangan
-* Laporan bulanan ke grup keluarga 😆
-
-Kamu bisa bikin tombol **“Share Bulanan”**:
-
-```js
-if (navigator.share) {
-  navigator.share({
-    title: 'Laporan Pengeluaran - November',
-    text: 'Total: Rp 2.500.000\nMakan: Rp 800.000\nTransport: Rp 400.000',
-    url: window.location.href
-  });
-}
-```
-
-Ini akan buka **native share sheet** (WhatsApp, Telegram, email, dll).
-
----
-
-## 4. Web Share Target (Terima Share dari App Lain)
-
-Level berikutnya: app kamu bisa muncul di **menu “Share to…”** dari browser atau app lain.
-
-Contoh:
-
-* User buka internet banking → export mutasi → share ke “Expense App” → app kamu terima file/text & tawarkan import.
-
-Ini diatur lewat `manifest.json` dengan `share_target`.
-
----
-
-## 5. File & Data: Import/Export (CSV/JSON)
-
-Biar user merasa data **punya mereka**, kamu bisa:
-
-* Export semua pengeluaran ke:
-
-  * CSV → dibuka di Excel/Google Sheets
-  * JSON → untuk backup
-* Import CSV/JSON → pindah device gampang.
-
-Kamu bisa pakai:
-
-* `<input type="file">` + FileReader API
-* Atau File System Access API (kalau mau UX advanced di Chrome)
-
----
-
-## 6. Clipboard API (Copy Cepat)
-
-Hal kecil tapi enak:
-
-* Tombol **“Copy ringkasan bulan ini”** → langsung ke clipboard.
-
-```js
-if (navigator.clipboard) {
-  navigator.clipboard.writeText(reportText);
-}
-```
-
-Cocok buat user yang suka tempel ringkasan di catatan lain.
-
----
-
-## 7. App Shortcuts (Quick Action dari Icon)
-
-Di `manifest.json`, kamu bisa tambahin **shortcut** kaya:
-
-* “+ Pengeluaran Hari Ini”
-* “Lihat Laporan Bulanan”
-* “Tambah Kategori”
-
-Jadi kalau user *long-press* icon app di home screen, bisa langsung lompat ke halaman tertentu di app.
-
----
-
-## 8. Theming & Sistem: Ikuti Tema HP
-
-Kamu sudah punya **dark mode**, bisa di-*upgrade*:
-
-* Deteksi `prefers-color-scheme: dark` → ikut setting OS user otomatis.
-* Simpan preferensi di localStorage, tapi default-nya ikut sistem.
-
----
-
-## 9. Keamanan: WebAuthn / Passwordless Login
-
-Kalau nanti kamu tambah auth (multi user):
-
-* Bisa pakai **WebAuthn** buat:
-
-  * Login pakai fingerprint / face unlock / device PIN
-  * Tanpa password
-
-Ini bikin app keuangan kamu berasa **serius & aman**, walau cuma web app.
-
----
-
-## 10. UX Kecil yang Berasa “Native”
-
-Beberapa hal lain yang bisa kamu kombinasikan:
-
-* **Getar halus** ketika:
-
-  * Pengeluaran berhasil tersimpan
-  * Pengeluaran gagal (beda durasi)
-* **Animasi transition** antar tab/page (Vue + Tailwind) biar smooth.
-* **Offline indicator**:
-
-  * Misal bar kecil di atas: “Mode offline, data akan disinkronkan saat online.”
-* **Skeleton loading** untuk list pengeluaran supaya terasa responsif.
-
----
-
-## 11. Ide Fitur Khusus Buat Expense App Kamu
-
-Ngomongin **fungsi**, bukan cuma API:
-
-* **Budget per kategori** + progress bar
-* **Hari tanpa pengeluaran** → bisa jadi gamification (“Streak hemat 3 hari 🎯”)
-* **Quick add**:
-
-  * Tombol seperti: “+15k kopi”, “+10k parkir”, super cepat 1 tap.
-* **Filter pintar**:
-
-  * “Hari ini”, “Kemarin”, “Minggu ini”, “Bulan ini”
-  * “Dari Tarisa 💸” (kalau nanti joint account sama istri 🤭)

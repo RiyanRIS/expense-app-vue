@@ -1,38 +1,36 @@
-const CACHE_NAME = 'expense-app-cache-v1';
+const CACHE_NAME = "expense-app-cache-v1";
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/manifest.json',
-  '/plugins/tailwindcss/tailwindcss.js',
-  '/plugins/vue/vue.global.js',
-  '/plugins/fontawesome/css/all.min.css'
+  "/",
+  "/index.html",
+  "/app.js",
+  "/manifest.json",
+  "/plugins/tailwindcss/tailwindcss.js",
+  "/plugins/vue/vue.global.js",
+  "/plugins/fontawesome/css/all.min.css",
 ];
 
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log("Opened cache");
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
+    caches.match(event.request).then((response) => {
+      // Cache hit - return response
+      if (response) {
+        return response;
+      }
+      return fetch(event.request);
+    })
   );
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -49,11 +47,14 @@ self.addEventListener('activate', (event) => {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('expense_view_db', 1);
+    const request = indexedDB.open("expense_view_db", 1);
     request.onupgradeneeded = () => {
       const db = request.result;
-      if (!db.objectStoreNames.contains('pending-expenses')) {
-        db.createObjectStore('pending-expenses', { keyPath: 'id', autoIncrement: true });
+      if (!db.objectStoreNames.contains("pending-expenses")) {
+        db.createObjectStore("pending-expenses", {
+          keyPath: "id",
+          autoIncrement: true,
+        });
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -64,23 +65,23 @@ function openDB() {
 async function syncPendingExpenses() {
   const db = await openDB();
   const items = await new Promise((resolve, reject) => {
-    const tx = db.transaction('pending-expenses', 'readonly');
-    const store = tx.objectStore('pending-expenses');
+    const tx = db.transaction("pending-expenses", "readonly");
+    const store = tx.objectStore("pending-expenses");
     const req = store.getAll();
     req.onsuccess = () => resolve(req.result || []);
     req.onerror = () => reject(req.error);
   });
   for (const item of items) {
     try {
-      const res = await fetch('/api/expenses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item)
+      const res = await fetch("/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(item),
       });
       if (res && res.ok) {
         await new Promise((resolve, reject) => {
-          const tx = db.transaction('pending-expenses', 'readwrite');
-          const store = tx.objectStore('pending-expenses');
+          const tx = db.transaction("pending-expenses", "readwrite");
+          const store = tx.objectStore("pending-expenses");
           const del = store.delete(item.id);
           del.onsuccess = () => resolve(true);
           del.onerror = () => reject(del.error);
@@ -88,20 +89,43 @@ async function syncPendingExpenses() {
       }
     } catch (e) {}
   }
-  const clientsList = await self.clients.matchAll({ includeUncontrolled: true });
+  const clientsList = await self.clients.matchAll({
+    includeUncontrolled: true,
+  });
   for (const client of clientsList) {
-    client.postMessage({ type: 'expenses-synced' });
+    client.postMessage({ type: "expenses-synced" });
   }
 }
 
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-expenses') {
+self.addEventListener("sync", (event) => {
+  if (event.tag === "sync-expenses") {
     event.waitUntil(syncPendingExpenses());
   }
 });
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'sync-expenses') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "sync-expenses") {
     event.waitUntil(syncPendingExpenses());
   }
+});
+
+self.addEventListener("push", (event) => {
+  const data = event.data.json();
+  console.log("Push received:", data);
+
+  const title = data.title || "Expense View Notification";
+  const options = {
+    body: data.body || "You have a new notification.",
+    icon: "/icons/icon-192x192.svg",
+    badge: "/icons/icon-32x32.svg",
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow("/") // Buka aplikasi ketika notifikasi diklik
+  );
 });

@@ -20,13 +20,28 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Cache hit - return response
-      if (response) {
+    fetch(event.request)
+      .then((response) => {
+        // Check if we received a valid response
+        if (!response || response.status !== 200 || response.type !== "basic") {
+          return response;
+        }
+
+        // IMPORTANT: Clone the response. A response is a stream
+        // and can only be consumed once. We must clone it so that
+        // the browser can consume the original response and we can consume the clone.
+        const responseToCache = response.clone();
+
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+
         return response;
-      }
-      return fetch(event.request);
-    })
+      })
+      .catch(() => {
+        // Network request failed, try to get it from the cache
+        return caches.match(event.request);
+      })
   );
 });
 

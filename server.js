@@ -321,18 +321,19 @@ app.post("/api/unsubscribe", async (req, res) => {
 
 app.post("/api/push-notification", async (req, res) => {
   try {
-    const { title, body } = req.body;
-    const subscriptions = await PushSubscription.find();
+    const { title, body, subscription } = req.body;
 
+    if (!subscription) {
+      return res.status(400).json({ error: "Subscription is required." });
+    }
     const notificationPayload = JSON.stringify({ title, body });
 
-    const pushPromises = subscriptions.map((sub) => {
       const pushSubscription = {
-        endpoint: sub.endpoint,
-        expirationTime: sub.expirationTime,
+        endpoint: subscription.endpoint,
+        expirationTime: subscription.expirationTime,
         keys: {
-          p256dh: sub.keys.p256dh,
-          auth: sub.keys.auth,
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth,
         },
       };
       return webpush
@@ -340,13 +341,13 @@ app.post("/api/push-notification", async (req, res) => {
         .catch((error) => {
           console.error("Error sending push notification:", error);
           if (error.statusCode === 410) {
-            return PushSubscription.deleteOne({ endpoint: sub.endpoint });
+            return PushSubscription.deleteOne({ endpoint: subscription.endpoint });
           }
+        })
+        .then(() => {
+          res.status(200).json({ message: "Push notifications sent." });
         });
-    });
 
-    await Promise.all(pushPromises);
-    res.status(200).json({ message: "Push notifications sent." });
   } catch (error) {
     console.error("Error sending push notifications:", error);
     res.status(500).json({ error: "Failed to send push notifications." });

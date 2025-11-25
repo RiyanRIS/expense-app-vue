@@ -42,6 +42,332 @@ createApp({
       isOnline: true,
       loadingExpenses: false,
       filter: "all", // Add filter data property
+      currentLang: localStorage.getItem("language") || "id",
+      translations: {
+        id: {
+          offlineSyncNotice:
+            "Mode offline, data akan disinkronkan saat online.",
+          pendingSyncNotice: "Menunggu Sinkronisasi",
+          pendingSyncNoticeDetail: "data akan dikirim saat online",
+          triggerSync: "Kirim Sekarang",
+
+          totalTodayNotice: "Total Hari Ini",
+          totalMonthNotice: "Total Bulan Ini",
+          topCategoryNotice: "Kategori Paling Sering",
+          topSourceNotice: "Sumber Dana Paling Sering",
+          topStoreNotice: "Toko Paling Sering",
+
+          filterNotice: "Filter Pengeluaran",
+          allNotice: "Semua",
+          todayNotice: "Hari Ini",
+          yesterdayNotice: "Kemarin",
+          thisWeekNotice: "Minggu Ini",
+          thisMonthNotice: "Bulan Ini",
+          latestNotice: "Transaksi Terbaru",
+
+          backupRestore: "Backup & Restore",
+          backupData: "Backup Data",
+          backupNotice:
+            "Unduh semua data pengeluaran, kategori, dan sumber dana.",
+          downloadBackup: "Unduh Backup",
+          restoreData: "Restore Data",
+          restoreNotice: "Unggah file backup (.json) untuk mengembalikan data.",
+          uploadRestore: "Unggah Restore",
+
+          quickAddItems: "Quick Add Items",
+          quickAddItemsList: "Daftar Quick Add Items",
+          noQuickAddItems: "Belum ada Quick Add item.",
+
+          itemError: "Nama barang tidak boleh kosong.",
+          amountError: "Jumlah tidak boleh kosong.",
+
+          amountPlaceholder: "Jumlah (e.g., 15.000)",
+          itemPlaceholder: "Nama Barang*",
+
+          selectCategory: "Pilih Kategori",
+          selectPaymentSource: "Pilih Sumber Pembayaran",
+
+          dayNames: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+          expenseDetail: "Detail Pengeluaran",
+          item: "Nama Barang",
+          amount: "Jumlah",
+          category: "Kategori",
+          paymentSource: "Sumber Dana",
+          date: "Tanggal",
+          time: "Waktu Input",
+
+          noExpenseSelected: "Tidak ada pengeluaran yang sedang dipilih.",
+          editExpense: "Edit Pengeluaran",
+
+          theme: "Tema Aplikasi",
+          accentColor: "Warna Aksen",
+          clearCache: "Hapus Cache",
+          testNotification: "Tes Notifikasi",
+          notificationSuccess: "Notifikasi Berhasil",
+          notificationError: "Notifikasi Gagal",
+          manageCategories: "Kelola Kategori",
+          managePaymentSources: "Kelola Sumber Dana",
+          manageProfile: "Manajemen Profil",
+          forgotPassword: "Lupa Password",
+          logout: "Logout",
+
+          manageCategoriesTitle: "Atur Kategori",
+          manageCategoriesListTitle: "Daftar Kategori",
+          newCategoryNamePlaceholder: "Nama Kategori Baru",
+          listOfCategories: "Daftar Kategori",
+          managePaymentSourcesTitle: "Atur Sumber Dana",
+          newPaymentSourceNamePlaceholder: "Nama Sumber Dana",
+          listOfPaymentSources: "Daftar Sumber Dana",
+          cancel: "Batal",
+          save: "Simpan",
+          edit: "Edit",
+          delete: "Hapus",
+          home: "Beranda",
+          createNew: "Buat Baru",
+          settings: "Pengaturan",
+
+          pressAgainToExit: "Tekan sekali lagi untuk keluar.",
+          dataOfflineSynced: "Data offline tersinkron!",
+
+          categoryAddedSuccessfully: "Kategori berhasil ditambahkan!",
+          failedToAddCategory: "Gagal menambahkan kategori.",
+          categoryDeletedSuccessfully: "Kategori berhasil dihapus!",
+          failedToDeleteCategory: "Gagal menghapus kategori.",
+          categoryUpdatedSuccessfully: "Kategori berhasil diperbarui!",
+          failedToUpdateCategory: "Gagal memperbarui kategori.",
+          confirmDeleteCategory:
+            'Apakah Anda yakin ingin menghapus kategori "%s"?',
+
+          paymentSourceAddedSuccessfully: "Sumber dana berhasil ditambahkan!",
+          failedToAddPaymentSource: "Gagal menambahkan sumber dana.",
+          paymentSourceDeletedSuccessfully: "Sumber dana berhasil dihapus!",
+          failedToDeletePaymentSource: "Gagal menghapus sumber dana.",
+          paymentSourceUpdatedSuccessfully: "Sumber dana berhasil diperbarui!",
+          failedToUpdatePaymentSource: "Gagal memperbarui sumber dana.",
+          confirmDeletePaymentSource:
+            'Apakah Anda yakin ingin menghapus sumber dana "%s"?',
+
+          quickAddItemDeletedSuccessfully: "Item Quick Add berhasil dihapus!",
+          failedToDeleteQuickAddItem: "Gagal menghapus item Quick Add.",
+          confirmDeleteQuickAddItem:
+            "Apakah Anda yakin ingin menghapus item Quick Add ini?",
+
+          yearsAgo: "tahun lalu",
+          monthsAgo: "bulan lalu",
+          daysAgo: "hari lalu",
+          hoursAgo: "jam lalu",
+          minutesAgo: "menit lalu",
+          justNow: "baru saja",
+
+          testNotificationTitle: "Test Notifikasi",
+          testNotificationBody:
+            "Ini adalah notifikasi percobaan dari Expense View.",
+          testNotificationSuccess: "Notifikasi berhasil dikirim!",
+          testNotificationError: "Gagal mengirim notifikasi.",
+
+          browserNotSupportNotification:
+            "Browser ini tidak mendukung notifikasi.",
+          notificationPermissionGranted: "Izin notifikasi diberikan!",
+          notificationPermissionDenied: "Izin notifikasi ditolak.",
+          notificationPermissionNotGranted: "Izin notifikasi tidak diberikan.",
+          pushNotificationNotSupportedByBrowser:
+            "Push notifikasi tidak didukung oleh browser ini.",
+          notificationPermissionNotGrantedForPush:
+            "Anda perlu memberikan izin notifikasi terlebih dahulu.",
+          pushSubscriptionSuccess: "Berlangganan push notifikasi berhasil!",
+          pushSubscriptionError: "Gagal berlangganan push notifikasi.",
+          testNotificationSent: "Notifikasi uji coba berhasil dikirim!",
+          testNotificationFailed: "Gagal mengirim notifikasi uji coba.",
+
+          monthlySummary: "Monthly Summary",
+          browserNotSupportClipboard:
+            "Browser ini tidak mendukung Clipboard API.",
+          monthlySummaryCopied: "Ringkasan bulan ini berhasil disalin!",
+          monthlySummaryCopyFailed: "Gagal menyalin ringkasan.",
+          total: "Total",
+          backupDownloaded: "Backup berhasil diunduh!",
+          backupDownloadedFallback: "Backup lokal berhasil diunduh!",
+
+          restoreProcessing: "Memproses...",
+          restoreSuccess: "Backup berhasil dipulihkan!",
+          restoreSuccessFallback: "Backup fallback berhasil dipulihkan!",
+          restoreFailed: "Gagal memulihkan backup.",
+
+          editExpenseSuccess: "Pengeluaran berhasil diperbarui!",
+          editExpenseFailed: "Gagal memperbarui pengeluaran.",
+          deleteExpenseSuccess: "Pengeluaran berhasil dihapus!",
+          deleteExpenseFailed: "Gagal menghapus pengeluaran.",
+
+          addExpenseSuccess: "Pengeluaran berhasil disimpan",
+          addExpenseSuccessOffline:
+            "Pengeluaran berhasil disimpan offline, akan tersinkron.",
+          addExpenseFailedOffline: "Gagal menambahkan pengeluaran offline.",
+          clearCacheSuccess:
+            "Cache berhasil dihapus dan halaman akan dimuat ulang.",
+        },
+        en: {
+          offlineSyncNotice: "Offline mode, data will sync when online.",
+          pendingSyncNotice: "Waiting for Sync",
+          pendingSyncNoticeDetail: "data will be sent when online",
+          triggerSync: "Sync Now",
+
+          totalTodayNotice: "Today's Total",
+          totalMonthNotice: "This Month's Total",
+          topCategoryNotice: "Most Frequent Category",
+          topSourceNotice: "Most Used Payment Source",
+          topStoreNotice: "Most Frequent Store",
+
+          filterNotice: "Filter Expenses",
+          allNotice: "All",
+          todayNotice: "Today",
+          yesterdayNotice: "Yesterday",
+          thisWeekNotice: "This Week",
+          thisMonthNotice: "This Month",
+          latestNotice: "Latest Transactions",
+
+          backupRestore: "Backup & Restore",
+          backupData: "Backup Data",
+          backupNotice:
+            "Download all expense, category, and payment source data.",
+          downloadBackup: "Download Backup",
+          restoreData: "Restore Data",
+          restoreNotice: "Upload a backup file (.json) to restore data.",
+          uploadRestore: "Upload Restore",
+
+          quickAddItems: "Quick Add Items",
+          quickAddItemsList: "Quick Add Items List",
+          noQuickAddItems: "No Quick Add items yet.",
+
+          itemError: "Item name cannot be empty.",
+          amountError: "Amount cannot be empty.",
+
+          amountPlaceholder: "Amount (e.g., 15,000)",
+          itemPlaceholder: "Item Name*",
+
+          selectCategory: "Select Category",
+          selectPaymentSource: "Select Payment Source",
+
+          dayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+          expenseDetail: "Expense Detail",
+          item: "Item Name",
+          amount: "Amount",
+          category: "Category",
+          paymentSource: "Payment Source",
+          date: "Date",
+          time: "Input Time",
+
+          noExpenseSelected: "No expense selected.",
+          editExpense: "Edit Expense",
+
+          theme: "App Theme",
+          accentColor: "Accent Color",
+          clearCache: "Clear Cache",
+          testNotification: "Test Notification",
+          notificationSuccess: "Notification Sent",
+          notificationError: "Notification Failed",
+          manageCategories: "Manage Categories",
+          managePaymentSources: "Manage Payment Sources",
+          manageProfile: "Profile Management",
+          forgotPassword: "Forgot Password",
+          logout: "Logout",
+
+          manageCategoriesTitle: "Manage Categories",
+          manageCategoriesListTitle: "Category List",
+          newCategoryNamePlaceholder: "New Category Name",
+          listOfCategories: "List of Categories",
+          managePaymentSourcesTitle: "Manage Payment Sources",
+          newPaymentSourceNamePlaceholder: "New Payment Source Name",
+          listOfPaymentSources: "List of Payment Sources",
+          cancel: "Cancel",
+          save: "Save",
+          edit: "Edit",
+          delete: "Delete",
+          home: "Home",
+          createNew: "Create New",
+          settings: "Settings",
+
+          pressAgainToExit: "Press again to exit.",
+          dataOfflineSynced: "Offline data synced!",
+
+          categoryAddedSuccessfully: "Category added successfully!",
+          failedToAddCategory: "Failed to add category.",
+          categoryDeletedSuccessfully: "Category deleted successfully!",
+          failedToDeleteCategory: "Failed to delete category.",
+          categoryUpdatedSuccessfully: "Category updated successfully!",
+          failedToUpdateCategory: "Failed to update category.",
+          confirmDeleteCategory:
+            'Are you sure you want to delete the category "%s"?',
+
+          paymentSourceAddedSuccessfully: "Payment source added successfully!",
+          failedToAddPaymentSource: "Failed to add payment source.",
+          paymentSourceDeletedSuccessfully:
+            "Payment source deleted successfully!",
+          failedToDeletePaymentSource: "Failed to delete payment source.",
+          paymentSourceUpdatedSuccessfully:
+            "Payment source updated successfully!",
+          failedToUpdatePaymentSource: "Failed to update payment source.",
+          confirmDeletePaymentSource:
+            'Are you sure you want to delete the payment source "%s"?',
+
+          quickAddItemDeletedSuccessfully:
+            "Quick Add item deleted successfully!",
+          failedToDeleteQuickAddItem: "Failed to delete Quick Add item.",
+          confirmDeleteQuickAddItem:
+            "Are you sure you want to delete this Quick Add item?",
+
+          yearsAgo: "years ago",
+          monthsAgo: "months ago",
+          daysAgo: "days ago",
+          hoursAgo: "hours ago",
+          minutesAgo: "minutes ago",
+          justNow: "just now",
+
+          testNotificationTitle: "Test Notification",
+          testNotificationBody:
+            "This is a test notification from Expense View.",
+          testNotificationSuccess: "Test notification sent!",
+          testNotificationError: "Failed to send test notification.",
+
+          browserNotSupportNotification:
+            "This browser does not support notifications.",
+          notificationPermissionGranted: "Notification permission granted!",
+          notificationPermissionDenied: "Notification permission denied.",
+          notificationPermissionNotGranted:
+            "Notification permission not granted.",
+          pushNotificationNotSupportedByBrowser:
+            "Push notifications are not supported by this browser.",
+          notificationPermissionNotGrantedForPush:
+            "You need to grant notification permission first.",
+          pushSubscriptionSuccess: "Push notification subscription successful!",
+          pushSubscriptionError: "Failed to subscribe to push notifications.",
+          testNotificationSent: "Test notification sent successfully!",
+          testNotificationFailed: "Failed to send test notification.",
+
+          monthlySummary: "Monthly Summary",
+          browserNotSupportClipboard:
+            "This browser does not support the Clipboard API.",
+          monthlySummaryCopied: "This month's summary copied!",
+          monthlySummaryCopyFailed: "Failed to copy summary.",
+          total: "Total",
+          backupDownloaded: "Backup downloaded successfully!",
+          backupDownloadedFallback: "Local backup downloaded successfully!",
+
+          restoreProcessing: "Processing...",
+          restoreSuccess: "Backup restored successfully!",
+          restoreSuccessFallback: "Fallback backup restored successfully!",
+          restoreFailed: "Failed to restore backup.",
+
+          editExpenseSuccess: "Expense updated successfully!",
+          editExpenseFailed: "Failed to update expense.",
+          deleteExpenseSuccess: "Expense deleted successfully!",
+          deleteExpenseFailed: "Failed to delete expense.",
+
+          addExpenseSuccess: "Expense saved successfully",
+          addExpenseSuccessOffline: "Expense saved offline, will sync later.",
+          addExpenseFailedOffline: "Failed to add offline expense.",
+          clearCacheSuccess: "Cache cleared and page will reload.",
+        },
+      },
       vapidPublicKey:
         "BIt2q9mIdxGqhVYsISG4JrKNl8gmfUUfMY49csaHSm0KM2ItJdqlVEQkFk_k6S_EtFoOudeE0GuwaYvqODZlpaI",
       pushSubscription: null,
@@ -94,7 +420,10 @@ createApp({
     },
     monthName() {
       const date = new Date(this.currentYear, this.currentMonth);
-      return date.toLocaleString("id-ID", { month: "long" });
+      return date.toLocaleString(
+        this.currentLang === "id" ? "id-ID" : "en-US",
+        { month: "long" }
+      );
     },
     latestTen() {
       return this.filteredExpenses;
@@ -222,7 +551,7 @@ createApp({
       ) {
         this.backPressCount++;
         if (this.backPressCount === 1) {
-          this.showToast("Tekan sekali lagi untuk keluar.", "info");
+          this.showToast(this.t("pressAgainToExit"), "info");
           setTimeout(() => {
             this.backPressCount = 0;
           }, 2000);
@@ -237,7 +566,7 @@ createApp({
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (event.data && event.data.type === "expenses-synced") {
           this.fetchExpenses();
-          this.showToast("Data offline tersinkron!", "success");
+          this.showToast(this.t("dataOfflineSynced"), "success");
           this.getPendingExpenses();
         }
       });
@@ -357,10 +686,10 @@ createApp({
         }
         this.newCategoryName = "";
         await this.fetchCategories();
-        this.showToast("Kategori berhasil ditambahkan!", "success");
+        this.showToast(this.t("categoryAddedSuccessfully"), "success");
       } catch (error) {
         console.error("Error adding category:", error);
-        this.showToast("Gagal menambahkan kategori.", "error");
+        this.showToast(this.t("failedToAddCategory"), "error");
       }
     },
     async deleteCategory(categoryName) {
@@ -372,10 +701,10 @@ createApp({
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         await this.fetchCategories();
-        this.showToast("Kategori berhasil dihapus!", "success");
+        this.showToast(this.t("categoryDeletedSuccessfully"), "success");
       } catch (error) {
         console.error("Error deleting category:", error);
-        this.showToast("Gagal menghapus kategori.", "error");
+        this.showToast(this.t("failedToDeleteCategory"), "error");
       }
     },
     editCategory(category) {
@@ -400,7 +729,7 @@ createApp({
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          this.showToast("Kategori berhasil diperbarui!", "success");
+          this.showToast(this.t("categoryUpdatedSuccessfully"), "success");
         } else {
           // Add new category
           const response = await fetch("/api/categories", {
@@ -413,14 +742,14 @@ createApp({
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          this.showToast("Kategori berhasil ditambahkan!", "success");
+          this.showToast(this.t("categoryAddedSuccessfully"), "success");
         }
         this.newCategoryName = "";
         this.editingCategory = null;
         await this.fetchCategories();
       } catch (error) {
         console.error("Error saving category:", error);
-        this.showToast("Gagal menyimpan kategori.", "error");
+        this.showToast(this.t("failedToSaveCategory"), "error");
       }
     },
     cancelEditCategory() {
@@ -428,9 +757,7 @@ createApp({
       this.newCategoryName = "";
     },
     deleteCategoryConfirm(category) {
-      if (
-        confirm(`Apakah Anda yakin ingin menghapus kategori "${category}"?`)
-      ) {
+      if (confirm(this.t("confirmDeleteCategory", category))) {
         this.deleteCategory(category);
       }
     },
@@ -449,10 +776,10 @@ createApp({
         }
         this.newPaymentSourceName = "";
         await this.fetchPaymentSources();
-        this.showToast("Sumber dana berhasil ditambahkan!", "success");
+        this.showToast(this.t("paymentSourceAddedSuccessfully"), "success");
       } catch (error) {
         console.error("Error adding payment source:", error);
-        this.showToast("Gagal menambahkan sumber dana.", "error");
+        this.showToast(this.t("failedToAddPaymentSource"), "error");
       }
     },
     async deletePaymentSource(sourceName) {
@@ -464,10 +791,10 @@ createApp({
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         await this.fetchPaymentSources();
-        this.showToast("Sumber dana berhasil dihapus!", "success");
+        this.showToast(this.t("paymentSourceDeletedSuccessfully"), "success");
       } catch (error) {
         console.error("Error deleting payment source:", error);
-        this.showToast("Gagal menghapus sumber dana.", "error");
+        this.showToast(this.t("failedToDeletePaymentSource"), "error");
       }
     },
     editPaymentSource(source) {
@@ -492,7 +819,7 @@ createApp({
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          this.showToast("Sumber dana berhasil diperbarui!", "success");
+          this.showToast(this.t("paymentSourceUpdatedSuccessfully"), "success");
         } else {
           // Add new payment source
           const response = await fetch("/api/payment-sources", {
@@ -505,14 +832,14 @@ createApp({
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          this.showToast("Sumber dana berhasil ditambahkan!!", "success");
+          this.showToast(this.t("paymentSourceAddedSuccessfully"), "success");
         }
         this.newPaymentSourceName = "";
         this.editingPaymentSource = null;
         await this.fetchPaymentSources();
       } catch (error) {
         console.error("Error saving payment source:", error);
-        this.showToast("Gagal menyimpan sumber dana.", "error");
+        this.showToast(this.t("failedToSavePaymentSource"), "error");
       }
     },
     cancelEditPaymentSource() {
@@ -520,9 +847,7 @@ createApp({
       this.newPaymentSourceName = "";
     },
     deletePaymentSourceConfirm(source) {
-      if (
-        confirm(`Apakah Anda yakin ingin menghapus sumber dana "${source}"?`)
-      ) {
+      if (confirm(this.t("confirmDeletePaymentSource", source))) {
         this.deletePaymentSource(source);
       }
     },
@@ -566,8 +891,9 @@ createApp({
       this.quickAddEditIndex = index;
     },
     deleteQuickAddItemConfirm(index) {
-      if (confirm("Apakah Anda yakin ingin menghapus item Quick Add ini?")) {
+      if (confirm(this.t("confirmDeleteQuickAddItem"))) {
         this.deleteQuickAddItem(index);
+        this.showToast(this.t("quickAddItemDeletedSuccessfully"), "success");
       }
     },
     cancelEditQuickAddItem() {
@@ -620,25 +946,25 @@ createApp({
 
       let interval = seconds / 31536000;
       if (interval > 1) {
-        return Math.floor(interval) + " tahun yang lalu";
+        return Math.floor(interval) + " " + this.t("yearsAgo");
       }
       interval = seconds / 2592000;
       if (interval > 1) {
-        return Math.floor(interval) + " bulan yang lalu";
+        return Math.floor(interval) + " " + this.t("monthsAgo");
       }
       interval = seconds / 86400;
       if (interval > 1) {
-        return Math.floor(interval) + " hari yang lalu";
+        return Math.floor(interval) + " " + this.t("daysAgo");
       }
       interval = seconds / 3600;
       if (interval > 1) {
-        return Math.floor(interval) + " jam yang lalu";
+        return Math.floor(interval) + " " + this.t("hoursAgo");
       }
       interval = seconds / 60;
       if (interval > 1) {
-        return Math.floor(interval) + " menit yang lalu";
+        return Math.floor(interval) + " " + this.t("minutesAgo");
       }
-      return "baru saja";
+      return this.t("justNow");
     },
     applyTheme(isDark) {
       if (isDark) {
@@ -657,18 +983,6 @@ createApp({
         navigator.vibrate(20);
       }
     },
-    async requestNotificationPermission() {
-      if (!("Notification" in window)) {
-        this.showToast("Browser ini tidak mendukung notifikasi.", "error");
-        return;
-      }
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        this.showToast("Izin notifikasi diberikan.", "success");
-      } else {
-        this.showToast("Izin notifikasi ditolak.", "error");
-      }
-    },
     async testNotification() {
       try {
         const response = await fetch("/api/push-notification", {
@@ -677,17 +991,18 @@ createApp({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            title: "Test Notifikasi",
-            body: "Ini adalah notifikasi percobaan dari Expense View.",
+            title: this.t("testNotificationTitle"),
+            body: this.t("testNotificationBody"),
+            subscription: this.pushSubscription,
           }),
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        this.showToast("Notifikasi percobaan berhasil dikirim!", "success");
+        this.showToast(this.t("testNotificationSuccess"), "success");
       } catch (error) {
         console.error("Error sending test notification:", error);
-        this.showToast("Gagal mengirim notifikasi percobaan.", "error");
+        this.showToast(this.t("testNotificationError"), "error");
       }
     },
     toggleDark() {
@@ -697,33 +1012,30 @@ createApp({
     },
     async requestNotificationPermission() {
       if (!("Notification" in window)) {
-        this.showToast("Browser ini tidak mendukung notifikasi.", "error");
+        this.showToast(this.t("browserNotSupportNotification"), "error");
         return;
       }
 
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
-        this.showToast("Izin notifikasi diberikan!", "success");
+        this.showToast(this.t("notificationPermissionGranted"), "success");
       } else if (permission === "denied") {
-        this.showToast("Izin notifikasi ditolak.", "error");
+        this.showToast(this.t("notificationPermissionDenied"), "error");
       } else {
-        this.showToast("Izin notifikasi tidak diberikan.", "info");
+        this.showToast(this.t("notificationPermissionNotGranted"), "info");
       }
     },
     async subscribeToPushNotifications() {
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
         this.showToast(
-          "Push notifikasi tidak didukung oleh browser ini.",
+          this.t("pushNotificationNotSupportedByBrowser"),
           "error"
         );
         return;
       }
 
       if (Notification.permission !== "granted") {
-        this.showToast(
-          "Anda perlu memberikan izin notifikasi terlebih dahulu.",
-          "info"
-        );
+        this.showToast(this.t("notificationPermissionNotGranted"), "info");
         return;
       }
 
@@ -757,10 +1069,10 @@ createApp({
         });
 
         this.pushSubscription = subscription;
-        this.showToast("Berhasil berlangganan notifikasi push!", "success");
+        this.showToast(this.t("pushSubscriptionSuccess"), "success");
       } catch (error) {
         console.error("Gagal berlangganan notifikasi push:", error);
-        this.showToast("Gagal berlangganan notifikasi push.", "error");
+        this.showToast(this.t("pushSubscriptionError"), "error");
       }
     },
     urlBase64ToUint8Array(base64String) {
@@ -807,7 +1119,7 @@ createApp({
     },
     async copyMonthlySummary() {
       if (!navigator.clipboard) {
-        this.showToast("Browser Anda tidak mendukung Clipboard API.", "error");
+        this.showToast(this.t("browserNotSupportClipboard"), "error");
         return;
       }
 
@@ -816,7 +1128,7 @@ createApp({
         (e) => (e.input_date || "").slice(0, 7) === ym
       );
 
-      let summaryText = `Ringkasan Pengeluaran Bulan Ini (${
+      let summaryText = `${this.t("monthlySummary")} (${
         this.monthName
       } ${new Date().getFullYear()}):`;
       let total = 0;
@@ -835,14 +1147,14 @@ createApp({
         total += expensesByCategory[category];
       }
 
-      summaryText += `\nTotal: Rp ${this.formatNumber(total)}`;
+      summaryText += `\n${this.t("total")}: Rp ${this.formatNumber(total)}`;
 
       try {
         await navigator.clipboard.writeText(summaryText);
-        this.showToast("Ringkasan bulan ini berhasil disalin!", "success");
+        this.showToast(this.t("monthlySummaryCopied"), "success");
       } catch (err) {
         console.error("Gagal menyalin ringkasan: ", err);
-        this.showToast("Gagal menyalin ringkasan.", "error");
+        this.showToast(this.t("monthlySummaryCopyFailed"), "error");
       }
     },
     async downloadBackup() {
@@ -862,7 +1174,7 @@ createApp({
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        this.showToast("Backup berhasil diunduh!", "success");
+        this.showToast(this.t("backupDownloaded"), "success");
       } catch (e) {
         const fallback = {
           expenses: this.expenses,
@@ -881,7 +1193,7 @@ createApp({
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        this.showToast("Backup lokal berhasil diunduh!", "success");
+        this.showToast(this.t("backupDownloadedFallback"), "success");
       }
     },
     handleRestoreFile(ev) {
@@ -891,7 +1203,7 @@ createApp({
     },
     async restoreData() {
       if (!this.restoreFile) return;
-      this.restoreStatus = "Memproses...";
+      this.restoreStatus = this.t("restoreProcessing");
       try {
         const text = await this.restoreFile.text();
         const payload = JSON.parse(text);
@@ -910,7 +1222,7 @@ createApp({
         await this.fetchExpenses();
         await this.fetchCategories();
         await this.fetchPaymentSources();
-        this.showToast("Restore berhasil!", "success");
+        this.showToast(this.t("restoreSuccess"), "success");
       } catch (e) {
         try {
           const text = await this.restoreFile.text();
@@ -943,14 +1255,14 @@ createApp({
             });
             cnt++;
           }
-          this.restoreStatus = `Selesai: ${cnt} pengeluaran (fallback).`;
+          this.restoreStatus = this.t("restoreSuccessFallback", { cnt });
           await this.fetchExpenses();
           await this.fetchCategories();
           await this.fetchPaymentSources();
-          this.showToast("Restore fallback berhasil!", "success");
+          this.showToast(this.t("restoreSuccessFallback"), "success");
         } catch (err) {
-          this.restoreStatus = "Gagal memulihkan data";
-          this.showToast("Restore gagal.", "error");
+          this.restoreStatus = this.t("restoreFailed");
+          this.showToast(this.t("restoreFailed"), "error");
         }
       }
       this.restoreFile = null;
@@ -998,11 +1310,11 @@ createApp({
         }
         await this.fetchExpenses();
         this.showDetail(this.selectedExpense._id);
-        this.showToast("Pengeluaran berhasil diperbarui!", "success");
+        this.showToast(this.t("editExpenseSuccess"), "success");
         this.haptic("success");
       } catch (error) {
         console.error("Error updating expense:", error);
-        this.showToast("Gagal memperbarui pengeluaran.", "error");
+        this.showToast(this.t("editExpenseFailed"), "error");
         this.haptic("error");
       }
     },
@@ -1015,12 +1327,12 @@ createApp({
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         await this.fetchExpenses();
-        this.showToast("Pengeluaran berhasil dihapus!", "success");
+        this.showToast(this.t("deleteExpenseSuccess"), "success");
         this.haptic("success");
         this.changeTab("home", false);
       } catch (error) {
         console.error("Error deleting expense:", error);
-        this.showToast("Gagal menghapus pengeluaran.", "error");
+        this.showToast(this.t("deleteExpenseFailed"), "error");
         this.haptic("error");
       }
     },
@@ -1060,10 +1372,7 @@ createApp({
 
       if (!navigator.onLine) {
         await this.addPendingExpense(this.newForm);
-        this.showToast(
-          "Pengeluaran disimpan offline, akan tersinkron.",
-          "success"
-        );
+        this.showToast(this.t("addExpenseSuccessOffline"), "success");
         await this.triggerSync();
         this.resetNewForm();
         await this.getPendingExpenses();
@@ -1081,22 +1390,19 @@ createApp({
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         await this.fetchExpenses();
-        this.showToast("Pengeluaran berhasil ditambahkan!", "success");
+        this.showToast(this.t("addExpenseSuccess"), "success");
         this.haptic("success");
         this.resetNewForm();
       } catch (error) {
         console.error("Error adding expense:", error);
         try {
           await this.addPendingExpense(this.newForm);
-          this.showToast(
-            "Pengeluaran disimpan offline, akan tersinkron.",
-            "success"
-          );
+          this.showToast(this.t("addExpenseSuccessOffline"), "success");
           await this.triggerSync();
           this.resetNewForm();
           await this.getPendingExpenses();
         } catch (e) {
-          this.showToast("Gagal menambahkan pengeluaran.", "error");
+          this.showToast(this.t("addExpenseFailedOffline"), "error");
           this.haptic("error");
         }
       }
@@ -1225,12 +1531,27 @@ createApp({
         count += 2;
       }
 
-      this.showToast(
-        `Cache berhasil dihapus dan halaman akan dimuat ulang. (${count})`
-      );
+      this.showToast(this.t("clearCacheSuccess"), "success");
       setTimeout(() => {
         window.location.reload(true);
       }, count * 1000);
+    },
+    setLanguage(lang) {
+      this.currentLang = lang;
+      localStorage.setItem("language", lang);
+    },
+    t(key, ...replacements) {
+      let translation = (this.translations[this.currentLang] || {})[key];
+      if (translation === undefined) return key;
+      replacements.forEach((rep) => {
+        const k = Object.keys(rep)[0];
+        const v = rep[k];
+        translation = translation.replace(
+          new RegExp(`\\{\\{${k}\\}\\}`, "g"),
+          v
+        );
+      });
+      return translation;
     },
   },
   watch: {

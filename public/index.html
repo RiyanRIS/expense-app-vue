@@ -47,13 +47,25 @@
               @click="toggleDark"
               :class="[darkMode ? 'fas fa-sun text-white' : 'fas fa-moon', 'text-lg cursor-pointer']"
             ></i>
+            <button
+              @click="setLanguage('id')"
+              :class="['px-2 py-1 rounded text-xs', currentLang === 'id' ? accentBgClass + ' text-white' : 'text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700']"
+            >
+              ID
+            </button>
+            <button
+              @click="setLanguage('en')"
+              :class="['px-2 py-1 rounded text-xs', currentLang === 'en' ? accentBgClass + ' text-white' : 'text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700']"
+            >
+              EN
+            </button>
           </div>
         </header>
         <div
           v-if="!isOnline"
           class="mb-2 rounded-lg p-2 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 text-xs text-yellow-800 dark:text-yellow-100"
         >
-          Mode offline, data akan disinkronkan saat online.
+          {{ t('offlineSyncNotice') }}
         </div>
 
         <transition name="fade" mode="out-in">
@@ -65,26 +77,26 @@
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-xs text-yellow-700 dark:text-yellow-200">
-                    Menunggu Sinkronisasi
+                    {{ t('pendingSyncNotice') }}
                   </div>
                   <div
                     class="text-sm font-medium text-yellow-800 dark:text-yellow-100"
                   >
-                    {{ pendingCount }} data akan dikirim saat online
+                    {{ pendingCount }} {{ t('pendingSyncNoticeDetail') }}
                   </div>
                 </div>
                 <button
                   @click="triggerSync"
                   class="px-3 py-1 rounded bg-yellow-600 text-white text-sm"
                 >
-                  Kirim Sekarang
+                  {{ t('triggerSync') }}
                 </button>
               </div>
             </section>
             <section class="grid grid-cols-2 gap-3">
               <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Total Hari Ini
+                  {{ t('totalTodayNotice') }}
                 </div>
                 <div
                   class="text-xl font-semibold text-gray-900 dark:text-gray-100"
@@ -95,7 +107,7 @@
               <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
                 <div class="flex items-center justify-between">
                   <div class="text-xs text-gray-500 dark:text-gray-400">
-                    Total Bulan Ini
+                    {{ t('totalMonthNotice') }}
                   </div>
                   <button
                     @click="copyMonthlySummary"
@@ -112,7 +124,7 @@
               </div>
               <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Kategori Paling Sering
+                  {{ t('topCategoryNotice') }}
                 </div>
                 <div
                   class="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -122,7 +134,7 @@
               </div>
               <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Sumber Dana Paling Sering
+                  {{ t('topSourceNotice') }}
                 </div>
                 <div
                   class="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -134,7 +146,7 @@
                 class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow col-span-2"
               >
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Toko Paling Sering
+                  {{ t('topStoreNotice') }}
                 </div>
                 <div
                   class="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -148,38 +160,38 @@
               class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow mb-4"
             >
               <h2 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                Filter Pengeluaran
+                {{ t('filterNotice') }}
               </h2>
               <div class="flex space-x-2 overflow-x-auto pb-2 hide-scrollbar">
                 <button
                   @click="setFilter('all')"
                   :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'all' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
                 >
-                  Semua
+                  {{ t('allNotice') }}
                 </button>
                 <button
                   @click="setFilter('today')"
                   :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'today' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
                 >
-                  Hari ini
+                  {{ t('todayNotice') }}
                 </button>
                 <button
                   @click="setFilter('yesterday')"
                   :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'yesterday' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
                 >
-                  Kemarin
+                  {{ t('yesterdayNotice') }}
                 </button>
                 <button
                   @click="setFilter('this_week')"
                   :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'this_week' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
                 >
-                  Minggu ini
+                  {{ t('thisWeekNotice') }}
                 </button>
                 <button
                   @click="setFilter('this_month')"
                   :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'this_month' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
                 >
-                  Bulan ini
+                  {{ t('thisMonthNotice') }}
                 </button>
               </div>
             </section>
@@ -187,7 +199,7 @@
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow">
               <div class="flex items-center justify-between p-4">
                 <h2 class="font-semibold text-gray-900 dark:text-gray-100">
-                  Transaksi Terbaru
+                  {{ t('latestNotice') }}
                 </h2>
                 <button
                   @click="manualRefresh"
@@ -254,7 +266,7 @@
                 <h2
                   class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
                 >
-                  Backup & Restore
+                  {{ t('backupRestore') }}
                 </h2>
                 <button
                   @click="changeTab('settings')"
@@ -268,26 +280,26 @@
                   <div
                     class="font-medium text-gray-800 dark:text-gray-200 mb-2"
                   >
-                    Backup Data
+                    {{ t('backupData') }}
                   </div>
                   <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Unduh semua data pengeluaran, kategori, dan sumber dana.
+                    {{ t('backupNotice') }}
                   </p>
                   <button
                     @click="downloadBackup"
                     :class="['py-2','px-4','rounded','text-white','font-semibold', accentBgClass]"
                   >
-                    Download Backup
+                    {{ t('downloadBackup') }}
                   </button>
                 </div>
                 <div class="border rounded-lg p-4 dark:border-gray-700">
                   <div
                     class="font-medium text-gray-800 dark:text-gray-200 mb-2"
                   >
-                    Restore Data
+                    {{ t('restoreData') }}
                   </div>
                   <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Pilih file backup (.json) untuk mengembalikan data.
+                    {{ t('restoreNotice') }}
                   </p>
                   <input
                     type="file"
@@ -301,7 +313,7 @@
                       :disabled="!restoreFile"
                       :class="['py-2','px-4','rounded','text-white','font-semibold', accentBgClass, !restoreFile ? 'opacity-50 cursor-not-allowed' : '']"
                     >
-                      Restore
+                      {{ t('uploadRestore') }}
                     </button>
                     <span class="text-sm text-gray-600 dark:text-gray-400"
                       >{{ restoreStatus }}</span
@@ -322,7 +334,7 @@
                 <h2
                   class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
                 >
-                  Quick Add Items
+                  {{ t('quickAddItems') }}
                 </h2>
                 <button
                   @click="changeTab('settings')"
@@ -350,7 +362,7 @@
                     v-model="newQuickAddItem.displayAmount"
                     type="text"
                     inputmode="numeric"
-                    placeholder="Jumlah (e.g., 15.000)"
+                    placeholder="{{ t('amountPlaceholder') }}"
                     @input="handleQuickAddAmountInput"
                     class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10"
                     required
@@ -361,7 +373,7 @@
                   class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                   required
                 >
-                  <option value="" disabled>Pilih Kategori</option>
+                  <option value="" disabled>{{ t('selectCategory') }}</option>
                   <option
                     v-for="category in categories"
                     :key="category"
@@ -375,7 +387,7 @@
                   class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                   required
                 >
-                  <option value="" disabled>Pilih Sumber Pembayaran</option>
+                  <option value="" disabled>{{ t('selectPaymentSource') }}</option>
                   <option
                     v-for="source in paymentSources"
                     :key="source"
@@ -390,13 +402,13 @@
                     type="button"
                     class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
                   >
-                    Batal
+                    {{ t('cancel') }}
                   </button>
                   <button
                     type="submit"
                     :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
                   >
-                    <i class="fas fa-save"></i> Simpan
+                    <i class="fas fa-save"></i> {{ t('save') }}
                   </button>
                 </div>
               </form>
@@ -406,7 +418,7 @@
                 <h3
                   class="text-md font-semibold mb-2 mt-2 text-gray-800 dark:text-gray-200"
                 >
-                  Daftar Quick Add Items
+                  {{ t('quickAddItemsList') }}
                 </h3>
                 <ul
                   v-if="quickAddItems.length > 0"
@@ -440,7 +452,7 @@
                   </li>
                 </ul>
                 <p v-else class="text-sm text-gray-500 dark:text-gray-400">
-                  Belum ada Quick Add item.
+                  {{ t('noQuickAddItems') }}
                 </p>
               </div>
             </div>
@@ -472,13 +484,13 @@
                   </button>
                 </div>
                 <div class="grid grid-cols-7 gap-1 text-center text-sm">
-                  <div class="text-gray-500 dark:text-gray-400">Min</div>
-                  <div class="text-gray-500 dark:text-gray-400">Sen</div>
-                  <div class="text-gray-500 dark:text-gray-400">Sel</div>
-                  <div class="text-gray-500 dark:text-gray-400">Rab</div>
-                  <div class="text-gray-500 dark:text-gray-400">Kam</div>
-                  <div class="text-gray-500 dark:text-gray-400">Jum</div>
-                  <div class="text-gray-500 dark:text-gray-400">Sab</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[0] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[1] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[2] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[3] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[4] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[5] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[6] }}</div>
                   <template v-for="day in calendarDays">
                     <div
                       v-if="day"
@@ -515,7 +527,7 @@
                 <div class="relative">
                   <input
                     v-model="newForm.item"
-                    placeholder="Nama Barang*"
+                    placeholder="{{ t('itemPlaceholder') }}"
                     :class="[
                     'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100',
                     itemError ? 'border-red-500 ring-1 ring-red-500' : '',
@@ -541,11 +553,11 @@
                   </div>
                 </div>
                 <p v-if="itemError" class="text-red-500 text-xs mt-1">
-                  Nama barang tidak boleh kosong.
+                  {{ t('itemError') }}
                 </p>
                 <div class="relative">
                   <div
-                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-eventsa_none"
+                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
                   >
                     <span class="text-gray-500 dark:text-gray-400">Rp</span>
                   </div>
@@ -553,7 +565,7 @@
                     v-model="newForm.displayAmount"
                     type="text"
                     inputmode="numeric"
-                    placeholder="1.000.000*"
+                    placeholder="{{ t('amountPlaceholder') }}"
                     @input="handleAmountInput"
                     :class="[
                     'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10',
@@ -580,7 +592,7 @@
                   </div>
                 </div>
                 <p v-if="amountError" class="text-red-500 text-xs mt-1">
-                  Harga tidak boleh kosong.
+                  {{ t('amountError') }}
                 </p>
                 <input
                   v-model="newForm.store"
@@ -588,7 +600,7 @@
                   class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 />
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Kategori
+                  {{ t('selectCategory') }}
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
                   <label
@@ -607,7 +619,7 @@
                   </label>
                 </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Sumber Pembayaran
+                  {{ t('selectPaymentSource') }}
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
                   <label
@@ -628,7 +640,7 @@
                 <button
                   :class="['w-full py-2 rounded text-white', accentBgClass]"
                 >
-                  Simpan
+                  {{ t('save') }}
                 </button>
               </form>
             </section>
@@ -643,7 +655,7 @@
             >
               <div class="flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900 dark:text-gray-100">
-                  Detail Pengeluaran
+                  {{ t('expenseDetail') }}
                 </h2>
                 <button
                   @click="changeTab('home')"
@@ -653,7 +665,9 @@
                 </button>
               </div>
               <div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">Item</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ t('item') }}
+                </div>
                 <div
                   class="text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
@@ -662,7 +676,7 @@
               </div>
               <div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Jumlah
+                  {{ t('amount') }}
                 </div>
                 <div
                   class="text-sm font-semibold text-gray-900 dark:text-gray-100"
@@ -680,7 +694,7 @@
               </div>
               <div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Kategori
+                  {{ t('category') }}
                 </div>
                 <div
                   class="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -690,7 +704,7 @@
               </div>
               <div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Sumber Pembayaran
+                  {{ t('paymentSource') }}
                 </div>
                 <div
                   class="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -700,7 +714,7 @@
               </div>
               <div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Tanggal
+                  {{ t('date') }}
                 </div>
                 <div
                   class="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -710,7 +724,7 @@
               </div>
               <div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Waktu Input
+                  {{ t('time') }}
                 </div>
                 <div
                   class="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -724,13 +738,13 @@
                   @click="editExpense(selectedExpense)"
                   :class="['w-full py-2 rounded text-white', accentBgClass]"
                 >
-                  Edit
+                  {{ t('edit') }}
                 </button>
                 <button
                   @click="deleteExpense(selectedExpense._id)"
                   class="w-full py-2 rounded bg-red-600 text-white"
                 >
-                  Hapus
+                  {{ t('delete') }}
                 </button>
               </div>
             </section>
@@ -739,7 +753,7 @@
               v-else
               class="text-center text-gray-500 dark:text-gray-400 pt-4"
             >
-              Tidak ada pengeluaran yang sedang dipilih.
+              {{ t('noExpenseSelected') }}
             </div>
           </main>
         </transition>
@@ -753,7 +767,7 @@
               <form @submit.prevent="submitEdit" class="space-y-3">
                 <div class="flex items-center justify-between">
                   <h2 class="font-semibold text-gray-900 dark:text-gray-100">
-                    Edit Pengeluaran
+                    {{ t('editExpense') }}
                   </h2>
                   <button
                     @click="changeTab('detail')"
@@ -783,13 +797,13 @@
                   </button>
                 </div>
                 <div class="grid grid-cols-7 gap-1 text-center text-sm">
-                  <div class="text-gray-500 dark:text-gray-400">Min</div>
-                  <div class="text-gray-500 dark:text-gray-400">Sen</div>
-                  <div class="text-gray-500 dark:text-gray-400">Sel</div>
-                  <div class="text-gray-500 dark:text-gray-400">Rab</div>
-                  <div class="text-gray-500 dark:text-gray-400">Kam</div>
-                  <div class="text-gray-500 dark:text-gray-400">Jum</div>
-                  <div class="text-gray-500 dark:text-gray-400">Sab</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[0] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[1] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[2] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[3] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[4] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[5] }}</div>
+                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[6] }}</div>
                   <template v-for="day in calendarDays">
                     <div
                       v-if="day"
@@ -810,7 +824,7 @@
                 <div class="relative">
                   <input
                     v-model="selectedExpense.item"
-                    placeholder="Nama Barang*"
+                    placeholder="{{ t('itemPlaceholder') }}"
                     :class="[
                     'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100',
                     itemError ? 'border-red-500 ring-1 ring-red-500' : '',
@@ -836,11 +850,11 @@
                   </div>
                 </div>
                 <p v-if="itemError" class="text-red-500 text-xs mt-1">
-                  Nama barang tidak boleh kosong.
+                  {{ t('itemError') }}
                 </p>
                 <div class="relative">
                   <div
-                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-eventsa_none"
+                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
                   >
                     <span class="text-gray-500 dark:text-gray-400">Rp</span>
                   </div>
@@ -848,7 +862,7 @@
                     v-model="selectedExpense.displayAmount"
                     type="text"
                     inputmode="numeric"
-                    placeholder="1.000.000*"
+                    placeholder="{{ t('amountPlaceholder') }}"
                     @input="handleEditAmountInput"
                     :class="[
                     'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10',
@@ -875,7 +889,7 @@
                   </div>
                 </div>
                 <p v-if="amountError" class="text-red-500 text-xs mt-1">
-                  Harga tidak boleh kosong.
+                  {{ t('amountError') }}
                 </p>
                 <input
                   v-model="selectedExpense.store"
@@ -883,7 +897,7 @@
                   class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 />
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Kategori
+                  {{ t('category') }}
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
                   <label
@@ -902,7 +916,7 @@
                   </label>
                 </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Sumber Pembayaran
+                  {{ t('paymentSource') }}
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
                   <label
@@ -923,7 +937,7 @@
                 <button
                   :class="['w-full py-2 rounded text-white', accentBgClass]"
                 >
-                  Simpan Perubahan
+                  {{ t('save') }}
                 </button>
               </form>
             </section>
@@ -931,7 +945,7 @@
               v-else
               class="text-center text-gray-500 dark:text-gray-400 pt-4"
             >
-              Tidak ada pengeluaran yang sedang diedit.
+              {{ t('noExpenseSelected') }}
             </div>
           </main>
         </transition>
@@ -964,7 +978,7 @@
               <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 <li class="flex items-center justify-between py-3">
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Tema Aplikasi</span
+                    >{{ t('theme') }}</span
                   >
                   <label
                     class="relative inline-flex items-center cursor-pointer"
@@ -983,7 +997,7 @@
                 </li>
                 <li class="flex items-center justify-between py-3">
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Warna Aksen</span
+                    >{{ t('accentColor') }}</span
                   >
                   <select
                     v-model="tone"
@@ -1001,7 +1015,7 @@
                   @click="clearCacheAndReload"
                 >
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Hapus Cache</span
+                    >{{ t('clearCache') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1010,7 +1024,7 @@
                   @click="testNotification"
                 >
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Tes Notifikasi</span
+                    >{{ t('testNotification') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1019,7 +1033,7 @@
                   @click="changeTab('backup-restore')"
                 >
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Backup & Restore</span
+                    >{{ t('backupRestore') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1035,7 +1049,7 @@
                   @click="changeTab('category')"
                 >
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Kategori Pengeluaran</span
+                    >{{ t('manageCategories') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1044,7 +1058,7 @@
                   @click="changeTab('payment-source')"
                 >
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Sumber Dana</span
+                    >{{ t('managePaymentSources') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1053,7 +1067,7 @@
                   @click="changeTab('quick-add')"
                 >
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Quick Add Items</span
+                    >{{ t('quickAddItems') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1069,7 +1083,7 @@
                   @click="action('profil')"
                 >
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Manajemen Profil</span
+                    >{{ t('manageProfile') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1078,7 +1092,7 @@
                   @click="action('lupa')"
                 >
                   <span class="text-gray-900 dark:text-gray-100"
-                    >Lupa Password</span
+                    >{{ t('forgotPassword') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1087,7 +1101,7 @@
                   @click="action('logout')"
                 >
                   <span class="text-red-600 hover:underline dark:text-red-400"
-                    >Logout</span
+                    >{{ t('logout') }}</span
                   >
                   <i class="fas fa-chevron-right text-gray-400"></i>
                 </li>
@@ -1105,7 +1119,7 @@
                 <h2
                   class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
                 >
-                  Atur Kategori
+                  {{ t('manageCategoriesTitle') }}
                 </h2>
                 <button
                   @click="changeTab('settings')"
@@ -1118,7 +1132,7 @@
                 <input
                   type="text"
                   v-model="newCategoryName"
-                  placeholder="Nama Kategori Baru"
+                  placeholder="{{ t('newCategoryNamePlaceholder') }}"
                   required
                   class="text-sm p-2 border border-gray-300 rounded-md shadow-sm w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 />
@@ -1128,13 +1142,13 @@
                     type="button"
                     class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
                   >
-                    Batal
+                    {{ t('cancel') }}
                   </button>
                   <button
                     type="submit"
                     :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
                   >
-                    <i class="fas fa-save"></i> Simpan
+                    <i class="fas fa-save"></i> {{ t('save') }}
                   </button>
                 </div>
               </form>
@@ -1146,7 +1160,7 @@
               <h2
                 class="text-md font-semibold mb-3 text-gray-800 dark:text-gray-200"
               >
-                Daftar Kategori
+                {{ t('manageCategoriesListTitle') }}
               </h2>
               <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 <li
@@ -1181,7 +1195,7 @@
                 <h2
                   class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
                 >
-                  Atur Sumber Dana
+                  {{ t('managePaymentSourcesTitle') }}
                 </h2>
                 <button
                   @click="changeTab('settings')"
@@ -1194,7 +1208,7 @@
                 <input
                   type="text"
                   v-model="newPaymentSourceName"
-                  placeholder="Nama Sumber Dana"
+                  placeholder="{{ t('newPaymentSourceNamePlaceholder') }}"
                   required
                   class="text-sm p-2 border border-gray-300 rounded-md shadow-sm w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 />
@@ -1204,13 +1218,13 @@
                     type="button"
                     class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
                   >
-                    Batal
+                    {{ t('cancel') }}
                   </button>
                   <button
                     type="submit"
                     :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
                   >
-                    <i class="fas fa-save"></i> Simpan
+                    <i class="fas fa-save"></i> {{ t('save') }}
                   </button>
                 </div>
               </form>
@@ -1222,7 +1236,7 @@
               <h2
                 class="text-md font-semibold mb-3 text-gray-800 dark:text-gray-200"
               >
-                Daftar Sumber Dana
+                {{ t('listOfPaymentSources') }}
               </h2>
               <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 <li
@@ -1255,19 +1269,19 @@
             @click="changeTab('home', false)"
             :class="['py-3 text-sm flex flex-col items-center', currentTab==='home' || currentTab==='detail' || currentTab==='edit' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
           >
-            <i class="fas fa-home text-lg"></i><span>Home</span>
+            <i class="fas fa-home text-lg"></i><span>{{ t('home') }}</span>
           </button>
           <button
             @click="changeTab('create', false)"
             :class="['py-3 text-sm flex flex-col items-center', currentTab==='create' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
           >
-            <i class="fas fa-plus-circle text-lg"></i><span>Create New</span>
+            <i class="fas fa-plus-circle text-lg"></i><span>{{ t('createNew') }}</span>
           </button>
           <button
             @click="changeTab('settings', false)"
             :class="['py-3 text-sm flex flex-col items-center', currentTab==='settings' || currentTab==='payment-source' || currentTab==='category' || currentTab==='backup-restore' || currentTab==='quick-add'   ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
           >
-            <i class="fas fa-cog text-lg"></i><span>Setting</span>
+            <i class="fas fa-cog text-lg"></i><span>{{ t('settings') }}</span>
           </button>
         </div>
       </nav>

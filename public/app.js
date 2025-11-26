@@ -2,14 +2,42 @@ const { createApp } = Vue;
 createApp({
   data() {
     return {
-      currentTab: "home",
+      currentTab: "login", // Start with login
       darkMode: null,
       tone: "indigo",
-      user: {
-        name: "User Demo",
-        level: "Standard",
-        photo: "https://i.pravatar.cc/100?img=5",
+      
+      // Auth state
+      isAuthenticated: false,
+      currentUser: null,
+      authToken: null,
+      authLoading: false,
+      authError: null,
+      loginForm: {
+        email: "",
+        password: ""
       },
+      signupForm: {
+        name: "",
+        email: "",
+        password: "",
+        passwordConfirm: ""
+      },
+      profileForm: {
+        name: "",
+        avatar: ""
+      },
+      changePasswordForm: {
+        newPassword: "",
+        confirmPassword: ""
+      },
+      forgotPasswordForm: {
+        email: ""
+      },
+      resetPasswordForm: {
+        password: "",
+        passwordConfirm: ""
+      },
+      resetToken: "",
       expenses: [],
       selectedExpense: null,
       newForm: {
@@ -45,6 +73,35 @@ createApp({
       currentLang: localStorage.getItem("language") || "id",
       translations: {
         id: {
+          // Auth translations
+          loginTitle: "Masuk ke Akun Anda",
+          loginSubtitle: "Kelola pengeluaran Anda dengan mudah",
+          login: "Masuk",
+          loggingIn: "Memproses...",
+          noAccount: "Belum punya akun?",
+          signupNow: "Daftar Sekarang",
+          
+          createAccount: "Buat Akun Baru",
+          signup: "Daftar",
+          signupSubtitle: "Mulai kelola keuangan Anda hari ini",
+          fullName: "Nama Lengkap",
+          fullNamePlaceholder: "John Doe",
+          email: "Email",
+          emailPlaceholder: "email@example.com",
+          password: "Password",
+          confirmPassword: "Konfirmasi Password",
+          passwordRequirement: "Minimal 6 karakter",
+          creatingAccount: "Membuat akun...",
+          haveAccount: "Sudah punya akun?",
+          loginNow: "Masuk Sekarang",
+          
+          passwordMismatch: "Password tidak sama",
+          signupFailed: "Pendaftaran gagal",
+          loginFailed: "Login gagal",
+          signupSuccess: "Akun berhasil dibuat!",
+          loginSuccess: "Selamat datang kembali!",
+          logoutSuccess: "Berhasil logout",
+          
           offlineSyncNotice:
             "Mode offline, data akan disinkronkan saat online.",
           pendingSyncNotice: "Menunggu Sinkronisasi",
@@ -108,6 +165,7 @@ createApp({
           manageCategories: "Kelola Kategori",
           managePaymentSources: "Kelola Sumber Dana",
           manageProfile: "Manajemen Profil",
+          changePassword: "Ubah Password",
           forgotPassword: "Lupa Password",
           logout: "Logout",
 
@@ -151,6 +209,34 @@ createApp({
           failedToDeleteQuickAddItem: "Gagal menghapus item Quick Add.",
           confirmDeleteQuickAddItem:
             "Apakah Anda yakin ingin menghapus item Quick Add ini?",
+
+          // Profile management translations
+          profileManagement: "Manajemen Profil",
+          updateProfile: "Perbarui Profil",
+          fullName: "Nama Lengkap",
+          profilePhoto: "Foto Profil",
+          profilePhotoPlaceholder: "URL foto profil (opsional)",
+          profileUpdatedSuccessfully: "Profil berhasil diperbarui!",
+          failedToUpdateProfile: "Gagal memperbarui profil.",
+
+          // Change password translations
+          changePassword: "Ubah Password",
+          passwordChangedSuccessfully: "Password berhasil diubah!",
+          failedToChangePassword: "Gagal mengubah password.",
+          passwordMismatch: "Password tidak cocok",
+
+          // Forgot password translations
+          forgotPasswordTitle: "Lupa Password",
+          forgotPasswordSubtitle: "Masukkan email Anda untuk mendapatkan link reset password",
+          resetPassword: "Reset Password",
+          resetPasswordTitle: "Reset Password",
+          resetPasswordSubtitle: "Masukkan password baru Anda",
+          newPassword: "Password Baru",
+          confirmNewPassword: "Konfirmasi Password Baru",
+          resetLinkSent: "Link reset password telah dikirim ke email Anda",
+          resetPasswordSuccess: "Password berhasil direset!",
+          resetPasswordFailed: "Gagal mereset password.",
+          invalidResetToken: "Token reset tidak valid atau sudah kadaluarsa",
 
           yearsAgo: "tahun lalu",
           monthsAgo: "bulan lalu",
@@ -206,6 +292,35 @@ createApp({
             "Cache berhasil dihapus dan halaman akan dimuat ulang.",
         },
         en: {
+          // Auth translations
+          loginTitle: "Login to Your Account",
+          loginSubtitle: "Manage your expenses easily",
+          login: "Login",
+          loggingIn: "Processing...",
+          noAccount: "Don't have an account?",
+          signupNow: "Sign Up Now",
+          
+          createAccount: "Create New Account",
+          signup: "Sign Up",
+          signupSubtitle: "Start managing your finances today",
+          fullName: "Full Name",
+          fullNamePlaceholder: "John Doe",
+          email: "Email",
+          emailPlaceholder: "email@example.com",
+          password: "Password",
+          confirmPassword: "Confirm Password",
+          passwordRequirement: "Minimum 6 characters",
+          creatingAccount: "Creating account...",
+          haveAccount: "Already have an account?",
+          loginNow: "Login Now",
+          
+          passwordMismatch: "Passwords do not match",
+          signupFailed: "Sign up failed",
+          loginFailed: "Login failed",
+          signupSuccess: "Account created successfully!",
+          loginSuccess: "Welcome back!",
+          logoutSuccess: "Successfully logged out",
+          
           offlineSyncNotice: "Offline mode, data will sync when online.",
           pendingSyncNotice: "Waiting for Sync",
           pendingSyncNoticeDetail: "data will be sent when online",
@@ -268,6 +383,7 @@ createApp({
           manageCategories: "Manage Categories",
           managePaymentSources: "Manage Payment Sources",
           manageProfile: "Profile Management",
+          changePassword: "Change Password",
           forgotPassword: "Forgot Password",
           logout: "Logout",
 
@@ -314,6 +430,34 @@ createApp({
           failedToDeleteQuickAddItem: "Failed to delete Quick Add item.",
           confirmDeleteQuickAddItem:
             "Are you sure you want to delete this Quick Add item?",
+
+          // Profile management translations
+          profileManagement: "Profile Management",
+          updateProfile: "Update Profile",
+          fullName: "Full Name",
+          profilePhoto: "Profile Photo",
+          profilePhotoPlaceholder: "Profile photo URL (optional)",
+          profileUpdatedSuccessfully: "Profile updated successfully!",
+          failedToUpdateProfile: "Failed to update profile.",
+
+          // Change password translations
+          changePassword: "Change Password",
+          passwordChangedSuccessfully: "Password changed successfully!",
+          failedToChangePassword: "Failed to change password.",
+          passwordMismatch: "Passwords do not match",
+
+          // Forgot password translations
+          forgotPasswordTitle: "Forgot Password",
+          forgotPasswordSubtitle: "Enter your email to receive a password reset link",
+          resetPassword: "Reset Password",
+          resetPasswordTitle: "Reset Password",
+          resetPasswordSubtitle: "Enter your new password",
+          newPassword: "New Password",
+          confirmNewPassword: "Confirm New Password",
+          resetLinkSent: "Password reset link has been sent to your email",
+          resetPasswordSuccess: "Password reset successfully!",
+          resetPasswordFailed: "Failed to reset password.",
+          invalidResetToken: "Reset token is invalid or expired",
 
           yearsAgo: "years ago",
           monthsAgo: "months ago",
@@ -391,6 +535,16 @@ createApp({
         green: "text-green-600",
         rose: "text-rose-600",
         amber: "text-amber-600",
+      };
+      return m[this.tone] || m.indigo;
+    },
+    accentRingClass() {
+      const m = {
+        indigo: "focus:ring-indigo-500",
+        blue: "focus:ring-blue-500",
+        green: "focus:ring-green-500",
+        rose: "focus:ring-rose-500",
+        amber: "focus:ring-amber-500",
       };
       return m[this.tone] || m.indigo;
     },
@@ -487,6 +641,9 @@ createApp({
     },
   },
   mounted() {
+    // Check authentication first
+    this.checkAuth();
+    
     const savedTheme = localStorage.getItem("darkMode");
     if (savedTheme !== null) {
       this.darkMode = savedTheme === "true";
@@ -511,15 +668,18 @@ createApp({
     window.addEventListener("offline", () => {
       this.isOnline = false;
     });
-    setInterval(() => {
+    
+    // Only load data if authenticated
+    if (this.isAuthenticated) {
       this.fetchExpenses();
-    }, 10000);
-    this.fetchExpenses();
-    this.fetchCategories();
-    this.fetchPaymentSources();
-    this.loadQuickAddItems();
+      this.fetchCategories();
+      this.fetchPaymentSources();
+      this.loadQuickAddItems();
+      this.getPendingExpenses();
+    }
+    
     this.changeTab(this.currentTab);
-    this.getPendingExpenses();
+    
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
@@ -530,8 +690,10 @@ createApp({
           .catch((error) => {
             console.error("ServiceWorker registration failed: ", error);
           });
-        this.requestNotificationPermission();
-        this.subscribeToPushNotifications();
+        if (this.isAuthenticated) {
+          this.requestNotificationPermission();
+          this.subscribeToPushNotifications();
+        }
       });
     }
     window.addEventListener("popstate", (event) => {
@@ -573,6 +735,184 @@ createApp({
     }
   },
   methods: {
+    // ========== Auth Methods ==========
+    async handleSignup() {
+      if (this.signupForm.password !== this.signupForm.passwordConfirm) {
+        this.authError = this.t('passwordMismatch');
+        this.showToast(this.t('passwordMismatch'), 'error');
+        return;
+      }
+      
+      this.authLoading = true;
+      this.authError = null;
+      
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.signupForm)
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error?.message || this.t('signupFailed'));
+        }
+        
+        this.authToken = data.token;
+        this.currentUser = data.user;
+        this.isAuthenticated = true;
+        
+        // Save to localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        this.showToast(this.t('signupSuccess'), 'success');
+        this.changeTab('home');
+        
+        // Clear form
+        this.signupForm = { name: "", email: "", password: "", passwordConfirm: "" };
+        
+        // Load user data
+        await this.fetchExpenses();
+        await this.fetchCategories();
+        await this.fetchPaymentSources();
+        
+      } catch (error) {
+        this.authError = error.message;
+        this.showToast(error.message, 'error');
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    
+    async handleLogin() {
+      this.authLoading = true;
+      this.authError = null;
+      
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.loginForm)
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error?.message || this.t('loginFailed'));
+        }
+        
+        this.authToken = data.token;
+        this.currentUser = data.user;
+        this.isAuthenticated = true;
+        
+        // Save to localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        this.showToast(this.t('loginSuccess'), 'success');
+        this.changeTab('home');
+        
+        // Clear form
+        this.loginForm = { email: "", password: "" };
+        
+        // Load user data
+        await this.fetchExpenses();
+        await this.fetchCategories();
+        await this.fetchPaymentSources();
+        
+      } catch (error) {
+        this.authError = error.message;
+        this.showToast(error.message, 'error');
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    
+    async logout() {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.authToken}`
+          }
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+      
+      // Clear state
+      this.authToken = null;
+      this.currentUser = null;
+      this.isAuthenticated = false;
+      this.expenses = [];
+      
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      this.showToast(this.t('logoutSuccess'), 'info');
+      this.changeTab('login');
+    },
+    
+    checkAuth() {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      
+      if (token && user) {
+        try {
+          this.authToken = token;
+          this.currentUser = JSON.parse(user);
+          this.isAuthenticated = true;
+          this.currentTab = 'home';
+        } catch (error) {
+          // Invalid data, clear it
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          this.currentTab = 'login';
+        }
+      } else {
+        this.currentTab = 'login';
+      }
+    },
+    
+    getAuthHeaders() {
+      if (!this.authToken) {
+        return { 'Content-Type': 'application/json' };
+      }
+      
+      return {
+        'Authorization': `Bearer ${this.authToken}`,
+        'Content-Type': 'application/json'
+      };
+    },
+    
+    async apiCall(url, method = 'GET', data = null) {
+      const config = {
+        method,
+        headers: this.getAuthHeaders()
+      };
+      
+      if (data && (method === 'POST' || method === 'PUT')) {
+        config.body = JSON.stringify(data);
+      }
+      
+      const response = await fetch(url, config);
+      
+      if (response.status === 401) {
+        this.logout();
+        throw new Error('Authentication required');
+      }
+      
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    
+    // ========== IndexedDB Methods ==========
     openDB() {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open("expense_view_db", 1);
@@ -632,9 +972,19 @@ createApp({
       }
     },
     async fetchExpenses() {
+      if (!this.isAuthenticated) return;
+      
       this.loadingExpenses = true;
       try {
-        const response = await fetch("/api/expenses");
+        const response = await fetch("/api/expenses", {
+          headers: this.getAuthHeaders()
+        });
+        
+        if (response.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -648,8 +998,18 @@ createApp({
       }
     },
     async fetchCategories() {
+      if (!this.isAuthenticated) return;
+      
       try {
-        const response = await fetch("/api/categories");
+        const response = await fetch("/api/categories", {
+          headers: this.getAuthHeaders()
+        });
+        
+        if (response.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -660,8 +1020,18 @@ createApp({
       }
     },
     async fetchPaymentSources() {
+      if (!this.isAuthenticated) return;
+      
       try {
-        const response = await fetch("/api/payment-sources");
+        const response = await fetch("/api/payment-sources", {
+          headers: this.getAuthHeaders()
+        });
+        
+        if (response.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -676,11 +1046,15 @@ createApp({
         if (!this.newCategoryName) return;
         const response = await fetch("/api/categories", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: this.getAuthHeaders(),
           body: JSON.stringify({ name: this.newCategoryName }),
         });
+        
+        if (response.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -696,7 +1070,14 @@ createApp({
       try {
         const response = await fetch(`/api/categories/${categoryName}`, {
           method: "DELETE",
+          headers: this.getAuthHeaders()
         });
+        
+        if (response.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -720,12 +1101,16 @@ createApp({
             `/api/categories/${this.editingCategory}`,
             {
               method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
+              headers: this.getAuthHeaders(),
               body: JSON.stringify({ newName: this.newCategoryName }),
             }
           );
+          
+          if (response.status === 401) {
+            this.logout();
+            return;
+          }
+          
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -734,11 +1119,15 @@ createApp({
           // Add new category
           const response = await fetch("/api/categories", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: this.getAuthHeaders(),
             body: JSON.stringify({ name: this.newCategoryName }),
           });
+          
+          if (response.status === 401) {
+            this.logout();
+            return;
+          }
+          
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -766,11 +1155,15 @@ createApp({
         if (!this.newPaymentSourceName) return;
         const response = await fetch("/api/payment-sources", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: this.getAuthHeaders(),
           body: JSON.stringify({ name: this.newPaymentSourceName }),
         });
+        
+        if (response.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -786,7 +1179,14 @@ createApp({
       try {
         const response = await fetch(`/api/payment-sources/${sourceName}`, {
           method: "DELETE",
+          headers: this.getAuthHeaders()
         });
+        
+        if (response.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -810,12 +1210,16 @@ createApp({
             `/api/payment-sources/${this.editingPaymentSource}`,
             {
               method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
+              headers: this.getAuthHeaders(),
               body: JSON.stringify({ newName: this.newPaymentSourceName }),
             }
           );
+          
+          if (response.status === 401) {
+            this.logout();
+            return;
+          }
+          
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -824,11 +1228,15 @@ createApp({
           // Add new payment source
           const response = await fetch("/api/payment-sources", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: this.getAuthHeaders(),
             body: JSON.stringify({ name: this.newPaymentSourceName }),
           });
+          
+          if (response.status === 401) {
+            this.logout();
+            return;
+          }
+          
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -852,23 +1260,49 @@ createApp({
       }
     },
     loadQuickAddItems() {
-      const items = localStorage.getItem("quickAddItems");
-      this.quickAddItems = items ? JSON.parse(items) : [];
-    },
-    saveQuickAddItems() {
-      localStorage.setItem("quickAddItems", JSON.stringify(this.quickAddItems));
+      this.apiCall("/api/quick-add-items", "GET")
+        .then((data) => {
+          this.quickAddItems = data;
+        })
+        .catch((error) => {
+          console.error("Failed to load quick add items:", error);
+          this.showToast("Gagal memuat Quick Add items", "error");
+        });
     },
     addQuickAddItem(item) {
-      this.quickAddItems.push(item);
-      this.saveQuickAddItems();
+      this.apiCall("/api/quick-add-items", "POST", item)
+        .then((newItem) => {
+          this.quickAddItems.push(newItem);
+          this.showToast("Quick Add item berhasil ditambahkan!", "success");
+        })
+        .catch((error) => {
+          console.error("Failed to add quick add item:", error);
+          this.showToast("Gagal menambahkan Quick Add item", "error");
+        });
     },
     editQuickAddItem(index, updatedItem) {
-      this.quickAddItems.splice(index, 1, updatedItem);
-      this.saveQuickAddItems();
+      const itemId = this.quickAddItems[index]._id;
+      this.apiCall(`/api/quick-add-items/${itemId}`, "PUT", updatedItem)
+        .then((updatedItemResponse) => {
+          this.quickAddItems.splice(index, 1, updatedItemResponse);
+          this.showToast("Quick Add item berhasil diupdate!", "success");
+        })
+        .catch((error) => {
+          console.error("Failed to update quick add item:", error);
+          this.showToast("Gagal mengupdate Quick Add item", "error");
+        });
     },
     deleteQuickAddItem(index) {
-      this.quickAddItems.splice(index, 1);
-      this.saveQuickAddItems();
+      const itemId = this.quickAddItems[index]._id;
+      this.apiCall(`/api/quick-add-items/${itemId}`, "DELETE")
+        .then(() => {
+          this.quickAddItems.splice(index, 1);
+          this.showToast("Quick Add item berhasil dihapus!", "success");
+        })
+        .catch((error) => {
+          console.error("Failed to delete quick add item:", error);
+          this.showToast("Gagal menghapus Quick Add item", "error");
+        });
     },
     saveQuickAddItem() {
       if (this.quickAddEditIndex !== null) {
@@ -1159,7 +1593,15 @@ createApp({
     },
     async downloadBackup() {
       try {
-        const res = await fetch("/api/backup");
+        const res = await fetch("/api/backup", {
+          headers: this.getAuthHeaders()
+        });
+        
+        if (res.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!res.ok) throw new Error("backup api unavailable");
         const data = await res.json();
         const blob = new Blob([JSON.stringify(data)], {
@@ -1209,19 +1651,26 @@ createApp({
         const payload = JSON.parse(text);
         const res = await fetch("/api/restore", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: this.getAuthHeaders(),
           body: JSON.stringify(payload),
         });
+        
+        if (res.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!res.ok) throw new Error("restore api unavailable");
         const out = await res.json();
         this.restoreStatus = `Selesai: ${
           out.expensesInserted || 0
         } pengeluaran, ${out.categoriesUpserted || 0} kategori, ${
           out.paymentSourcesUpserted || 0
-        } sumber dana.`;
+        } sumber dana, ${out.quickAddItemsUpserted || 0} quick add items.`;
         await this.fetchExpenses();
         await this.fetchCategories();
         await this.fetchPaymentSources();
+        this.loadQuickAddItems();
         this.showToast(this.t("restoreSuccess"), "success");
       } catch (e) {
         try {
@@ -1234,14 +1683,14 @@ createApp({
           for (const name of cats) {
             await fetch("/api/categories", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: this.getAuthHeaders(),
               body: JSON.stringify({ name }),
             });
           }
           for (const name of srcs) {
             await fetch("/api/payment-sources", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: this.getAuthHeaders(),
               body: JSON.stringify({ name }),
             });
           }
@@ -1250,7 +1699,7 @@ createApp({
           for (const exp of exps) {
             await fetch("/api/expenses", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: this.getAuthHeaders(),
               body: JSON.stringify(exp),
             });
             cnt++;
@@ -1276,7 +1725,15 @@ createApp({
     },
     async showDetail(expenseId) {
       try {
-        const response = await fetch(`/api/expenses/${expenseId}`);
+        const response = await fetch(`/api/expenses/${expenseId}`, {
+          headers: this.getAuthHeaders()
+        });
+        
+        if (response.status === 401) {
+          this.logout();
+          return;
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -1409,8 +1866,7 @@ createApp({
     },
     action(t) {
       if (t === "logout") {
-        this.user = { ...this.user };
-        this.changeTab("settings");
+        this.logout(); // Call the logout method
       } else if (t === "kategori") {
         this.changeTab("category");
       } else if (t === "sumber-dana") {
@@ -1510,6 +1966,137 @@ createApp({
         toast.style.transform = "translateY(20px)";
         toast.addEventListener("transitionend", () => toast.remove());
       }, 3500);
+    },
+    action(type) {
+      if (type === 'profil') {
+        this.initializeProfileForm();
+        this.changeTab('profile');
+      } else if (type === 'logout') {
+        this.logout();  
+      }
+    },
+    initializeProfileForm() {
+      if (this.currentUser) {
+        this.profileForm.name = this.currentUser.name || '';
+        this.profileForm.avatar = this.currentUser.avatar || '';
+      }
+    },
+    async updateProfile() {
+      try {
+        const response = await this.apiCall('/api/auth/profile', 'PUT', {
+          name: this.profileForm.name,
+          avatar: this.profileForm.avatar
+        });
+
+        // Update current user data
+        this.currentUser = { ...this.currentUser, ...response.user };
+
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(this.currentUser));
+
+        this.showToast(this.t('profileUpdatedSuccessfully'), 'success');
+        this.changeTab('settings');
+      } catch (error) {
+        this.showToast(this.t('failedToUpdateProfile'), 'error');
+      }
+    },
+    async changePassword() {
+      if (this.changePasswordForm.newPassword !== this.changePasswordForm.confirmPassword) {
+        this.showToast(this.t('passwordMismatch'), 'error');
+        return;
+      }
+
+      try {
+        const response = await this.apiCall('/api/auth/change-password', 'PUT', {
+          newPassword: this.changePasswordForm.newPassword,
+          newPasswordConfirm: this.changePasswordForm.confirmPassword
+        });
+
+        this.authToken = response.token;
+        this.currentUser = response.user;
+
+        // Update localStorage
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+
+        this.showToast(this.t('passwordChangedSuccessfully'), 'success');
+        this.changeTab('settings');
+
+        // Clear form
+        this.changePasswordForm = { newPassword: "", confirmPassword: "" };
+      } catch (error) {
+        this.showToast(error.message, 'error');
+      }
+    },
+    async forgotPassword() {
+      try {
+        const response = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: this.forgotPasswordForm.email })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error?.message || this.t('resetPasswordFailed'));
+        }
+
+        this.showToast(this.t('resetLinkSent'), 'success');
+
+        // For demo purposes, show the reset token
+        if (data.resetToken) {
+          console.log('Reset token (for demo):', data.resetToken);
+          console.log('Reset URL (for demo):', data.resetUrl);
+          this.showToast('Check console for demo reset token', 'info');
+        }
+
+        this.changeTab('login');
+      } catch (error) {
+        this.showToast(error.message, 'error');
+      }
+    },
+    async resetPassword() {
+      if (this.resetPasswordForm.password !== this.resetPasswordForm.passwordConfirm) {
+        this.showToast(this.t('passwordMismatch'), 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/auth/reset-password/${this.resetToken}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            password: this.resetPasswordForm.password,
+            passwordConfirm: this.resetPasswordForm.passwordConfirm
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error?.message || this.t('resetPasswordFailed'));
+        }
+
+        this.authToken = data.token;
+        this.currentUser = data.user;
+        this.isAuthenticated = true;
+
+        // Save to localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        this.showToast(this.t('resetPasswordSuccess'), 'success');
+        this.changeTab('home');
+
+        // Load user data
+        await this.fetchExpenses();
+        await this.fetchCategories();
+        await this.fetchPaymentSources();
+
+      } catch (error) {
+        this.showToast(error.message, 'error');
+      }
     },
     async clearCacheAndReload() {
       let count = 0;

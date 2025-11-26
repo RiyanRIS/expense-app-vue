@@ -1,39 +1,92 @@
 # Aplikasi Pengelola Pengeluaran (Expense App)
 
-Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun dengan Node.js, Express, dan MongoDB sebagai backend, serta Vue.js sebagai frontend. Aplikasi ini juga diimplementasikan sebagai Progressive Web App (PWA) yang dapat diinstal dan mendukung fungsionalitas offline.
+Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun dengan Node.js, Express, dan MongoDB sebagai backend, serta Vue.js sebagai frontend. Aplikasi ini juga diimplementasikan sebagai Progressive Web App (PWA) yang dapat di}
+}}}}}}
+```
 
-## Fitur
+## 📚 Dokumentasi Lengkap
+## 📚 Dokumentasi Lengkap
+## 📚 Dokumentasi Lengkap
+## 📚 Dokumentasi Lengkap
+## 📚 Dokumentasi Lengkap
+## 📚 Dokumentasi Lengkap
+## 📚 Dokumentasi Lengkap dan mendukung fungsionalitas offline.
 
-- **Pencatatan Pengeluaran**: Mencatat detail pengeluaran seperti tanggal, toko, item, jumlah, kategori, dan sumber pembayaran.
-- **Manajemen Kategori**: Menambah, mengedit, dan menghapus kategori pengeluaran.
-- **Manajemen Sumber Pembayaran**: Menambah, mengedit, dan menghapus sumber pembayaran.
-- **CRUD API**: Menyediakan API untuk membuat, membaca, memperbarui, dan menghapus catatan pengeluaran, kategori, dan sumber pembayaran.
-- **Koneksi MongoDB**: Menggunakan MongoDB sebagai database untuk menyimpan data pengeluaran.
-- **Mode Gelap (Dark Mode) Adaptif**: Secara otomatis mengikuti preferensi tema sistem operasi (`prefers-color-scheme: dark`) dan menyimpan preferensi pengguna di `localStorage` untuk pengalaman yang konsisten. Default tema akan mengikuti pengaturan sistem jika belum ada preferensi yang disimpan.
-- **Progressive Web App (PWA)**:
-    - **Dapat Diinstal**: Aplikasi dapat diinstal ke layar utama perangkat seluler atau desktop.
-    - **Dukungan Offline**: Konten aplikasi di-cache oleh Service Worker untuk akses offline.
-    - **Manajemen Cache**: Fungsi untuk menghapus cache dan memuat ulang aplikasi secara manual.
-- **Tampilan Dinamis**: Konten tab dimuat secara dinamis dan dikompilasi oleh Vue.js.
-- **Quick Add**: Membuat template pengeluaran yang dapat disesuaikan oleh pengguna untuk entri pengeluaran satu ketukan, disimpan di `localStorage`.
+## ✨ Fitur
 
-## Teknologi yang Digunakan
+### 🔐 **Authentication & Authorization**
+- **JWT-based Authentication**: Sistem login dan registrasi dengan JSON Web Tokens
+- **User Registration**: Pendaftaran akun baru dengan validasi email dan password
+- **Secure Login**: Login dengan email dan password yang di-hash
+- **Password Security**: Hashing password dengan bcryptjs dan validasi kekuatan password
+- **Session Management**: Token-based sessions dengan auto-logout
+- **User Data Isolation**: Setiap user hanya dapat mengakses data mereka sendiri
+
+### 👤 **Profile Management**
+- **Update Profile**: Mengubah nama dan foto profil
+- **Change Password**: Mengubah password dengan validasi keamanan
+- **Password History**: Mencegah penggunaan ulang password lama
+- **Forgot Password**: Reset password via email (demo mode)
+
+### 📊 **Expense Management**
+- **Pencatatan Pengeluaran**: Mencatat detail pengeluaran seperti tanggal, toko, item, jumlah, kategori, dan sumber pembayaran
+- **Quick Add Items**: Template pengeluaran untuk entri cepat
+- **Expense Filtering**: Filter berdasarkan tanggal (hari ini, kemarin, minggu ini, bulan ini)
+- **Expense Statistics**: Total pengeluaran hari ini, bulan ini, kategori terbanyak, dll.
+
+### 📁 **Category & Payment Management**
+- **Manajemen Kategori**: Menambah, mengedit, dan menghapus kategori pengeluaran
+- **Manajemen Sumber Pembayaran**: Menambah, mengedit, dan menghapus sumber pembayaran
+- **Default Data**: Kategori dan sumber pembayaran default untuk user baru
+
+### 💾 **Data Management**
+- **Backup & Restore**: Backup data ke file JSON dan restore
+- **Offline Support**: IndexedDB untuk penyimpanan offline
+- **Data Synchronization**: Sinkronisasi otomatis saat online
+- **Cache Management**: Clear cache dan reload aplikasi
+
+### 🎨 **User Interface**
+- **🌓 Dark Mode**: Mode gelap adaptif mengikuti preferensi sistem
+- **🌍 Multi-Language**: Support Bahasa Indonesia & English
+- **📱 Mobile-First**: Desain responsif untuk perangkat mobile
+- **🎨 Theme Customization**: Berbagai pilihan warna tema
+
+### 🔔 **Notifications & PWA**
+- **Push Notifications**: Notifikasi push untuk pengingat dan alert
+- **Progressive Web App**: Dapat diinstal ke layar utama
+- **Service Worker**: Cache untuk akses offline
+- **Web App Manifest**: Metadata aplikasi untuk PWA
+
+### 🔒 **Security & Validation**
+- **Input Validation**: express-validator untuk semua endpoints
+- **Error Logging**: Winston + Morgan untuk comprehensive logging
+- **CORS Protection**: Cross-Origin Resource Sharing
+- **Rate Limiting**: Perlindungan terhadap abuse
+
+## 🛠️ Teknologi yang Digunakan
 
 **Backend:**
-
-- **Node.js**: Lingkungan runtime JavaScript.
-- **Express.js**: Framework web untuk Node.js.
-- **Mongoose**: Pemodelan objek MongoDB untuk Node.js.
-- **dotenv**: Untuk mengelola variabel lingkungan.
-- **cors**: Middleware untuk mengaktifkan Cross-Origin Resource Sharing.
+- **Node.js v14+**: Lingkungan runtime JavaScript
+- **Express.js**: Framework web untuk Node.js
+- **MongoDB + Mongoose**: Database NoSQL dengan ODM
+- **JWT (jsonwebtoken)**: Authentication tokens
+- **bcryptjs**: Password hashing
+- **express-validator**: Input validation
+- **Winston**: Advanced logging
+- **Morgan**: HTTP request logger
+- **Web-Push**: Push notifications
+- **dotenv**: Environment variables
+- **cors**: Cross-Origin Resource Sharing
 
 **Frontend:**
+- **Vue.js 3**: Framework JavaScript progresif
+- **Tailwind CSS**: Framework CSS utilitas-first
+- **Font Awesome**: Library ikon
+- **Service Worker API**: Offline functionality
+- **IndexedDB**: Local storage
+- **Web Push API**: Push notifications
 
-- **Vue.js**: Framework JavaScript progresif untuk membangun antarmuka pengguna.
-- **Tailwind CSS**: Framework CSS utilitas-first untuk styling cepat.
-- **Font Awesome**: Perpustakaan ikon.
-
-## Instalasi dan Setup
+## 📦 Instalasi dan Setup
 
 Untuk menjalankan aplikasi ini secara lokal, ikuti langkah-langkah berikut:
 
@@ -83,90 +136,199 @@ Untuk menjalankan aplikasi ini secara lokal, ikuti langkah-langkah berikut:
 ```
 .env.example
 .gitignore
+config/
+│   └── logger.js              # Winston logger configuration
+controllers/
+│   └── authController.js      # Authentication controllers
+docs/                          # Documentation files
+logs/                          # Application logs
+middlewares/
+│   ├── auth.js                # JWT authentication middleware
+│   ├── errorHandler.js        # Error handling middleware
+│   └── validation.js          # Input validation middleware
 models/
-│   ├── Category.js
-│   ├── Expense.js
-│   └── PaymentSource.js
+│   ├── Category.js            # Category model
+│   ├── Expense.js             # Expense model
+│   ├── PaymentSource.js       # Payment source model
+│   ├── PushSubscription.js    # Push notification subscriptions
+│   ├── QuickAddItem.js        # Quick add templates
+│   └── User.js                # User authentication model
 package.json
-prompt.md
 public/
-│   ├── app.js
+│   ├── app.js                 # Vue.js application logic
 │   ├── icons/
 │   │   ├── icon-192x192.svg
-│   │   └── icon-512x512.svg
-│   ├── index.html
-│   ├── manifest.json
+│   │   ├── icon-32x32.svg
+│   │   ├── icon-512x512.svg
+│   ├── index.html             # Main HTML file
+│   ├── manifest.json          # PWA manifest
 │   ├── plugins/
 │   │   ├── fontawesome/
 │   │   ├── tailwindcss/
 │   │   └── vue/
-│   └── service-worker.js
-server.js
+│   └── service-worker.js      # Service worker for PWA
+server.js                      # Express server & API routes
 README.md
 ```
 
--   `server.js`: Titik masuk utama aplikasi backend, mengelola rute API dan koneksi database.
--   `models/Expense.js`: Mendefinisikan skema Mongoose untuk catatan pengeluaran.
--   `models/Category.js`: Mendefinisikan skema Mongoose untuk kategori.
--   `models/PaymentSource.js`: Mendefinisikan skema Mongoose untuk sumber pembayaran.
--   `public/`: Berisi file frontend statis (HTML, JavaScript, CSS, PWA assets).
-    -   `public/app.js`: Logika utama aplikasi Vue.js.
-    -   `public/index.html`: Struktur HTML utama aplikasi.
-    -   `public/manifest.json`: Manifes aplikasi web untuk PWA.
-    -   `public/service-worker.js`: Service Worker untuk fungsionalitas offline dan caching.
-    -   `public/icons/`: Berisi ikon aplikasi untuk PWA.
-    -   `public/plugins/`: Berisi pustaka pihak ketiga seperti Font Awesome, Tailwind CSS, dan Vue.
--   `package.json`: Berisi metadata proyek dan daftar dependensi.
--   `.env.example`: Contoh file variabel lingkungan.
+### **File Descriptions**
+
+- **`server.js`**: Main Express server with API routes and database connection
+- **`models/User.js`**: User model with authentication, password hashing, and JWT methods
+- **`models/Expense.js`**: Expense model with user isolation
+- **`models/Category.js`**: Category model with user-specific categories
+- **`models/PaymentSource.js`**: Payment source model with user-specific sources
+- **`models/QuickAddItem.js`**: Quick add templates for rapid expense entry
+- **`controllers/authController.js`**: Authentication controllers (signup, login, profile, password)
+- **`middlewares/auth.js`**: JWT authentication and authorization middleware
+- **`public/app.js`**: Vue.js application with authentication, expense management, and PWA features
+- **`public/index.html`**: Main HTML template with Vue.js components
+- **`config/logger.js`**: Winston logger configuration for error tracking
 
 ## API Endpoints
 
-Berikut adalah endpoint API yang tersedia:
+### **Authentication Endpoints**
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user profile
+- `PUT /api/auth/profile` - Update user profile (name, avatar)
+- `PUT /api/auth/change-password` - Change user password
+- `POST /api/auth/forgot-password` - Request password reset
+- `POST /api/auth/reset-password/:token` - Reset password with token
+- `DELETE /api/auth/account` - Delete user account
 
--   `GET /api/expenses`: Mengambil semua catatan pengeluaran (maksimal 200).
--   `GET /api/expenses/:id`: Mengambil catatan pengeluaran berdasarkan ID.
--   `POST /api/expenses`: Membuat catatan pengeluaran baru.
--   `PUT /api/expenses/:id`: Memperbarui catatan pengeluaran berdasarkan ID.
--   `DELETE /api/expenses/:id`: Menghapus catatan pengeluaran berdasarkan ID.
--   `GET /api/categories`: Mengambil semua kategori.
--   `POST /api/categories`: Membuat kategori baru.
-- `DELETE /api/categories/:name`: Menghapus kategori berdasarkan nama.
-- `PUT /api/categories/:name`: Memperbarui nama kategori berdasarkan nama lama.
--   `GET /api/payment-sources`: Mengambil semua sumber pembayaran.
--   `POST /api/payment-sources`: Membuat sumber pembayaran baru.
-- `DELETE /api/payment-sources/:name`: Menghapus sumber pembayaran berdasarkan nama.
-- `PUT /api/payment-sources/:name`: Memperbarui nama sumber pembayaran berdasarkan nama lama.
+### **Expense Endpoints**
+- `GET /api/expenses` - Get all user expenses (max 200)
+- `GET /api/expenses/:id` - Get expense by ID
+- `POST /api/expenses` - Create new expense
+- `PUT /api/expenses/:id` - Update expense
+- `DELETE /api/expenses/:id` - Delete expense
 
-## Skema Pengeluaran (Expense Schema)
+### **Category Endpoints**
+- `GET /api/categories` - Get all user categories
+- `POST /api/categories` - Create new category
+- `PUT /api/categories/:name` - Update category
+- `DELETE /api/categories/:name` - Delete category
 
-Setiap catatan pengeluaran memiliki properti berikut:
+### **Payment Source Endpoints**
+- `GET /api/payment-sources` - Get all user payment sources
+- `POST /api/payment-sources` - Create new payment source
+- `PUT /api/payment-sources/:name` - Update payment source
+- `DELETE /api/payment-sources/:name` - Delete payment source
 
--   `input_date`: Tanggal pengeluaran (String, wajib).
--   `store`: Nama toko (String).
--   `item`: Item yang dibeli (String).
--   `amount`: Jumlah pengeluaran (Number).
--   `category`: Kategori pengeluaran (String).
--   `payment_source`: Sumber pembayaran (String).
--   `input_time`: Waktu input (String).
+### **Quick Add Endpoints**
+- `GET /api/quick-add-items` - Get all user quick add items
+- `POST /api/quick-add-items` - Create new quick add item
+- `PUT /api/quick-add-items/:id` - Update quick add item
+- `DELETE /api/quick-add-items/:id` - Delete quick add item
 
-UPDATE FITUR (v2)
----
-## 1. Push Notification (Reminder & Alert Budget)
+### **Backup & Restore Endpoints**
+- `GET /api/backup` - Download user data backup
+- `POST /api/restore` - Restore user data from backup
 
-Gunanya misalnya:
+### **Push Notification Endpoints**
+- `POST /api/subscribe` - Subscribe to push notifications
+- `POST /api/unsubscribe` - Unsubscribe from push notifications
+- `POST /api/test-notification` - Send test notification
 
-* Reminder harian: “Jangan lupa catat pengeluaran hari ini”
-* Reminder tanggal gajian
-* Alert kalau pengeluaran kategori X lewat batas bulanan
+## Database Models
 
-**Teknis singkat:**
+### **User Schema**
+```javascript
+{
+  name: String (required, 2-100 chars),
+  email: String (required, unique, lowercase),
+  password: String (required, min 6 chars, hashed),
+  role: String (enum: 'user', 'admin', default: 'user'),
+  status: String (enum: 'active', 'suspended', 'deleted', default: 'active'),
+  avatar: String (optional URL),
+  lastLogin: Date,
+  passwordChangedAt: Date,
+  lastPasswordUpdate: Date,
+  previousPassword: String (hashed, for security),
+  passwordResetToken: String,
+  passwordResetExpires: Date,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-* Butuh:
+### **Expense Schema**
+```javascript
+{
+  user: ObjectId (reference to User, required),
+  date: String (required, YYYY-MM-DD format),
+  store: String (optional),
+  item: String (required),
+  amount: Number (required),
+  category: String (required),
+  payment_source: String (required),
+  input_date: String (auto-generated, YYYY-MM-DD),
+  input_time: String (auto-generated, HH:MM:SS),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-  * Service Worker (kamu sudah punya 💪)
-  * Push subscription (Web Push)
-  * Endpoint di backend buat kirim notifikasi
+### **Category Schema**
+```javascript
+{
+  name: String (required, unique per user),
+  user: ObjectId (reference to User, required),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-Contoh skenario:
+### **PaymentSource Schema**
+```javascript
+{
+  name: String (required, unique per user),
+  user: ObjectId (reference to User, required),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-* User aktifkan “Reminder harian jam 21:00” → kamu simpan preferensi di DB → cron job di backend kirim web push ke semua subscription yang aktif.
+### **QuickAddItem Schema**
+```javascript
+{
+  name: String (required),
+  amount: Number (required),
+  category: String (required),
+  paymentSource: String (required),
+  user: ObjectId (reference to User, required),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+## 📚 Dokumentasi Lengkap
+
+- [Dokumentasi Utama](docs/DOKUMENTASI.md) - Dokumentasi lengkap aplikasi
+- [Panduan Implementasi Auth (JWT)](docs/AUTH_IMPLEMENTATION_GUIDE.md)
+- [Ringkasan Implementasi Auth](docs/AUTH_COMPLETE.md)
+- [Panduan Validasi](docs/VALIDATION_GUIDE.md)
+- [Ringkasan Error Handling](docs/ERROR_HANDLING_SUMMARY.md)
+- [Ringkasan Implementasi](docs/IMPLEMENTATION_SUMMARY.md)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Vue.js team for the amazing framework
+- Tailwind CSS for the utility-first CSS framework
+- Font Awesome for the icon library
+- MongoDB Atlas for database hosting
+- All contributors and users of this project

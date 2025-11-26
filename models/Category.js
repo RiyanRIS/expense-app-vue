@@ -4,8 +4,18 @@ const CategorySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
-}, { collection: 'category' });
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+}, {
+  collection: 'category',
+  timestamps: true
+});
+
+// Compound index untuk unique name per user
+CategorySchema.index({ name: 1, user: 1 }, { unique: true });
 
 module.exports = mongoose.model('Category', CategorySchema);

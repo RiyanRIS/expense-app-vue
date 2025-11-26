@@ -69,1199 +69,1572 @@
         </div>
 
         <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='home'" class="space-y-4">
-            <section
-              v-if="pendingCount > 0"
-              class="bg-yellow-50 dark:bg-yellow-900 rounded-xl p-4 shadow border border-yellow-200 dark:border-yellow-800"
-            >
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-xs text-yellow-700 dark:text-yellow-200">
-                    {{ t('pendingSyncNotice') }}
-                  </div>
-                  <div
-                    class="text-sm font-medium text-yellow-800 dark:text-yellow-100"
-                  >
-                    {{ pendingCount }} {{ t('pendingSyncNoticeDetail') }}
-                  </div>
+          <main v-if="currentTab==='login'" class="space-y-4">
+              <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
+                <div class="text-center mb-6">
+                  <i class="fas fa-wallet text-5xl mb-4" :class="accentTextClass"></i>
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {{ t('loginTitle') }}
+                  </h2>
+                  <p class="text-gray-600 dark:text-gray-400 mt-2">
+                    {{ t('loginSubtitle') }}
+                  </p>
                 </div>
-                <button
-                  @click="triggerSync"
-                  class="px-3 py-1 rounded bg-yellow-600 text-white text-sm"
-                >
-                  {{ t('triggerSync') }}
-                </button>
-              </div>
-            </section>
-            <section class="grid grid-cols-2 gap-3">
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('totalTodayNotice') }}
-                </div>
-                <div
-                  class="text-xl font-semibold text-gray-900 dark:text-gray-100"
-                >
-                  Rp {{ formatNumber(totalToday) }}
-                </div>
-              </div>
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-                <div class="flex items-center justify-between">
-                  <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ t('totalMonthNotice') }}
-                  </div>
-                  <button
-                    @click="copyMonthlySummary"
-                    :class="['py-0', 'px-2', 'rounded-md', 'text-xs', 'font-medium', accentBgClass + ' text-white', 'hover:opacity-90']"
-                  >
-                    <i class="fas fa-copy"></i>
-                  </button>
-                </div>
-                <div
-                  class="text-xl font-semibold text-gray-900 dark:text-gray-100"
-                >
-                  Rp {{ formatNumber(totalMonth) }}
-                </div>
-              </div>
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('topCategoryNotice') }}
-                </div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ topCategory }}
-                </div>
-              </div>
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('topSourceNotice') }}
-                </div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ topSource }}
-                </div>
-              </div>
-              <div
-                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow col-span-2"
-              >
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('topStoreNotice') }}
-                </div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ topStore }}
-                </div>
-              </div>
-            </section>
-
-            <section
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow mb-4"
-            >
-              <h2 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                {{ t('filterNotice') }}
-              </h2>
-              <div class="flex space-x-2 overflow-x-auto pb-2 hide-scrollbar">
-                <button
-                  @click="setFilter('all')"
-                  :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'all' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
-                >
-                  {{ t('allNotice') }}
-                </button>
-                <button
-                  @click="setFilter('today')"
-                  :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'today' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
-                >
-                  {{ t('todayNotice') }}
-                </button>
-                <button
-                  @click="setFilter('yesterday')"
-                  :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'yesterday' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
-                >
-                  {{ t('yesterdayNotice') }}
-                </button>
-                <button
-                  @click="setFilter('this_week')"
-                  :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'this_week' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
-                >
-                  {{ t('thisWeekNotice') }}
-                </button>
-                <button
-                  @click="setFilter('this_month')"
-                  :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'this_month' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
-                >
-                  {{ t('thisMonthNotice') }}
-                </button>
-              </div>
-            </section>
-
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow">
-              <div class="flex items-center justify-between p-4">
-                <h2 class="font-semibold text-gray-900 dark:text-gray-100">
-                  {{ t('latestNotice') }}
-                </h2>
-                <button
-                  @click="manualRefresh"
-                  :class="['rounded text-gray-900 dark:text-white']"
-                >
-                  <i class="fas fa-sync-alt"></i>
-                </button>
-              </div>
-              <ul
-                v-if="!loadingExpenses"
-                class="divide-y divide-gray-100 dark:divide-gray-700"
-              >
-                <li
-                  v-for="t in latestTen"
-                  :key="t._id"
-                  @click="showDetail(t._id)"
-                  class="p-4 flex items-center justify-between cursor-pointer"
-                >
+                
+                <form @submit.prevent="handleLogin" class="space-y-4">
+                  <!-- Email -->
                   <div>
-                    <div
-                      class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                    >
-                      {{ t.item }}
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ t.store }} • {{ t.category }} • {{ t.payment_source }}
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ timeAgo(t.input_date || t.Date, t.input_time) }}
-                    </div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('email') }}
+                    </label>
+                    <input
+                      v-model="loginForm.email"
+                      type="email"
+                      required
+                      class="w-full px-4 py-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:border-transparent"
+                      :class="accentRingClass"
+                      :placeholder="t('emailPlaceholder')"
+                      autocomplete="email"
+                    />
                   </div>
-                  <div class="text-right">
-                    <div
-                      class="text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap"
-                    >
-                      Rp {{ formatNumber(toNumber(t.amount)) }}
-                    </div>
+                  
+                  <!-- Password -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('password') }}
+                    </label>
+                    <input
+                      v-model="loginForm.password"
+                      type="password"
+                      required
+                      class="w-full px-4 py-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:border-transparent"
+                      :class="accentRingClass"
+                      placeholder="••••••••"
+                      autocomplete="current-password"
+                    />
                   </div>
-                </li>
-              </ul>
-              <div v-else class="p-4 space-y-2">
-                <div v-for="n in 6" :key="n" class="animate-pulse">
-                  <div
-                    class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2"
-                  ></div>
-                  <div
-                    class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-1"
-                  ></div>
-                  <div
-                    class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"
-                  ></div>
-                </div>
-              </div>
-            </section>
-          </main>
-        </transition>
-
-        <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='backup-restore'" class="space-y-4">
-            <div
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
-            >
-              <div class="flex items-center justify-between">
-                <h2
-                  class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
-                >
-                  {{ t('backupRestore') }}
-                </h2>
-                <button
-                  @click="changeTab('settings')"
-                  class="text-gray-500 dark:text-gray-400"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <div class="grid grid-cols-1 gap-4">
-                <div class="border rounded-lg p-4 dark:border-gray-700">
-                  <div
-                    class="font-medium text-gray-800 dark:text-gray-200 mb-2"
-                  >
-                    {{ t('backupData') }}
+                  
+                  <!-- Error Message -->
+                  <div v-if="authError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p class="text-sm text-red-600 dark:text-red-400">
+                      <i class="fas fa-exclamation-circle mr-2"></i>{{ authError }}
+                    </p>
                   </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    {{ t('backupNotice') }}
-                  </p>
-                  <button
-                    @click="downloadBackup"
-                    :class="['py-2','px-4','rounded','text-white','font-semibold', accentBgClass]"
-                  >
-                    {{ t('downloadBackup') }}
-                  </button>
-                </div>
-                <div class="border rounded-lg p-4 dark:border-gray-700">
-                  <div
-                    class="font-medium text-gray-800 dark:text-gray-200 mb-2"
-                  >
-                    {{ t('restoreData') }}
-                  </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    {{ t('restoreNotice') }}
-                  </p>
-                  <input
-                    type="file"
-                    accept="application/json"
-                    @change="handleRestoreFile"
-                    class="text-sm text-gray-700 dark:text-gray-200"
-                  />
-                  <div class="mt-3 flex items-center gap-2">
-                    <button
-                      @click="restoreData"
-                      :disabled="!restoreFile"
-                      :class="['py-2','px-4','rounded','text-white','font-semibold', accentBgClass, !restoreFile ? 'opacity-50 cursor-not-allowed' : '']"
-                    >
-                      {{ t('uploadRestore') }}
-                    </button>
-                    <span class="text-sm text-gray-600 dark:text-gray-400"
-                      >{{ restoreStatus }}</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </transition>
-
-        <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='quick-add'" class="space-y-4">
-            <div
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
-            >
-              <div class="flex items-center justify-between">
-                <h2
-                  class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
-                >
-                  {{ t('quickAddItems') }}
-                </h2>
-                <button
-                  @click="changeTab('settings')"
-                  class="text-gray-500 dark:text-gray-400"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-
-              <!-- Form to add/edit Quick Add item -->
-              <form @submit.prevent="saveQuickAddItem" class="space-y-3">
-                <input
-                  v-model="newQuickAddItem.name"
-                  placeholder="Nama Item (e.g., Kopi)"
-                  class="text-sm p-2 border rounded-md shadow-sm w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                  required
-                />
-                <div class="relative">
-                  <div
-                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                  >
-                    <span class="text-gray-500 dark:text-gray-400">Rp</span>
-                  </div>
-                  <input
-                    v-model="newQuickAddItem.displayAmount"
-                    type="text"
-                    inputmode="numeric"
-                    placeholder="{{ t('amountPlaceholder') }}"
-                    @input="handleQuickAddAmountInput"
-                    class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10"
-                    required
-                  />
-                </div>
-                <select
-                  v-model="newQuickAddItem.category"
-                  class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                  required
-                >
-                  <option value="" disabled>{{ t('selectCategory') }}</option>
-                  <option
-                    v-for="category in categories"
-                    :key="category"
-                    :value="category"
-                  >
-                    {{ category }}
-                  </option>
-                </select>
-                <select
-                  v-model="newQuickAddItem.paymentSource"
-                  class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                  required
-                >
-                  <option value="" disabled>{{ t('selectPaymentSource') }}</option>
-                  <option
-                    v-for="source in paymentSources"
-                    :key="source"
-                    :value="source"
-                  >
-                    {{ source }}
-                  </option>
-                </select>
-                <div class="flex space-x-2">
-                  <button
-                    @click="cancelEditQuickAddItem"
-                    type="button"
-                    class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
-                  >
-                    {{ t('cancel') }}
-                  </button>
+                  
+                  <!-- Submit Button -->
                   <button
                     type="submit"
-                    :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
+                    :disabled="authLoading"
+                    :class="[accentBgClass, 'w-full text-white py-3 rounded-lg font-medium transition-opacity active:scale-95', authLoading ? 'opacity-50 cursor-not-allowed' : '']"
                   >
-                    <i class="fas fa-save"></i> {{ t('save') }}
+                    <i v-if="authLoading" class="fas fa-spinner fa-spin mr-2"></i>
+                    {{ authLoading ? t('loggingIn') : t('login') }}
+                  </button>
+                </form>
+                
+                <!-- Signup Link -->
+                <div class="mt-6 text-center">
+                  <p class="text-gray-600 dark:text-gray-400">
+                    {{ t('noAccount') }}
+                    <button @click="changeTab('signup')" :class="[accentTextClass, 'font-medium']">
+                      {{ t('signupNow') }}
+                    </button>
+                  </p>
+                </div>
+
+                <!-- Forgot Password Link (shown on login error) -->
+                <div v-if="authError" class="mt-4 text-center">
+                  <button @click="changeTab('forgot-password')" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline">
+                    {{ t('forgotPassword') }}
                   </button>
                 </div>
-              </form>
+              </div>
+            </main>
+          </transition>
 
-              <!-- List of Quick Add items -->
-              <div class="mt-6">
-                <h3
-                  class="text-md font-semibold mb-2 mt-2 text-gray-800 dark:text-gray-200"
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='signup'" class="space-y-4">
+              <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
+                <div class="text-center mb-6">
+                  <i class="fas fa-user-plus text-5xl mb-4" :class="accentTextClass"></i>
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {{ t('createAccount') }}
+                  </h2>
+                  <p class="text-gray-600 dark:text-gray-400 mt-2">
+                    {{ t('signupSubtitle') }}
+                  </p>
+                </div>
+                
+                <form @submit.prevent="handleSignup" class="space-y-4">
+                  <!-- Name -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('fullName') }}
+                    </label>
+                    <input
+                      v-model="signupForm.name"
+                      type="text"
+                      required
+                      minlength="2"
+                      class="w-full px-4 py-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:border-transparent"
+                      :class="accentRingClass"
+                      :placeholder="t('fullNamePlaceholder')"
+                      autocomplete="name"
+                    />
+                  </div>
+                  
+                  <!-- Email -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('email') }}
+                    </label>
+                    <input
+                      v-model="signupForm.email"
+                      type="email"
+                      required
+                      class="w-full px-4 py-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:border-transparent"
+                      :class="accentRingClass"
+                      :placeholder="t('emailPlaceholder')"
+                      autocomplete="email"
+                    />
+                  </div>
+                  
+                  <!-- Password -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('password') }}
+                    </label>
+                    <input
+                      v-model="signupForm.password"
+                      type="password"
+                      required
+                      minlength="6"
+                      class="w-full px-4 py-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:border-transparent"
+                      :class="accentRingClass"
+                      placeholder="••••••••"
+                      autocomplete="new-password"
+                    />
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {{ t('passwordRequirement') }}
+                    </p>
+                  </div>
+                  
+                  <!-- Confirm Password -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('confirmPassword') }}
+                    </label>
+                    <input
+                      v-model="signupForm.passwordConfirm"
+                      type="password"
+                      required
+                      minlength="6"
+                      class="w-full px-4 py-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:border-transparent"
+                      :class="accentRingClass"
+                      placeholder="••••••••"
+                      autocomplete="new-password"
+                    />
+                  </div>
+                  
+                  <!-- Error Message -->
+                  <div v-if="authError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p class="text-sm text-red-600 dark:text-red-400">
+                      <i class="fas fa-exclamation-circle mr-2"></i>{{ authError }}
+                    </p>
+                  </div>
+                  
+                  <!-- Submit Button -->
+                  <button
+                    type="submit"
+                    :disabled="authLoading"
+                    :class="[accentBgClass, 'w-full text-white py-3 rounded-lg font-medium transition-opacity active:scale-95', authLoading ? 'opacity-50 cursor-not-allowed' : '']"
+                  >
+                    <i v-if="authLoading" class="fas fa-spinner fa-spin mr-2"></i>
+                    {{ authLoading ? t('creatingAccount') : t('createAccount') }}
+                  </button>
+                </form>
+                
+                <!-- Login Link -->
+                <div class="mt-6 text-center">
+                  <p class="text-gray-600 dark:text-gray-400">
+                    {{ t('haveAccount') }}
+                    <button @click="changeTab('login')" :class="[accentTextClass, 'font-medium']">
+                      {{ t('loginNow') }}
+                    </button>
+                  </p>
+                </div>
+              </div>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='home'" class="space-y-4">
+              <section
+                v-if="pendingCount > 0"
+                class="bg-yellow-50 dark:bg-yellow-900 rounded-xl p-4 shadow border border-yellow-200 dark:border-yellow-800"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-xs text-yellow-700 dark:text-yellow-200">
+                      {{ t('pendingSyncNotice') }}
+                    </div>
+                    <div
+                      class="text-sm font-medium text-yellow-800 dark:text-yellow-100"
+                    >
+                      {{ pendingCount }} {{ t('pendingSyncNoticeDetail') }}
+                    </div>
+                  </div>
+                  <button
+                    @click="triggerSync"
+                    class="px-3 py-1 rounded bg-yellow-600 text-white text-sm"
+                  >
+                    {{ t('triggerSync') }}
+                  </button>
+                </div>
+              </section>
+              <section class="grid grid-cols-2 gap-3">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('totalTodayNotice') }}
+                  </div>
+                  <div
+                    class="text-xl font-semibold text-gray-900 dark:text-gray-100"
+                  >
+                    Rp {{ formatNumber(totalToday) }}
+                  </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                  <div class="flex items-center justify-between">
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ t('totalMonthNotice') }}
+                    </div>
+                    <button
+                      @click="copyMonthlySummary"
+                      :class="['py-0', 'px-2', 'rounded-md', 'text-xs', 'font-medium', accentBgClass + ' text-white', 'hover:opacity-90']"
+                    >
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                  <div
+                    class="text-xl font-semibold text-gray-900 dark:text-gray-100"
+                  >
+                    Rp {{ formatNumber(totalMonth) }}
+                  </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('topCategoryNotice') }}
+                  </div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ topCategory }}
+                  </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('topSourceNotice') }}
+                  </div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ topSource }}
+                  </div>
+                </div>
+                <div
+                  class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow col-span-2"
                 >
-                  {{ t('quickAddItemsList') }}
-                </h3>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('topStoreNotice') }}
+                  </div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ topStore }}
+                  </div>
+                </div>
+              </section>
+
+              <section
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow mb-4"
+              >
+                <h2 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  {{ t('filterNotice') }}
+                </h2>
+                <div class="flex space-x-2 overflow-x-auto pb-2 hide-scrollbar">
+                  <button
+                    @click="setFilter('all')"
+                    :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'all' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
+                  >
+                    {{ t('allNotice') }}
+                  </button>
+                  <button
+                    @click="setFilter('today')"
+                    :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'today' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
+                  >
+                    {{ t('todayNotice') }}
+                  </button>
+                  <button
+                    @click="setFilter('yesterday')"
+                    :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'yesterday' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
+                  >
+                    {{ t('yesterdayNotice') }}
+                  </button>
+                  <button
+                    @click="setFilter('this_week')"
+                    :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'this_week' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
+                  >
+                    {{ t('thisWeekNotice') }}
+                  </button>
+                  <button
+                    @click="setFilter('this_month')"
+                    :class="['py-2', 'px-4', 'rounded-md', 'text-xs text-nowrap', 'font-medium', filter === 'this_month' ? accentBgClass + ' text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600']"
+                  >
+                    {{ t('thisMonthNotice') }}
+                  </button>
+                </div>
+              </section>
+
+              <section class="bg-white dark:bg-gray-800 rounded-xl shadow">
+                <div class="flex items-center justify-between p-4">
+                  <h2 class="font-semibold text-gray-900 dark:text-gray-100">
+                    {{ t('latestNotice') }}
+                  </h2>
+                  <button
+                    @click="manualRefresh"
+                    :class="['rounded text-gray-900 dark:text-white']"
+                  >
+                    <i class="fas fa-sync-alt"></i>
+                  </button>
+                </div>
                 <ul
-                  v-if="quickAddItems.length > 0"
+                  v-if="!loadingExpenses"
                   class="divide-y divide-gray-100 dark:divide-gray-700"
                 >
                   <li
-                    v-for="(item, index) in quickAddItems"
-                    :key="index"
-                    class="py-3 flex items-center justify-between"
-                    @click="editQuickAddItemForm(index)"
+                    v-for="t in latestTen"
+                    :key="t._id"
+                    @click="showDetail(t._id)"
+                    class="p-4 flex items-center justify-between cursor-pointer"
                   >
                     <div>
                       <div
                         class="text-sm font-medium text-gray-900 dark:text-gray-100"
                       >
-                        {{ item.name }}
+                        {{ t.item }}
                       </div>
                       <div class="text-xs text-gray-500 dark:text-gray-400">
-                        Rp {{ formatNumber(item.amount) }} • {{ item.category }}
-                        • {{ item.paymentSource }}
+                        {{ t.store }} • {{ t.category }} • {{ t.payment_source }}
+                      </div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ timeAgo(t.input_date || t.Date, t.input_time) }}
                       </div>
                     </div>
+                    <div class="text-right">
+                      <div
+                        class="text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap"
+                      >
+                        Rp {{ formatNumber(toNumber(t.amount)) }}
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <div v-else class="p-4 space-y-2">
+                  <div v-for="n in 6" :key="n" class="animate-pulse">
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2"
+                    ></div>
+                    <div
+                      class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-1"
+                    ></div>
+                    <div
+                      class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"
+                    ></div>
+                  </div>
+                </div>
+              </section>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='backup-restore'" class="space-y-4">
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+              >
+                <div class="flex items-center justify-between">
+                  <h2
+                    class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+                  >
+                    {{ t('backupRestore') }}
+                  </h2>
+                  <button
+                    @click="changeTab('settings')"
+                    class="text-gray-500 dark:text-gray-400"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                  <div class="border rounded-lg p-4 dark:border-gray-700">
+                    <div
+                      class="font-medium text-gray-800 dark:text-gray-200 mb-2"
+                    >
+                      {{ t('backupData') }}
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      {{ t('backupNotice') }}
+                    </p>
+                    <button
+                      @click="downloadBackup"
+                      :class="['py-2','px-4','rounded','text-white','font-semibold', accentBgClass]"
+                    >
+                      {{ t('downloadBackup') }}
+                    </button>
+                  </div>
+                  <div class="border rounded-lg p-4 dark:border-gray-700">
+                    <div
+                      class="font-medium text-gray-800 dark:text-gray-200 mb-2"
+                    >
+                      {{ t('restoreData') }}
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      {{ t('restoreNotice') }}
+                    </p>
+                    <input
+                      type="file"
+                      accept="application/json"
+                      @change="handleRestoreFile"
+                      class="text-sm text-gray-700 dark:text-gray-200"
+                    />
+                    <div class="mt-3 flex items-center gap-2">
+                      <button
+                        @click="restoreData"
+                        :disabled="!restoreFile"
+                        :class="['py-2','px-4','rounded','text-white','font-semibold', accentBgClass, !restoreFile ? 'opacity-50 cursor-not-allowed' : '']"
+                      >
+                        {{ t('uploadRestore') }}
+                      </button>
+                      <span class="text-sm text-gray-600 dark:text-gray-400"
+                        >{{ restoreStatus }}</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='quick-add'" class="space-y-4">
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+              >
+                <div class="flex items-center justify-between">
+                  <h2
+                    class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+                  >
+                    {{ t('quickAddItems') }}
+                  </h2>
+                  <button
+                    @click="changeTab('settings')"
+                    class="text-gray-500 dark:text-gray-400"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+
+                <!-- Form to add/edit Quick Add item -->
+                <form @submit.prevent="saveQuickAddItem" class="space-y-3">
+                  <input
+                    v-model="newQuickAddItem.name"
+                    placeholder="Nama Item (e.g., Kopi)"
+                    class="text-sm p-2 border rounded-md shadow-sm w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    required
+                  />
+                  <div class="relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                    >
+                      <span class="text-gray-500 dark:text-gray-400">Rp</span>
+                    </div>
+                    <input
+                      v-model="newQuickAddItem.displayAmount"
+                      type="text"
+                      inputmode="numeric"
+                      placeholder="{{ t('amountPlaceholder') }}"
+                      @input="handleQuickAddAmountInput"
+                      class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10"
+                      required
+                    />
+                  </div>
+                  <select
+                    v-model="newQuickAddItem.category"
+                    class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    required
+                  >
+                    <option value="" disabled>{{ t('selectCategory') }}</option>
+                    <option
+                      v-for="category in categories"
+                      :key="category"
+                      :value="category"
+                    >
+                      {{ category }}
+                    </option>
+                  </select>
+                  <select
+                    v-model="newQuickAddItem.paymentSource"
+                    class="text-sm p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    required
+                  >
+                    <option value="" disabled>{{ t('selectPaymentSource') }}</option>
+                    <option
+                      v-for="source in paymentSources"
+                      :key="source"
+                      :value="source"
+                    >
+                      {{ source }}
+                    </option>
+                  </select>
+                  <div class="flex space-x-2">
+                    <button
+                      @click="cancelEditQuickAddItem"
+                      type="button"
+                      class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
+                    >
+                      {{ t('cancel') }}
+                    </button>
+                    <button
+                      type="submit"
+                      :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
+                    >
+                      <i class="fas fa-save"></i> {{ t('save') }}
+                    </button>
+                  </div>
+                </form>
+
+                <!-- List of Quick Add items -->
+                <div class="mt-6">
+                  <h3
+                    class="text-md font-semibold mb-2 mt-2 text-gray-800 dark:text-gray-200"
+                  >
+                    {{ t('quickAddItemsList') }}
+                  </h3>
+                  <ul
+                    v-if="quickAddItems.length > 0"
+                    class="divide-y divide-gray-100 dark:divide-gray-700"
+                  >
+                    <li
+                      v-for="(item, index) in quickAddItems"
+                      :key="index"
+                      class="py-3 flex items-center justify-between"
+                      @click="editQuickAddItemForm(index)"
+                    >
+                      <div>
+                        <div
+                          class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                        >
+                          {{ item.name }}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                          Rp {{ formatNumber(item.amount) }} • {{ item.category }}
+                          • {{ item.paymentSource }}
+                        </div>
+                      </div>
+                      <div class="flex gap-2">
+                        <button
+                          @click="deleteQuickAddItemConfirm(index)"
+                          class="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </li>
+                  </ul>
+                  <p v-else class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ t('noQuickAddItems') }}
+                  </p>
+                </div>
+              </div>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='create'" class="space-y-4">
+              <section class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                <form @submit.prevent="submitNew" class="space-y-3">
+                  <div class="flex justify-between items-center mb-2">
+                    <button
+                      type="button"
+                      @click="currentMonth--"
+                      class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                    >
+                      <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span
+                      class="font-semibold text-lg text-gray-500 dark:text-gray-400"
+                      >{{ monthName }} {{ currentYear }}</span
+                    >
+                    <button
+                      type="button"
+                      @click="currentMonth++"
+                      class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                    >
+                      <i class="fas fa-chevron-right"></i>
+                    </button>
+                  </div>
+                  <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[0] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[1] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[2] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[3] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[4] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[5] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[6] }}</div>
+                    <template v-for="day in calendarDays">
+                      <div
+                        v-if="day"
+                        :key="`${currentYear}-${currentMonth}-${day}`"
+                        @click="selectDay(day)"
+                        :class="[
+                          'p-2 rounded-full cursor-pointer',
+                          newForm.date === new Date(currentYear, currentMonth, day).toISOString().slice(0, 10)
+                            ? accentBgClass + ' text-white'
+                            : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400',
+                        ]"
+                      >
+                        {{ day }}
+                      </div>
+                      <div v-else class="p-2"></div>
+                    </template>
+                  </div>
+                  <!-- Quick Add Buttons -->
+                  <div
+                    v-if="quickAddItems.length > 0"
+                    class="flex space-x-2 overflow-x-auto pb-2"
+                  >
+                    <button
+                      v-for="(item, index) in quickAddItems"
+                      :key="index"
+                      @click="applyQuickAddItem(item)"
+                      class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium text-white"
+                      :class="accentBgClass"
+                    >
+                      {{ item.name }} (Rp {{ formatNumber(item.amount) }})
+                    </button>
+                  </div>
+                  <!-- End Quick Add Buttons -->
+                  <div class="relative">
+                    <input
+                      v-model="newForm.item"
+                      placeholder="{{ t('itemPlaceholder') }}"
+                      :class="[
+                      'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100',
+                      itemError ? 'border-red-500 ring-1 ring-red-500' : '',
+                    ]"
+                    />
+                    <div
+                      v-if="itemError"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                    >
+                      <svg
+                        class="h-5 w-5 text-red-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p v-if="itemError" class="text-red-500 text-xs mt-1">
+                    {{ t('itemError') }}
+                  </p>
+                  <div class="relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                    >
+                      <span class="text-gray-500 dark:text-gray-400">Rp</span>
+                    </div>
+                    <input
+                      v-model="newForm.displayAmount"
+                      type="text"
+                      inputmode="numeric"
+                      placeholder="{{ t('amountPlaceholder') }}"
+                      @input="handleAmountInput"
+                      :class="[
+                      'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10',
+                      amountError ? 'border-red-500 ring-1 ring-red-500' : '',
+                    ]"
+                    />
+                    <div
+                      v-if="amountError"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                    >
+                      <svg
+                        class="h-5 w-5 text-red-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p v-if="amountError" class="text-red-500 text-xs mt-1">
+                    {{ t('amountError') }}
+                  </p>
+                  <input
+                    v-model="newForm.store"
+                    placeholder="Toko"
+                    class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  />
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('selectCategory') }}
+                  </div>
+                  <div class="flex flex-wrap gap-2 items-center">
+                    <label
+                      v-for="category in categories"
+                      :key="category"
+                      class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    >
+                      <input
+                        type="radio"
+                        name="category"
+                        :value="category"
+                        v-model="newForm.category"
+                        class=""
+                      />
+                      <span class="text-sm">{{ category }}</span>
+                    </label>
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('selectPaymentSource') }}
+                  </div>
+                  <div class="flex flex-wrap gap-2 items-center">
+                    <label
+                      v-for="source in paymentSources"
+                      :key="source"
+                      class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    >
+                      <input
+                        type="radio"
+                        name="payment_source"
+                        :value="source"
+                        v-model="newForm.payment_source"
+                        class=""
+                      />
+                      <span class="text-sm">{{ source }}</span>
+                    </label>
+                  </div>
+                  <button
+                    :class="['w-full py-2 rounded text-white', accentBgClass]"
+                  >
+                    {{ t('save') }}
+                  </button>
+                </form>
+              </section>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='detail'" class="space-y-4">
+              <section
+                v-if="selectedExpense"
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+              >
+                <div class="flex items-center justify-between">
+                  <h2 class="font-semibold text-gray-900 dark:text-gray-100">
+                    {{ t('expenseDetail') }}
+                  </h2>
+                  <button
+                    @click="changeTab('home')"
+                    class="text-gray-500 dark:text-gray-400"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('item') }}
+                  </div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ selectedExpense.item }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('amount') }}
+                  </div>
+                  <div
+                    class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+                  >
+                    Rp {{ formatNumber(toNumber(selectedExpense.amount)) }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">Toko</div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ selectedExpense.store }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('category') }}
+                  </div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ selectedExpense.category }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('paymentSource') }}
+                  </div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ selectedExpense.payment_source }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('date') }}
+                  </div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ selectedExpense.date }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('time') }}
+                  </div>
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    {{ selectedExpense.input_date }} {{ selectedExpense.input_time
+                    }}
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <button
+                    @click="editExpense(selectedExpense)"
+                    :class="['w-full py-2 rounded text-white', accentBgClass]"
+                  >
+                    {{ t('edit') }}
+                  </button>
+                  <button
+                    @click="deleteExpense(selectedExpense._id)"
+                    class="w-full py-2 rounded bg-red-600 text-white"
+                  >
+                    {{ t('delete') }}
+                  </button>
+                </div>
+              </section>
+
+              <div
+                v-else
+                class="text-center text-gray-500 dark:text-gray-400 pt-4"
+              >
+                {{ t('noExpenseSelected') }}
+              </div>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='edit'" class="space-y-4">
+              <section
+                v-if="selectedExpense"
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow"
+              >
+                <form @submit.prevent="submitEdit" class="space-y-3">
+                  <div class="flex items-center justify-between">
+                    <h2 class="font-semibold text-gray-900 dark:text-gray-100">
+                      {{ t('editExpense') }}
+                    </h2>
+                    <button
+                      @click="changeTab('detail')"
+                      class="text-gray-500 dark:text-gray-400"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <div class="flex justify-between items-center mb-2">
+                    <button
+                      type="button"
+                      @click="currentMonth--"
+                      class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                    >
+                      <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span
+                      class="font-semibold text-lg text-gray-500 dark:text-gray-400"
+                      >{{ monthName }} {{ currentYear }}</span
+                    >
+                    <button
+                      type="button"
+                      @click="currentMonth++"
+                      class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                    >
+                      <i class="fas fa-chevron-right"></i>
+                    </button>
+                  </div>
+                  <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[0] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[1] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[2] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[3] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[4] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[5] }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[6] }}</div>
+                    <template v-for="day in calendarDays">
+                      <div
+                        v-if="day"
+                        :key="`${currentYear}-${currentMonth}-${day}`"
+                        @click="selectDayEdit(day)"
+                        :class="[
+                          'p-2 rounded-full cursor-pointer',
+                          selectedExpense.date === new Date(currentYear, currentMonth, day).toISOString().slice(0, 10)
+                            ? accentBgClass + ' text-white'
+                            : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400',
+                        ]"
+                      >
+                        {{ day }}
+                      </div>
+                      <div v-else class="p-2"></div>
+                    </template>
+                  </div>
+                  <div class="relative">
+                    <input
+                      v-model="selectedExpense.item"
+                      placeholder="{{ t('itemPlaceholder') }}"
+                      :class="[
+                      'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100',
+                      itemError ? 'border-red-500 ring-1 ring-red-500' : '',
+                    ]"
+                    />
+                    <div
+                      v-if="itemError"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                    >
+                      <svg
+                        class="h-5 w-5 text-red-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p v-if="itemError" class="text-red-500 text-xs mt-1">
+                    {{ t('itemError') }}
+                  </p>
+                  <div class="relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                    >
+                      <span class="text-gray-500 dark:text-gray-400">Rp</span>
+                    </div>
+                    <input
+                      v-model="selectedExpense.displayAmount"
+                      type="text"
+                      inputmode="numeric"
+                      placeholder="{{ t('amountPlaceholder') }}"
+                      @input="handleEditAmountInput"
+                      :class="[
+                      'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10',
+                      amountError ? 'border-red-500 ring-1 ring-red-500' : '',
+                    ]"
+                    />
+                    <div
+                      v-if="amountError"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                    >
+                      <svg
+                        class="h-5 w-5 text-red-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <p v-if="amountError" class="text-red-500 text-xs mt-1">
+                    {{ t('amountError') }}
+                  </p>
+                  <input
+                    v-model="selectedExpense.store"
+                    placeholder="Toko"
+                    class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  />
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('category') }}
+                  </div>
+                  <div class="flex flex-wrap gap-2 items-center">
+                    <label
+                      v-for="category in categories"
+                      :key="category"
+                      class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    >
+                      <input
+                        type="radio"
+                        name="category"
+                        :value="category"
+                        v-model="selectedExpense.category"
+                        class=""
+                      />
+                      <span class="text-sm">{{ category }}</span>
+                    </label>
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('paymentSource') }}
+                  </div>
+                  <div class="flex flex-wrap gap-2 items-center">
+                    <label
+                      v-for="source in paymentSources"
+                      :key="source"
+                      class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    >
+                      <input
+                        type="radio"
+                        name="payment_source"
+                        :value="source"
+                        v-model="selectedExpense.payment_source"
+                        class=""
+                      />
+                      <span class="text-sm">{{ source }}</span>
+                    </label>
+                  </div>
+                  <button
+                    :class="['w-full py-2 rounded text-white', accentBgClass]"
+                  >
+                    {{ t('save') }}
+                  </button>
+                </form>
+              </section>
+              <div
+                v-else
+                class="text-center text-gray-500 dark:text-gray-400 pt-4"
+              >
+                {{ t('noExpenseSelected') }}
+              </div>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='settings'" class="space-y-4">
+              <section
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+              >
+                <div class="flex items-center gap-3">
+                  <img
+                    :src="currentUser?.photo || 'https://i.pravatar.cc/100?img=5'"
+                    alt="user"
+                    class="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <div class="font-semibold text-gray-900 dark:text-gray-100">
+                      {{ currentUser?.name || 'User' }}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      Level {{ currentUser?.level || 'Standard' }}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section
+                class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
+              >
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <li class="flex items-center justify-between py-3">
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('theme') }}</span
+                    >
+                    <label
+                      class="relative inline-flex items-center cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        v-model="darkMode"
+                        @change="toggleDark"
+                        class="sr-only peer"
+                      />
+                      <div
+                        @click="toggleDark"
+                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                      ></div>
+                    </label>
+                  </li>
+                  <li class="flex items-center justify-between py-3">
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('accentColor') }}</span
+                    >
+                    <select
+                      v-model="tone"
+                      :class="['px-1.5 py-1 border rounded text-white', accentBgClass]"
+                    >
+                      <option value="indigo">Indigo</option>
+                      <option value="blue">Blue</option>
+                      <option value="green">Green</option>
+                      <option value="rose">Rose</option>
+                      <option value="amber">Amber</option>
+                    </select>
+                  </li>
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="clearCacheAndReload"
+                  >
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('clearCache') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="testNotification"
+                  >
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('testNotification') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="changeTab('backup-restore')"
+                  >
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('backupRestore') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                </ul>
+              </section>
+
+              <section
+                class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
+              >
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="changeTab('category')"
+                  >
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('manageCategories') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="changeTab('payment-source')"
+                  >
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('managePaymentSources') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="changeTab('quick-add')"
+                  >
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('quickAddItems') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                </ul>
+              </section>
+
+              <section
+                class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
+              >
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="action('profil')"
+                  >
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('manageProfile') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="changeTab('change-password')"
+                  >
+                    <span class="text-gray-900 dark:text-gray-100"
+                      >{{ t('changePassword') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                  <li
+                    class="flex items-center justify-between py-3"
+                    @click="action('logout')"
+                  >
+                    <span class="text-red-600 hover:underline dark:text-red-400"
+                      >{{ t('logout') }}</span
+                    >
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </li>
+                </ul>
+              </section>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='profile'" class="space-y-4">
+              <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    {{ t('profileManagement') }}
+                  </h2>
+                  <button
+                    @click="changeTab('settings')"
+                    class="text-gray-500 dark:text-gray-400"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+
+                <form @submit.prevent="updateProfile" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('fullName') }}
+                    </label>
+                    <input
+                      v-model="profileForm.name"
+                      type="text"
+                      :placeholder="t('fullName')"
+                      required
+                      class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('profilePhoto') }}
+                    </label>
+                    <input
+                      v-model="profileForm.avatar"
+                      type="url"
+                      :placeholder="t('profilePhotoPlaceholder')"
+                      class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    :class="['w-full py-3 rounded-lg text-white font-medium', accentBgClass]"
+                  >
+                    {{ t('updateProfile') }}
+                  </button>
+                </form>
+              </div>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='change-password'" class="space-y-4">
+              <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    {{ t('changePassword') }}
+                  </h2>
+                  <button
+                    @click="changeTab('settings')"
+                    class="text-gray-500 dark:text-gray-400"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+
+                <form @submit.prevent="changePassword" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('newPassword') }}
+                    </label>
+                    <input
+                      v-model="changePasswordForm.newPassword"
+                      type="password"
+                      :placeholder="t('newPassword')"
+                      required
+                      class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('confirmNewPassword') }}
+                    </label>
+                    <input
+                      v-model="changePasswordForm.confirmPassword"
+                      type="password"
+                      :placeholder="t('confirmNewPassword')"
+                      required
+                      class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    :class="['w-full py-3 rounded-lg text-white font-medium', accentBgClass]"
+                  >
+                    {{ t('changePassword') }}
+                  </button>
+                </form>
+              </div>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='forgot-password'" class="space-y-4">
+              <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                <div class="text-center mb-6">
+                  <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    {{ t('forgotPasswordTitle') }}
+                  </h2>
+                  <p class="text-gray-600 dark:text-gray-400 mt-2">
+                    {{ t('forgotPasswordSubtitle') }}
+                  </p>
+                </div>
+
+                <form @submit.prevent="forgotPassword" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {{ t('email') }}
+                    </label>
+                    <input
+                      v-model="forgotPasswordForm.email"
+                      type="email"
+                      :placeholder="t('emailPlaceholder')"
+                      required
+                      class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    :class="['w-full py-3 rounded-lg text-white font-medium', accentBgClass]"
+                  >
+                    {{ t('resetPassword') }}
+                  </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                  <button
+                    @click="changeTab('login')"
+                    class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  >
+                    {{ t('loginNow') }}
+                  </button>
+                </div>
+              </div>
+            </main>
+          </transition>
+
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='category'" class="space-y-4">
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+              >
+                <div class="flex items-center justify-between">
+                  <h2
+                    class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+                  >
+                    {{ t('manageCategoriesTitle') }}
+                  </h2>
+                  <button
+                    @click="changeTab('settings')"
+                    class="text-gray-500 dark:text-gray-400"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <form @submit.prevent="saveCategory" class="space-y-3">
+                  <input
+                    type="text"
+                    v-model="newCategoryName"
+                    placeholder="{{ t('newCategoryNamePlaceholder') }}"
+                    required
+                    class="text-sm p-2 border border-gray-300 rounded-md shadow-sm w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  />
+                  <div class="flex space-x-2">
+                    <button
+                      @click="cancelEditCategory"
+                      type="button"
+                      class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
+                    >
+                      {{ t('cancel') }}
+                    </button>
+                    <button
+                      type="submit"
+                      :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
+                    >
+                      <i class="fas fa-save"></i> {{ t('save') }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+              >
+                <h2
+                  class="text-md font-semibold mb-3 text-gray-800 dark:text-gray-200"
+                >
+                  {{ t('manageCategoriesListTitle') }}
+                </h2>
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <li
+                    v-for="category in categories"
+                    :key="category"
+                    @click="editCategory(category)"
+                    class="flex items-center justify-between py-2"
+                  >
+                    <span class="text-sm text-gray-900 dark:text-gray-100"
+                      >{{ category }}</span
+                    >
                     <div class="flex gap-2">
                       <button
-                        @click="deleteQuickAddItemConfirm(index)"
-                        class="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                        @click="deleteCategoryConfirm(category)"
+                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
                       >
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
                   </li>
                 </ul>
-                <p v-else class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ t('noQuickAddItems') }}
-                </p>
               </div>
-            </div>
-          </main>
-        </transition>
+            </main>
+          </transition>
 
-        <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='create'" class="space-y-4">
-            <section class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-              <form @submit.prevent="submitNew" class="space-y-3">
-                <div class="flex justify-between items-center mb-2">
-                  <button
-                    type="button"
-                    @click="currentMonth--"
-                    class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                  >
-                    <i class="fas fa-chevron-left"></i>
-                  </button>
-                  <span
-                    class="font-semibold text-lg text-gray-500 dark:text-gray-400"
-                    >{{ monthName }} {{ currentYear }}</span
-                  >
-                  <button
-                    type="button"
-                    @click="currentMonth++"
-                    class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                  >
-                    <i class="fas fa-chevron-right"></i>
-                  </button>
-                </div>
-                <div class="grid grid-cols-7 gap-1 text-center text-sm">
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[0] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[1] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[2] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[3] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[4] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[5] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[6] }}</div>
-                  <template v-for="day in calendarDays">
-                    <div
-                      v-if="day"
-                      :key="`${currentYear}-${currentMonth}-${day}`"
-                      @click="selectDay(day)"
-                      :class="[
-                        'p-2 rounded-full cursor-pointer',
-                        newForm.date === new Date(currentYear, currentMonth, day).toISOString().slice(0, 10)
-                          ? accentBgClass + ' text-white'
-                          : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400',
-                      ]"
-                    >
-                      {{ day }}
-                    </div>
-                    <div v-else class="p-2"></div>
-                  </template>
-                </div>
-                <!-- Quick Add Buttons -->
-                <div
-                  v-if="quickAddItems.length > 0"
-                  class="flex space-x-2 overflow-x-auto pb-2"
-                >
-                  <button
-                    v-for="(item, index) in quickAddItems"
-                    :key="index"
-                    @click="applyQuickAddItem(item)"
-                    class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium text-white"
-                    :class="accentBgClass"
-                  >
-                    {{ item.name }} (Rp {{ formatNumber(item.amount) }})
-                  </button>
-                </div>
-                <!-- End Quick Add Buttons -->
-                <div class="relative">
-                  <input
-                    v-model="newForm.item"
-                    placeholder="{{ t('itemPlaceholder') }}"
-                    :class="[
-                    'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100',
-                    itemError ? 'border-red-500 ring-1 ring-red-500' : '',
-                  ]"
-                  />
-                  <div
-                    v-if="itemError"
-                    class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
-                  >
-                    <svg
-                      class="h-5 w-5 text-red-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p v-if="itemError" class="text-red-500 text-xs mt-1">
-                  {{ t('itemError') }}
-                </p>
-                <div class="relative">
-                  <div
-                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                  >
-                    <span class="text-gray-500 dark:text-gray-400">Rp</span>
-                  </div>
-                  <input
-                    v-model="newForm.displayAmount"
-                    type="text"
-                    inputmode="numeric"
-                    placeholder="{{ t('amountPlaceholder') }}"
-                    @input="handleAmountInput"
-                    :class="[
-                    'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10',
-                    amountError ? 'border-red-500 ring-1 ring-red-500' : '',
-                  ]"
-                  />
-                  <div
-                    v-if="amountError"
-                    class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
-                  >
-                    <svg
-                      class="h-5 w-5 text-red-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p v-if="amountError" class="text-red-500 text-xs mt-1">
-                  {{ t('amountError') }}
-                </p>
-                <input
-                  v-model="newForm.store"
-                  placeholder="Toko"
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                />
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('selectCategory') }}
-                </div>
-                <div class="flex flex-wrap gap-2 items-center">
-                  <label
-                    v-for="category in categories"
-                    :key="category"
-                    class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                  >
-                    <input
-                      type="radio"
-                      name="category"
-                      :value="category"
-                      v-model="newForm.category"
-                      class=""
-                    />
-                    <span class="text-sm">{{ category }}</span>
-                  </label>
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('selectPaymentSource') }}
-                </div>
-                <div class="flex flex-wrap gap-2 items-center">
-                  <label
-                    v-for="source in paymentSources"
-                    :key="source"
-                    class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                  >
-                    <input
-                      type="radio"
-                      name="payment_source"
-                      :value="source"
-                      v-model="newForm.payment_source"
-                      class=""
-                    />
-                    <span class="text-sm">{{ source }}</span>
-                  </label>
-                </div>
-                <button
-                  :class="['w-full py-2 rounded text-white', accentBgClass]"
-                >
-                  {{ t('save') }}
-                </button>
-              </form>
-            </section>
-          </main>
-        </transition>
-
-        <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='detail'" class="space-y-4">
-            <section
-              v-if="selectedExpense"
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
-            >
-              <div class="flex items-center justify-between">
-                <h2 class="font-semibold text-gray-900 dark:text-gray-100">
-                  {{ t('expenseDetail') }}
-                </h2>
-                <button
-                  @click="changeTab('home')"
-                  class="text-gray-500 dark:text-gray-400"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('item') }}
-                </div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ selectedExpense.item }}
-                </div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('amount') }}
-                </div>
-                <div
-                  class="text-sm font-semibold text-gray-900 dark:text-gray-100"
-                >
-                  Rp {{ formatNumber(toNumber(selectedExpense.amount)) }}
-                </div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">Toko</div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ selectedExpense.store }}
-                </div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('category') }}
-                </div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ selectedExpense.category }}
-                </div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('paymentSource') }}
-                </div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ selectedExpense.payment_source }}
-                </div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('date') }}
-                </div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ selectedExpense.date }}
-                </div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('time') }}
-                </div>
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ selectedExpense.input_date }} {{ selectedExpense.input_time
-                  }}
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <button
-                  @click="editExpense(selectedExpense)"
-                  :class="['w-full py-2 rounded text-white', accentBgClass]"
-                >
-                  {{ t('edit') }}
-                </button>
-                <button
-                  @click="deleteExpense(selectedExpense._id)"
-                  class="w-full py-2 rounded bg-red-600 text-white"
-                >
-                  {{ t('delete') }}
-                </button>
-              </div>
-            </section>
-
-            <div
-              v-else
-              class="text-center text-gray-500 dark:text-gray-400 pt-4"
-            >
-              {{ t('noExpenseSelected') }}
-            </div>
-          </main>
-        </transition>
-
-        <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='edit'" class="space-y-4">
-            <section
-              v-if="selectedExpense"
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow"
-            >
-              <form @submit.prevent="submitEdit" class="space-y-3">
+          <transition name="fade" mode="out-in">
+            <main v-if="currentTab==='payment-source'" class="space-y-4">
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3 mb-6"
+              >
                 <div class="flex items-center justify-between">
-                  <h2 class="font-semibold text-gray-900 dark:text-gray-100">
-                    {{ t('editExpense') }}
+                  <h2
+                    class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+                  >
+                    {{ t('managePaymentSourcesTitle') }}
                   </h2>
                   <button
-                    @click="changeTab('detail')"
+                    @click="changeTab('settings')"
                     class="text-gray-500 dark:text-gray-400"
                   >
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
-                <div class="flex justify-between items-center mb-2">
-                  <button
-                    type="button"
-                    @click="currentMonth--"
-                    class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                  >
-                    <i class="fas fa-chevron-left"></i>
-                  </button>
-                  <span
-                    class="font-semibold text-lg text-gray-500 dark:text-gray-400"
-                    >{{ monthName }} {{ currentYear }}</span
-                  >
-                  <button
-                    type="button"
-                    @click="currentMonth++"
-                    class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                  >
-                    <i class="fas fa-chevron-right"></i>
-                  </button>
-                </div>
-                <div class="grid grid-cols-7 gap-1 text-center text-sm">
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[0] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[1] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[2] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[3] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[4] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[5] }}</div>
-                  <div class="text-gray-500 dark:text-gray-400">{{ t('dayNames')[6] }}</div>
-                  <template v-for="day in calendarDays">
-                    <div
-                      v-if="day"
-                      :key="`${currentYear}-${currentMonth}-${day}`"
-                      @click="selectDayEdit(day)"
-                      :class="[
-                        'p-2 rounded-full cursor-pointer',
-                        selectedExpense.date === new Date(currentYear, currentMonth, day).toISOString().slice(0, 10)
-                          ? accentBgClass + ' text-white'
-                          : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400',
-                      ]"
-                    >
-                      {{ day }}
-                    </div>
-                    <div v-else class="p-2"></div>
-                  </template>
-                </div>
-                <div class="relative">
+                <form @submit.prevent="savePaymentSource" class="space-y-3">
                   <input
-                    v-model="selectedExpense.item"
-                    placeholder="{{ t('itemPlaceholder') }}"
-                    :class="[
-                    'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100',
-                    itemError ? 'border-red-500 ring-1 ring-red-500' : '',
-                  ]"
-                  />
-                  <div
-                    v-if="itemError"
-                    class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
-                  >
-                    <svg
-                      class="h-5 w-5 text-red-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p v-if="itemError" class="text-red-500 text-xs mt-1">
-                  {{ t('itemError') }}
-                </p>
-                <div class="relative">
-                  <div
-                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                  >
-                    <span class="text-gray-500 dark:text-gray-400">Rp</span>
-                  </div>
-                  <input
-                    v-model="selectedExpense.displayAmount"
                     type="text"
-                    inputmode="numeric"
-                    placeholder="{{ t('amountPlaceholder') }}"
-                    @input="handleEditAmountInput"
-                    :class="[
-                    'p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 pl-10',
-                    amountError ? 'border-red-500 ring-1 ring-red-500' : '',
-                  ]"
+                    v-model="newPaymentSourceName"
+                    placeholder="{{ t('newPaymentSourceNamePlaceholder') }}"
+                    required
+                    class="text-sm p-2 border border-gray-300 rounded-md shadow-sm w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                   />
-                  <div
-                    v-if="amountError"
-                    class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
-                  >
-                    <svg
-                      class="h-5 w-5 text-red-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
+                  <div class="flex space-x-2">
+                    <button
+                      @click="cancelEditPaymentSource"
+                      type="button"
+                      class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
                     >
-                      <path
-                        fill-rule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
+                      {{ t('cancel') }}
+                    </button>
+                    <button
+                      type="submit"
+                      :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
+                    >
+                      <i class="fas fa-save"></i> {{ t('save') }}
+                    </button>
                   </div>
-                </div>
-                <p v-if="amountError" class="text-red-500 text-xs mt-1">
-                  {{ t('amountError') }}
-                </p>
-                <input
-                  v-model="selectedExpense.store"
-                  placeholder="Toko"
-                  class="p-2 border rounded w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                />
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('category') }}
-                </div>
-                <div class="flex flex-wrap gap-2 items-center">
-                  <label
-                    v-for="category in categories"
-                    :key="category"
-                    class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                  >
-                    <input
-                      type="radio"
-                      name="category"
-                      :value="category"
-                      v-model="selectedExpense.category"
-                      class=""
-                    />
-                    <span class="text-sm">{{ category }}</span>
-                  </label>
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('paymentSource') }}
-                </div>
-                <div class="flex flex-wrap gap-2 items-center">
-                  <label
+                </form>
+              </div>
+
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
+              >
+                <h2
+                  class="text-md font-semibold mb-3 text-gray-800 dark:text-gray-200"
+                >
+                  {{ t('listOfPaymentSources') }}
+                </h2>
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <li
                     v-for="source in paymentSources"
                     :key="source"
-                    class="flex items-center gap-2 p-2 border rounded cursor-pointer dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                    @click="editPaymentSource(source)"
+                    class="flex items-center justify-between py-2"
                   >
-                    <input
-                      type="radio"
-                      name="payment_source"
-                      :value="source"
-                      v-model="selectedExpense.payment_source"
-                      class=""
-                    />
-                    <span class="text-sm">{{ source }}</span>
-                  </label>
-                </div>
-                <button
-                  :class="['w-full py-2 rounded text-white', accentBgClass]"
-                >
-                  {{ t('save') }}
-                </button>
-              </form>
-            </section>
-            <div
-              v-else
-              class="text-center text-gray-500 dark:text-gray-400 pt-4"
-            >
-              {{ t('noExpenseSelected') }}
-            </div>
-          </main>
-        </transition>
-
-        <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='settings'" class="space-y-4">
-            <section
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
-            >
-              <div class="flex items-center gap-3">
-                <img
-                  :src="user.photo"
-                  alt="user"
-                  class="w-12 h-12 rounded-full object-cover"
-                />
-                <div>
-                  <div class="font-semibold text-gray-900 dark:text-gray-100">
-                    {{ user.name }}
-                  </div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">
-                    Level {{ user.level }}
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section
-              class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
-            >
-              <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                <li class="flex items-center justify-between py-3">
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('theme') }}</span
-                  >
-                  <label
-                    class="relative inline-flex items-center cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      v-model="darkMode"
-                      @change="toggleDark"
-                      class="sr-only peer"
-                    />
-                    <div
-                      @click="toggleDark"
-                      class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-                    ></div>
-                  </label>
-                </li>
-                <li class="flex items-center justify-between py-3">
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('accentColor') }}</span
-                  >
-                  <select
-                    v-model="tone"
-                    :class="['px-1.5 py-1 border rounded text-white', accentBgClass]"
-                  >
-                    <option value="indigo">Indigo</option>
-                    <option value="blue">Blue</option>
-                    <option value="green">Green</option>
-                    <option value="rose">Rose</option>
-                    <option value="amber">Amber</option>
-                  </select>
-                </li>
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="clearCacheAndReload"
-                >
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('clearCache') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="testNotification"
-                >
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('testNotification') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="changeTab('backup-restore')"
-                >
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('backupRestore') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-              </ul>
-            </section>
-
-            <section
-              class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
-            >
-              <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="changeTab('category')"
-                >
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('manageCategories') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="changeTab('payment-source')"
-                >
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('managePaymentSources') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="changeTab('quick-add')"
-                >
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('quickAddItems') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-              </ul>
-            </section>
-
-            <section
-              class="bg-white dark:bg-gray-800 rounded-xl px-4 shadow space-y-3 mt-4"
-            >
-              <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="action('profil')"
-                >
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('manageProfile') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="action('lupa')"
-                >
-                  <span class="text-gray-900 dark:text-gray-100"
-                    >{{ t('forgotPassword') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-                <li
-                  class="flex items-center justify-between py-3"
-                  @click="action('logout')"
-                >
-                  <span class="text-red-600 hover:underline dark:text-red-400"
-                    >{{ t('logout') }}</span
-                  >
-                  <i class="fas fa-chevron-right text-gray-400"></i>
-                </li>
-              </ul>
-            </section>
-          </main>
-        </transition>
-
-        <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='category'" class="space-y-4">
-            <div
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
-            >
-              <div class="flex items-center justify-between">
-                <h2
-                  class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
-                >
-                  {{ t('manageCategoriesTitle') }}
-                </h2>
-                <button
-                  @click="changeTab('settings')"
-                  class="text-gray-500 dark:text-gray-400"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <form @submit.prevent="saveCategory" class="space-y-3">
-                <input
-                  type="text"
-                  v-model="newCategoryName"
-                  placeholder="{{ t('newCategoryNamePlaceholder') }}"
-                  required
-                  class="text-sm p-2 border border-gray-300 rounded-md shadow-sm w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                />
-                <div class="flex space-x-2">
-                  <button
-                    @click="cancelEditCategory"
-                    type="button"
-                    class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
-                  >
-                    {{ t('cancel') }}
-                  </button>
-                  <button
-                    type="submit"
-                    :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
-                  >
-                    <i class="fas fa-save"></i> {{ t('save') }}
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <div
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
-            >
-              <h2
-                class="text-md font-semibold mb-3 text-gray-800 dark:text-gray-200"
-              >
-                {{ t('manageCategoriesListTitle') }}
-              </h2>
-              <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                <li
-                  v-for="category in categories"
-                  :key="category"
-                  @click="editCategory(category)"
-                  class="flex items-center justify-between py-2"
-                >
-                  <span class="text-sm text-gray-900 dark:text-gray-100"
-                    >{{ category }}</span
-                  >
-                  <div class="flex gap-2">
+                    <span class="text-sm text-gray-900 dark:text-gray-100"
+                      >{{ source }}</span
+                    >
                     <button
-                      @click="deleteCategoryConfirm(category)"
+                      @click="deletePaymentSourceConfirm(source)"
                       class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
                     >
                       <i class="fas fa-trash"></i>
                     </button>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </main>
-        </transition>
-
-        <transition name="fade" mode="out-in">
-          <main v-if="currentTab==='payment-source'" class="space-y-4">
-            <div
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3 mb-6"
-            >
-              <div class="flex items-center justify-between">
-                <h2
-                  class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
-                >
-                  {{ t('managePaymentSourcesTitle') }}
-                </h2>
-                <button
-                  @click="changeTab('settings')"
-                  class="text-gray-500 dark:text-gray-400"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
+                  </li>
+                </ul>
               </div>
-              <form @submit.prevent="savePaymentSource" class="space-y-3">
-                <input
-                  type="text"
-                  v-model="newPaymentSourceName"
-                  placeholder="{{ t('newPaymentSourceNamePlaceholder') }}"
-                  required
-                  class="text-sm p-2 border border-gray-300 rounded-md shadow-sm w-full dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-                />
-                <div class="flex space-x-2">
-                  <button
-                    @click="cancelEditPaymentSource"
-                    type="button"
-                    class="text-sm w-full py-2 rounded text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 mt-2"
-                  >
-                    {{ t('cancel') }}
-                  </button>
-                  <button
-                    type="submit"
-                    :class="['text-sm w-full py-2 rounded text-white mt-2', accentBgClass]"
-                  >
-                    <i class="fas fa-save"></i> {{ t('save') }}
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <div
-              class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3"
-            >
-              <h2
-                class="text-md font-semibold mb-3 text-gray-800 dark:text-gray-200"
-              >
-                {{ t('listOfPaymentSources') }}
-              </h2>
-              <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                <li
-                  v-for="source in paymentSources"
-                  :key="source"
-                  @click="editPaymentSource(source)"
-                  class="flex items-center justify-between py-2"
-                >
-                  <span class="text-sm text-gray-900 dark:text-gray-100"
-                    >{{ source }}</span
-                  >
-                  <button
-                    @click="deletePaymentSourceConfirm(source)"
-                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
-                  >
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </main>
-        </transition>
+            </main>
+          </transition>
       </div>
 
+      <!-- Bottom Navigation - Login/Signup -->
       <nav
+        v-if="!isAuthenticated"
+        class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+      >
+        <div class="max-w-xl mx-auto grid grid-cols-2">
+          <button
+            @click="changeTab('login', false)"
+            :class="['py-3 text-sm flex flex-col items-center', currentTab==='login' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
+          >
+            <i class="fas fa-sign-in-alt text-lg"></i><span>{{ t('login') }}</span>
+          </button>
+          <button
+            @click="changeTab('signup', false)"
+            :class="['py-3 text-sm flex flex-col items-center', currentTab==='signup' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
+          >
+            <i class="fas fa-user-plus text-lg"></i><span>{{ t('signup') }}</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Bottom Navigation - Authenticated -->
+      <nav
+        v-if="isAuthenticated"
         class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
       >
         <div class="max-w-xl mx-auto grid grid-cols-3">
@@ -1279,7 +1652,7 @@
           </button>
           <button
             @click="changeTab('settings', false)"
-            :class="['py-3 text-sm flex flex-col items-center', currentTab==='settings' || currentTab==='payment-source' || currentTab==='category' || currentTab==='backup-restore' || currentTab==='quick-add'   ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
+            :class="['py-3 text-sm flex flex-col items-center', currentTab==='settings' || currentTab==='payment-source' || currentTab==='category' || currentTab==='backup-restore' || currentTab==='quick-add' || currentTab==='profile' || currentTab==='change-password' ? accentTextClass : 'text-gray-600 dark:text-gray-300']"
           >
             <i class="fas fa-cog text-lg"></i><span>{{ t('settings') }}</span>
           </button>

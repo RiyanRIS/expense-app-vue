@@ -1,16 +1,6 @@
 # Aplikasi Pengelola Pengeluaran (Expense App)
 
-Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun dengan Node.js, Express, dan MongoDB sebagai backend, serta Vue.js sebagai frontend. Aplikasi ini juga diimplementasikan sebagai Progressive Web App (PWA) yang dapat di}
-}}}}}}
-```
-
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap dan mendukung fungsionalitas offline.
+Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun dengan Node.js, Express, dan MongoDB sebagai backend, serta Vue.js sebagai frontend. Aplikasi ini juga diimplementasikan sebagai Progressive Web App (PWA) yang dapat digunakan dan mendukung fungsionalitas offline.
 
 ## ✨ Fitur
 

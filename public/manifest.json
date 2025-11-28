@@ -1,43 +1,48 @@
 {
-  "name": "Expense View",
-  "short_name": "ExpenseApp",
-  "description": "A simple expense tracking application",
+  "name": "Expense Tracker - Aplikasi Catatan Pengeluaran",
+  "short_name": "Expense App",
+  "description": "Aplikasi mobile-first untuk mencatat dan mengelola pengeluaran harian Anda",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#4F46E5",
+  "categories": ["finance", "productivity", "lifestyle"],
   "icons": [
     {
       "src": "/icons/icon-192x192.svg",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-512x512.svg",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "+ Pengeluaran Hari Ini",
-      "short_name": "+ Hari Ini",
-      "description": "Tambahkan pengeluaran untuk hari ini",
-      "url": "/#create",
+      "name": "Tambah Pengeluaran",
+      "short_name": "Tambah",
+      "description": "Catat pengeluaran baru",
+      "url": "/#/dashboard",
       "icons": [{"src": "/icons/icon-192x192.svg", "sizes": "192x192"}]
     },
     {
-      "name": "Lihat Laporan Bulanan",
-      "short_name": "Laporan",
-      "description": "Lihat ringkasan pengeluaran bulanan",
-      "url": "/#home",
+      "name": "Quick Add",
+      "short_name": "Quick Add",
+      "description": "Gunakan template quick add",
+      "url": "/#/quick-add",
       "icons": [{"src": "/icons/icon-192x192.svg", "sizes": "192x192"}]
     },
     {
-      "name": "Tambah Kategori",
-      "short_name": "+ Kategori",
-      "description": "Tambahkan kategori pengeluaran baru",
-      "url": "/#category",
+      "name": "Kategori",
+      "short_name": "Kategori",
+      "description": "Kelola kategori pengeluaran",
+      "url": "/#/categories",
       "icons": [{"src": "/icons/icon-192x192.svg", "sizes": "192x192"}]
     }
   ]

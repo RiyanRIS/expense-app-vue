@@ -184,7 +184,7 @@ const validateUpdateCategory = [
     .notEmpty()
     .withMessage('Nama kategori tidak boleh kosong'),
   
-  body('newName')
+  body('name')
     .notEmpty()
     .withMessage('Nama kategori baru tidak boleh kosong')
     .trim()
@@ -243,7 +243,7 @@ const validateUpdatePaymentSource = [
     .notEmpty()
     .withMessage('Nama sumber pembayaran tidak boleh kosong'),
   
-  body('newName')
+  body('name')
     .notEmpty()
     .withMessage('Nama sumber pembayaran baru tidak boleh kosong')
     .trim()

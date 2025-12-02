@@ -18,8 +18,11 @@ const { logger } = require('../config/logger');
  */
 exports.getAllExpenses = asyncHandler(async (req, res) => {
   const expenses = await Expense.find({ user: req.userId }).sort({ _id: -1 }).limit(200);
-  logger.info('Fetched expenses', { count: expenses.length, userId: req.userId });
-  res.json(expenses);
+  res.json({
+    success: true, 
+    count: expenses.length, 
+    expenses: expenses
+  })
 });
 
 /**

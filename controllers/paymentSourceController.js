@@ -18,7 +18,11 @@ const { logger } = require('../config/logger');
  */
 exports.getAllPaymentSources = asyncHandler(async (req, res) => {
   const paymentSources = await PaymentSource.find({ user: req.userId });
-  res.json(paymentSources);
+  res.json({
+    success: true,
+    count: paymentSources.length,
+    paymentSources: paymentSources
+  });
 });
 
 /**
@@ -53,7 +57,7 @@ exports.createPaymentSource = asyncHandler(async (req, res) => {
  */
 exports.updatePaymentSource = asyncHandler(async (req, res) => {
   const { name } = req.params;
-  const { newName } = req.body;
+  const { name: newName } = req.body;
   
   if (!newName) {
     throw new ValidationError("New payment source name is required");

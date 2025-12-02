@@ -18,7 +18,11 @@ const { logger } = require('../config/logger');
  */
 exports.getAllCategories = asyncHandler(async (req, res) => {
   const categories = await Category.find({ user: req.userId });
-  res.json(categories);
+  res.json({
+    success: true,
+    count: categories.length,
+    categories: categories
+  });
 });
 
 /**
@@ -53,7 +57,7 @@ exports.createCategory = asyncHandler(async (req, res) => {
  */
 exports.updateCategory = asyncHandler(async (req, res) => {
   const { name } = req.params;
-  const { newName } = req.body;
+  const { name: newName } = req.body;
   
   if (!newName) {
     throw new ValidationError("New category name is required");

@@ -135,7 +135,7 @@ const QuickAddView = {
               :key="item._id"
               class="px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 active:bg-gray-100 dark:active:bg-gray-700 transition"
             >
-              <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start justify-between gap-3" @click="startEdit(item)">
                 <div class="flex-1 min-w-0">
                   <h4 class="text-base font-medium text-gray-900 dark:text-white truncate">
                     {{ item.name }}
@@ -159,27 +159,47 @@ const QuickAddView = {
 
                 <div class="flex flex-col gap-2">
                   <button
-                    @click="useQuickAdd(item)"
-                    class="px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 active:scale-95 transition-transform whitespace-nowrap"
-                    :title="t('useTemplate') || 'Gunakan Template'"
-                  >
-                    <i class="fas fa-plus mr-1"></i>
-                    {{ t('use') || 'Gunakan' }}
-                  </button>
-                  <button
-                    @click="startEdit(item)"
-                    class="w-10 h-10 flex items-center justify-center text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg active:scale-95 transition"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    @click="handleDelete(item)"
+                    @click="showDeleteModal(item)"
                     class="w-10 h-10 flex items-center justify-center text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg active:scale-95 transition"
                   >
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div 
+          v-if="showDeleteConfirmation" 
+          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          @click.self="cancelDelete"
+        >
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full mx-4 transform transition-all">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                {{ t('confirmDelete') || 'Konfirmasi Hapus' }}
+              </h3>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+              <button
+                @click="cancelDelete"
+                class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-transform"
+              >
+                {{ t('cancel') || 'Batal' }}
+              </button>
+              <button
+                @click="confirmDelete"
+                :disabled="deleting"
+                class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 active:scale-95 transition-transform"
+              >
+                {{ deleting ? t('deleting') || 'Menghapus...' : t('delete') || 'Hapus' }}
+              </button>
             </div>
           </div>
         </div>
@@ -201,7 +221,10 @@ const QuickAddView = {
       displayAmount: '',
       editingItem: null,
       loading: false,
-      loadingItems: false
+      loadingItems: false,
+      showDeleteConfirmation: false,
+      itemToDelete: null,
+      deleting: false
     };
   },
 
@@ -211,6 +234,13 @@ const QuickAddView = {
       this.fetchCategories(),
       this.fetchPaymentSources()
     ]);
+    // Add keyboard listener for modal
+    document.addEventListener('keydown', this.handleKeydown);
+  },
+
+  beforeUnmount() {
+    // Clean up keyboard listener
+    document.removeEventListener('keydown', this.handleKeydown);
   },
 
   methods: {
@@ -313,48 +343,47 @@ const QuickAddView = {
       this.displayAmount = '';
     },
 
-    async handleDelete(item) {
-      const confirmed = confirm(this.t('confirmDeleteQuickAddItem'));
-      if (!confirmed) return;
+    showDeleteModal(item) {
+      this.itemToDelete = item;
+      this.showDeleteConfirmation = true;
+    },
+
+    cancelDelete() {
+      this.showDeleteConfirmation = false;
+      this.itemToDelete = null;
+      this.deleting = false;
+    },
+
+    async confirmDelete() {
+      if (!this.itemToDelete) return;
+
+      this.deleting = true;
 
       try {
-        await apiClient.quickAddItems.delete(item._id);
+        await apiClient.quickAddItems.delete(this.itemToDelete._id);
+        this.resetForm();
         this.$root.showNotification(this.t('quickAddItemDeletedSuccessfully'), 'success');
         await this.fetchQuickAddItems();
+        this.cancelDelete();
       } catch (error) {
         this.$root.showNotification(
           error.message || this.t('failedToDeleteQuickAddItem'),
           'error'
         );
+        this.deleting = false;
       }
     },
 
-    async useQuickAdd(item) {
-      // Create expense from quick add template
-      try {
-        const expenseData = {
-          date: new Date().toISOString().slice(0, 10),
-          item: item.name,
-          amount: item.amount,
-          category: item.category,
-          payment_source: item.paymentSource,
-          store: ''
-        };
+    async handleDelete(item) {
+      // Legacy method - now redirects to modal
+      this.showDeleteModal(item);
+    },
 
-        await apiClient.expenses.create(expenseData);
-        this.$root.showNotification(
-          this.t('expenseCreatedFromTemplate') || 'Pengeluaran berhasil dibuat dari template!',
-          'success'
-        );
-        
-        // Redirect to dashboard
-        this.$router.push('/dashboard');
-      } catch (error) {
-        this.$root.showNotification(
-          error.message || this.t('failedToCreateExpense') || 'Gagal membuat pengeluaran',
-          'error'
-        );
+    handleKeydown(event) {
+      // Close modal on ESC key
+      if (event.key === 'Escape' && this.showDeleteConfirmation) {
+        this.cancelDelete();
       }
-    }
+    },
   }
 };

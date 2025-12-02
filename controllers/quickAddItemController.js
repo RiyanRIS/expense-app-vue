@@ -18,7 +18,11 @@ const { logger } = require('../config/logger');
  */
 exports.getAllQuickAddItems = asyncHandler(async (req, res) => {
   const quickAddItems = await QuickAddItem.find({ user: req.userId });
-  res.json(quickAddItems);
+  res.json({
+    success: true,
+    count: quickAddItems.length,
+    quickAddItems: quickAddItems
+  });
 });
 
 /**

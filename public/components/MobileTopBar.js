@@ -82,7 +82,7 @@ const MobileTopBar = {
                 class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors"
               >
                 <i class="fas fa-bolt w-5 text-gray-600 dark:text-gray-400"></i>
-                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ t('quickAdd') }}</span>
+                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ t('quickAddTitle') }}</span>
               </router-link>
 
               <router-link
@@ -91,7 +91,7 @@ const MobileTopBar = {
                 class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors"
               >
                 <i class="fas fa-tags w-5 text-gray-600 dark:text-gray-400"></i>
-                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ t('categories') }}</span>
+                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ t('categoriesTitle') }}</span>
               </router-link>
 
               <router-link
@@ -100,7 +100,7 @@ const MobileTopBar = {
                 class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors"
               >
                 <i class="fas fa-credit-card w-5 text-gray-600 dark:text-gray-400"></i>
-                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ t('paymentSources') }}</span>
+                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ t('paymentSourcesTitle') }}</span>
               </router-link>
 
               <router-link
@@ -144,9 +144,9 @@ const MobileTopBar = {
       const titles = {
         '/dashboard': this.t('home'),
         '/profile': this.t('profile'),
-        '/categories': this.t('categories'),
-        '/payment-sources': this.t('paymentSources'),
-        '/quick-add': this.t('quickAdd'),
+        '/categories': this.t('categoriesTitle'),
+        '/payment-sources': this.t('paymentSourcesTitle'),
+        '/quick-add': this.t('quickAddTitle'),
         '/settings': this.t('settings')
       };
       return titles[this.$route.path] || this.t('appName') || 'Expense';
@@ -174,11 +174,7 @@ const MobileTopBar = {
     },
 
     goBack() {
-      if (window.history.length > 1) {
-        this.$router.back();
-      } else {
-        this.$router.push('/dashboard');
-      }
+      this.$router.push('/dashboard');
     },
 
     toggleDarkMode() {

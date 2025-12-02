@@ -36,6 +36,19 @@ const ProfileView = {
               </button>
             </div>
 
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {{ t('email') }}
+              </label>
+              <input
+                v-model="profileForm.email"
+                type="email"
+                disabled
+                class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed"
+                :placeholder="t('emailPlaceholder')"
+              />
+            </div>
+
               <!-- Name -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -251,6 +264,7 @@ const ProfileView = {
   data() {
     return {
       profileForm: {
+        email: '',
         name: '',
         avatar: ''
       },
@@ -287,6 +301,7 @@ const ProfileView = {
 
     loadUserData() {
       if (this.$root.currentUser) {
+        this.profileForm.email = this.$root.currentUser.email;
         this.profileForm.name = this.$root.currentUser.name;
         this.profileForm.avatar = this.$root.currentUser.avatar || '';
       }

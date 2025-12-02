@@ -369,6 +369,40 @@ const DashboardView = {
         </div>
       </transition>
 
+      <!-- Delete Confirmation Modal -->
+      <div 
+        v-if="showDeleteConfirmation" 
+        class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black bg-opacity-50"
+        @click.self="cancelDelete"
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full mx-4 transform transition-all">
+          <!-- Modal Header -->
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+              <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+              {{ t('confirmDelete') || 'Konfirmasi Hapus' }}
+            </h3>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+            <button
+              @click="cancelDelete"
+              class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-transform"
+            >
+              {{ t('cancel') || 'Batal' }}
+            </button>
+            <button
+              @click="confirmDelete"
+              :disabled="deleting"
+              class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 active:scale-95 transition-transform"
+            >
+              {{ deleting ? t('deleting') || 'Menghapus...' : t('delete') || 'Hapus' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <mobile-bottom-nav v-if="!showExpenseModal"></mobile-bottom-nav>
     </div>
   `,
@@ -393,6 +427,9 @@ const DashboardView = {
       lastBackPress: 0,
       backPressTimeout: null,
       displayAmount: '',
+      showDeleteConfirmation: false,
+      expenseToDelete: null,
+      deleting: false,
       formData: {
         item: '',
         amount: '',
@@ -539,11 +576,15 @@ const DashboardView = {
     
     // Handle browser back button
     this.setupBackButtonHandler();
+    
+    // Add keyboard listener for modal
+    document.addEventListener('keydown', this.handleKeydown);
   },
 
   beforeUnmount() {
     // Clean up event listeners
     window.removeEventListener('popstate', this.handleBackButton);
+    document.removeEventListener('keydown', this.handleKeydown);
     this.$root.$off('show-add-expense');
     
     if (this.backPressTimeout) {
@@ -698,9 +739,8 @@ const DashboardView = {
       if (this.swipeOffset < -60) {
         // Delete expense
         const expense = this.expenses.find(e => e._id === this.swipedExpense);
-        if (expense && confirm(this.t('confirmDelete'))) {
-          this.deleteExpense(expense);
-        }
+        if (!expense) return;
+        this.deleteExpense(expense);
       }
       
       this.swipedExpense = null;
@@ -812,26 +852,44 @@ const DashboardView = {
 
     async deleteCurrentExpense() {
       if (!this.selectedExpense) return;
-      
-      if (confirm(this.t('confirmDelete'))) {
-        try {
-          await apiClient.expenses.delete(this.selectedExpense._id);
-          await this.loadData();
-          this.$root.showNotification(this.t('expenseDeleted'), 'success');
-          this.closeExpenseModal();
-        } catch (error) {
-          this.$root.showNotification(error.message, 'error');
-        }
-      }
+      this.showDeleteModal(this.selectedExpense);
     },
 
     async deleteExpense(expense) {
+      // Legacy method - now redirects to modal
+      this.showDeleteModal(expense);
+    },
+
+    showDeleteModal(expense) {
+      this.expenseToDelete = expense;
+      this.showDeleteConfirmation = true;
+    },
+
+    cancelDelete() {
+      this.showDeleteConfirmation = false;
+      this.expenseToDelete = null;
+      this.deleting = false;
+    },
+
+    async confirmDelete() {
+      if (!this.expenseToDelete) return;
+
+      this.deleting = true;
+
       try {
-        await apiClient.expenses.delete(expense._id);
+        await apiClient.expenses.delete(this.expenseToDelete._id);
+        
+        // Close expense modal if it's open and we're deleting the current expense
+        if (this.selectedExpense && this.selectedExpense._id === this.expenseToDelete._id) {
+          this.closeExpenseModal();
+        }
+        
         await this.loadData();
         this.$root.showNotification(this.t('expenseDeleted'), 'success');
+        this.cancelDelete();
       } catch (error) {
         this.$root.showNotification(error.message, 'error');
+        this.deleting = false;
       }
     },
 
@@ -840,6 +898,13 @@ const DashboardView = {
       const expense = this.expenses.find(e => e._id === expenseId);
       if (expense) {
         this.selectExpense(expense);
+      }
+    },
+
+    handleKeydown(event) {
+      // Close delete modal on ESC key
+      if (event.key === 'Escape' && this.showDeleteConfirmation) {
+        this.cancelDelete();
       }
     }
   }

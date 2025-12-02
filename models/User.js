@@ -108,9 +108,24 @@ UserSchema.pre('save', async function(next) {
  */
 UserSchema.methods.comparePassword = async function(candidatePassword) {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    // Strict validation
+    if (!candidatePassword || typeof candidatePassword !== 'string') {
+      return false;
+    }
+
+    if (!this.password || typeof this.password !== 'string') {
+      return false;
+    }
+
+    // CRITICAL: Use bcrypt compare - this is the security boundary
+    const result = await bcrypt.compare(candidatePassword, this.password);
+    
+    // ENSURE we return exactly boolean true or false
+    return result === true;
+    
   } catch (error) {
-    throw new Error('Password comparison failed');
+    // Always return false on error for security
+    return false;
   }
 };
 

@@ -65,6 +65,12 @@ const routes = [
     name: 'Settings',
     component: SettingsView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/reactivate',
+    name: 'Reactivate',
+    component: ReactivateView,
+    meta: { requiresGuest: true }
   }
 ];
 

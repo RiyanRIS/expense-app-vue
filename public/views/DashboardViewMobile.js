@@ -493,26 +493,20 @@ const DashboardViewMobile = {
   watch: {
     '$route.query.action'(newAction) {
       if (newAction === 'add') {
-        this.openNewExpenseForm();
-        // Clean up the URL
-        this.$router.replace({ path: '/dashboard' });
+        // Use nextTick to avoid navigation during navigation
+        this.$nextTick(() => {
+          this.openNewExpenseForm();
+          // Clean up the URL without causing navigation loop
+          if (this.$route.query.action) {
+            const query = { ...this.$route.query };
+            delete query.action;
+            this.$router.replace({ path: '/dashboard', query });
+          }
+        });
       }
     },
     
-    // Watch modals to manage browser history
-    showExpenseModal(isOpen) {
-      if (isOpen) {
-        // Push a state when modal opens
-        window.history.pushState({ modal: 'expense' }, '');
-      }
-    },
-    
-    showQuickAddModal(isOpen) {
-      if (isOpen) {
-        // Push a state when modal opens
-        window.history.pushState({ modal: 'quickAdd' }, '');
-      }
-    }
+
   },
 
   async created() {
@@ -520,9 +514,14 @@ const DashboardViewMobile = {
     
     // Check if we should show add form from query parameter
     if (this.$route.query.action === 'add') {
-      this.openNewExpenseForm();
-      // Clean up the URL
-      this.$router.replace({ path: '/dashboard' });
+      // Use nextTick to ensure component is fully mounted
+      this.$nextTick(() => {
+        this.openNewExpenseForm();
+        // Clean up the URL without navigation loop
+        const query = { ...this.$route.query };
+        delete query.action;
+        this.$router.replace({ path: '/dashboard', query });
+      });
     }
     
     // Listen for add expense event from bottom nav (fallback)
@@ -538,8 +537,9 @@ const DashboardViewMobile = {
   },
 
   beforeUnmount() {
-    // Clean up event listener
+    // Clean up event listeners
     window.removeEventListener('popstate', this.handleBackButton);
+    this.$root.$off('show-add-expense');
     
     if (this.backPressTimeout) {
       clearTimeout(this.backPressTimeout);
@@ -587,48 +587,45 @@ const DashboardViewMobile = {
       this.handleBackButton = (event) => {
         // If expense modal is open, close it
         if (this.showExpenseModal) {
-          event.preventDefault();
           this.closeExpenseModal();
           return;
         }
         
         // If quick add modal is open, close it
         if (this.showQuickAddModal) {
-          event.preventDefault();
           this.showQuickAddModal = false;
           return;
         }
         
-        // If no modals open and on dashboard, show exit confirmation
-        const currentTime = Date.now();
-        const timeSinceLastBack = currentTime - this.lastBackPress;
-        
-        if (timeSinceLastBack < 2000) {
-          // Double back press detected - allow exit
-          this.lastBackPress = 0;
-          if (this.backPressTimeout) {
-            clearTimeout(this.backPressTimeout);
-          }
-          // Let the browser handle the back (will exit app if installed as PWA)
-          return;
-        } else {
-          // First back press
-          event.preventDefault();
-          this.lastBackPress = currentTime;
+        // If no modals open and on dashboard, handle exit confirmation
+        if (this.$route.path === '/dashboard') {
+          const currentTime = Date.now();
+          const timeSinceLastBack = currentTime - this.lastBackPress;
           
-          // Show notification
-          this.$root.showNotification(
-            this.t('pressBackAgainToExit') || 'Tekan sekali lagi untuk keluar',
-            'info'
-          );
-          
-          // Reset after 2 seconds
-          this.backPressTimeout = setTimeout(() => {
+          if (timeSinceLastBack < 2000) {
+            // Double back press detected - allow exit
             this.lastBackPress = 0;
-          }, 2000);
-          
-          // Push state back to prevent actual navigation
-          window.history.pushState({ dashboard: true }, '');
+            if (this.backPressTimeout) {
+              clearTimeout(this.backPressTimeout);
+            }
+            // Let the browser handle the back
+            return;
+          } else {
+            // First back press - prevent default
+            event.preventDefault();
+            this.lastBackPress = currentTime;
+            
+            // Show notification
+            this.$root.showNotification(
+              this.t('pressBackAgainToExit') || 'Tekan sekali lagi untuk keluar',
+              'info'
+            );
+            
+            // Reset after 2 seconds
+            this.backPressTimeout = setTimeout(() => {
+              this.lastBackPress = 0;
+            }, 2000);
+          }
         }
       };
       

@@ -1,6 +1,9 @@
 const User = require('../models/User');
 const Category = require('../models/Category');
 const PaymentSource = require('../models/PaymentSource');
+const Expense = require('../models/Expense');
+const QuickAddItem = require('../models/QuickAddItem');
+const PushSubscription = require('../models/PushSubscription');
 const { asyncHandler } = require('../middlewares/errorHandler');
 const {
   ValidationError,
@@ -261,9 +264,13 @@ exports.updateProfile = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.changePassword = asyncHandler(async (req, res) => {
-  const { newPassword, newPasswordConfirm } = req.body;
+  const { oldPassword, newPassword, newPasswordConfirm } = req.body;
 
-  // 1. Validate input
+  // 1. Validate input - OLD PASSWORD IS REQUIRED
+  if (!oldPassword) {
+    throw new ValidationError('Please provide your current password');
+  }
+
   if (!newPassword || !newPasswordConfirm) {
     throw new ValidationError('Please provide new password and confirmation');
   }
@@ -283,13 +290,25 @@ exports.changePassword = asyncHandler(async (req, res) => {
     throw new NotFoundError('User');
   }
 
-  // 3. Check if new password is different from current password
+  // 3. VERIFY OLD PASSWORD FIRST (Most important security check)
+  const isOldPasswordCorrect = await user.comparePassword(oldPassword);
+  
+  if (!isOldPasswordCorrect) {
+    logger.warn('Change password attempt with incorrect current password', {
+      userId: user._id,
+      email: user.email,
+      ip: req.ip
+    });
+    throw new UnauthorizedError('Current password is incorrect');
+  }
+
+  // 4. Check if new password is different from current password
   const isSameAsCurrent = await user.comparePassword(newPassword);
   if (isSameAsCurrent) {
     throw new ValidationError('New password must be different from current password');
   }
 
-  // 4. Check if new password is same as previous password (if exists)
+  // 5. Check if new password is same as previous password (if exists)
   if (user.previousPassword) {
     const bcrypt = require('bcryptjs');
     const isSameAsPrevious = await bcrypt.compare(newPassword, user.previousPassword);
@@ -298,7 +317,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
     }
   }
 
-  // 5. Update password and history
+  // 6. Update password and history
   user.previousPassword = user.password; // Store current password as previous
   user.password = newPassword;
   user.passwordChangedAt = new Date();
@@ -310,7 +329,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
     email: user.email
   });
 
-  // 6. Send new token
+  // 7. Send new token
   sendTokenResponse(user, 200, res, {
     message: 'Password changed successfully'
   });
@@ -451,13 +470,40 @@ exports.deleteAccount = asyncHandler(async (req, res) => {
     throw new UnauthorizedError('Password is incorrect');
   }
 
-  // 4. Soft delete (change status to deleted)
-  user.status = 'deleted';
-  await user.save({ validateBeforeSave: false });
+  // 4. Hard delete - Remove all user data permanently
+  const userId = user._id;
+  const userEmail = user.email;
 
-  logger.warn('User account deleted', {
-    userId: user._id,
-    email: user.email
+  // Delete all user-related data
+  const deletionResults = await Promise.allSettled([
+    // Delete user's expenses
+    Expense.deleteMany({ user: userId }),
+    // Delete user's categories
+    Category.deleteMany({ user: userId }),
+    // Delete user's payment sources
+    PaymentSource.deleteMany({ user: userId }),
+    // Delete user's quick add items
+    QuickAddItem.deleteMany({ user: userId }),
+    // Delete user's push subscriptions (if any)
+    PushSubscription.deleteMany({}), // Note: PushSubscription doesn't have user field, so delete all related to this user's sessions
+    // Finally delete the user account
+    User.findByIdAndDelete(userId)
+  ]);
+
+  // Log deletion results
+  const deletedCounts = {
+    expenses: deletionResults[0].status === 'fulfilled' ? deletionResults[0].value.deletedCount : 0,
+    categories: deletionResults[1].status === 'fulfilled' ? deletionResults[1].value.deletedCount : 0,
+    paymentSources: deletionResults[2].status === 'fulfilled' ? deletionResults[2].value.deletedCount : 0,
+    quickAddItems: deletionResults[3].status === 'fulfilled' ? deletionResults[3].value.deletedCount : 0,
+    pushSubscriptions: deletionResults[4].status === 'fulfilled' ? deletionResults[4].value.deletedCount : 0
+  };
+
+  logger.warn('User account and all data permanently deleted', {
+    userId,
+    email: userEmail,
+    deletedAt: new Date(),
+    deletedData: deletedCounts
   });
 
   // 5. Clear cookie
@@ -514,5 +560,80 @@ exports.getUserStats = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     stats
+  });
+});
+
+/**
+ * @desc    Reactivate suspended account
+ * @route   POST /api/auth/reactivate
+ * @access  Public
+ */
+exports.reactivateAccount = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  logger.info('Reactivate account attempt', { 
+    email: email?.toLowerCase(),
+    hasPassword: !!password,
+    ip: req.ip 
+  });
+
+  // 1. Validate input
+  if (!email || !password) {
+    throw new ValidationError('Please provide email and password');
+  }
+
+  // 2. Find user (including suspended/deleted ones)
+  const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+
+  if (!user) {
+    logger.warn('Reactivation attempt with non-existent email', { email });
+    throw new UnauthorizedError('Invalid email or password');
+  }
+
+  logger.info('User found for reactivation', { 
+    userId: user._id, 
+    currentStatus: user.status,
+    email: user.email 
+  });
+
+  // 3. Check if account can be reactivated
+  if (user.status === 'active') {
+    return res.status(400).json({
+      success: false,
+      message: 'Account is already active'
+    });
+  }
+
+  if (user.status !== 'suspended' && user.status !== 'deleted') {
+    throw new UnauthorizedError('Account cannot be reactivated. Please contact support.');
+  }
+
+  // 4. Verify password
+  const isPasswordCorrect = await user.comparePassword(password);
+
+  if (!isPasswordCorrect) {
+    logger.warn('Reactivation attempt with incorrect password', {
+      userId: user._id,
+      email: user.email
+    });
+    throw new UnauthorizedError('Invalid email or password');
+  }
+
+  // 5. Reactivate account
+  const previousStatus = user.status;
+  user.status = 'active';
+  user.lastLogin = new Date();
+  await user.save({ validateBeforeSave: false });
+
+  logger.info('Account reactivated successfully', {
+    userId: user._id,
+    email: user.email,
+    previousStatus: previousStatus,
+    reactivatedAt: new Date()
+  });
+
+  // 6. Send token response
+  sendTokenResponse(user, 200, res, {
+    message: 'Account reactivated successfully'
   });
 });

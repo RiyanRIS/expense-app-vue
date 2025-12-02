@@ -123,10 +123,19 @@ const apiClient = {
       });
     },
 
-    async deleteAccount() {
+    async deleteAccount(deleteData) {
       return apiClient.request(`${API_BASE_URL}/api/auth/account`, {
         method: 'DELETE',
-        headers: apiClient.getHeaders()
+        headers: apiClient.getHeaders(),
+        body: JSON.stringify(deleteData)
+      });
+    },
+
+    async reactivateAccount(credentials) {
+      return apiClient.request(`${API_BASE_URL}/api/auth/reactivate`, {
+        method: 'POST',
+        headers: apiClient.getHeaders(false),
+        body: JSON.stringify(credentials)
       });
     }
   },

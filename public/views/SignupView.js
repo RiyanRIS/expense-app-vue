@@ -27,9 +27,20 @@ const SignupView = {
                 v-model="form.name"
                 type="text"
                 required
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                autofocus="autofocus"
+                :class="[
+                  'mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none dark:bg-gray-700 dark:text-white',
+                  nameValid === null ? 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500' :
+                  nameValid ? 'border-green-300 focus:ring-green-500 focus:border-green-500' :
+                  'border-red-300 focus:ring-red-500 focus:border-red-500'
+                ]"
                 :placeholder="t('fullNamePlaceholder')"
+                @input="validateName"
+                @blur="validateName"
               />
+              <p v-if="form.name && nameValid === false" class="mt-1 text-xs text-red-500">
+                {{ t('nameRequired') || 'Nama lengkap harus diisi dan minimal 2 karakter' }}
+              </p>
             </div>
 
             <div>
@@ -41,26 +52,52 @@ const SignupView = {
                 v-model="form.email"
                 type="email"
                 required
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                :class="[
+                  'mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none dark:bg-gray-700 dark:text-white',
+                  emailValid === null ? 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500' :
+                  emailValid ? 'border-green-300 focus:ring-green-500 focus:border-green-500' :
+                  'border-red-300 focus:ring-red-500 focus:border-red-500'
+                ]"
                 :placeholder="t('emailPlaceholder')"
+                @input="validateEmail"
+                @blur="validateEmail"
               />
+              <p v-if="form.email && emailValid === false" class="mt-1 text-xs text-red-500">
+                {{ t('emailInvalid') || 'Format email tidak valid' }}
+              </p>
             </div>
 
             <div>
               <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t('password') }}
               </label>
-              <input
-                id="password"
-                v-model="form.password"
-                type="password"
-                required
-                minlength="6"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                placeholder="••••••••"
-              />
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {{ t('passwordRequirement') }}
+              <div class="relative">
+                <input
+                  id="password"
+                  v-model="form.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  required
+                  minlength="6"
+                  :class="[
+                    'mt-1 block w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none dark:bg-gray-700 dark:text-white',
+                    passwordValid === null ? 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500' :
+                    passwordValid ? 'border-green-300 focus:ring-green-500 focus:border-green-500' :
+                    'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  ]"
+                  placeholder="••••••••"
+                  @input="validatePassword"
+                  @blur="validatePassword"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mt-1"
+                >
+                  <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+              </div>
+              <p v-if="form.password && passwordValid === false" class="mt-1 text-xs text-red-500">
+                {{ t('passwordTooShort') || 'Password minimal 6 karakter' }}
               </p>
             </div>
 
@@ -68,21 +105,39 @@ const SignupView = {
               <label for="passwordConfirm" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t('confirmPassword') }}
               </label>
-              <input
-                id="passwordConfirm"
-                v-model="form.passwordConfirm"
-                type="password"
-                required
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                placeholder="••••••••"
-              />
+              <div class="relative">
+                <input
+                  id="passwordConfirm"
+                  v-model="form.passwordConfirm"
+                  :type="showPasswordConfirm ? 'text' : 'password'"
+                  required
+                  :class="[
+                    'mt-1 block w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none dark:bg-gray-700 dark:text-white',
+                    passwordsMatch === null ? 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500' :
+                    passwordsMatch ? 'border-green-300 focus:ring-green-500 focus:border-green-500' :
+                    'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  ]"
+                  placeholder="••••••••"
+                  @input="validatePasswords"
+                />
+                <button
+                  type="button"
+                  @click="showPasswordConfirm = !showPasswordConfirm"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mt-1"
+                >
+                  <i :class="showPasswordConfirm ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+              </div>
+              <p v-if="form.passwordConfirm && passwordsMatch === false" class="mt-1 text-xs text-red-500">
+                {{ t('passwordMismatch') || 'Password tidak cocok' }}
+              </p>
             </div>
           </div>
 
           <button
             type="submit"
-            :disabled="loading"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            :disabled="loading || !isFormValid"
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ loading ? t('creatingAccount') : t('signup') }}
           </button>
@@ -112,8 +167,23 @@ const SignupView = {
         passwordConfirm: ''
       },
       loading: false,
-      error: null
+      error: null,
+      showPassword: false,
+      showPasswordConfirm: false,
+      nameValid: null,
+      emailValid: null,
+      passwordValid: null,
+      passwordsMatch: null
     };
+  },
+
+  computed: {
+    isFormValid() {
+      return this.nameValid === true && 
+             this.emailValid === true && 
+             this.passwordValid === true && 
+             this.passwordsMatch === true;
+    }
   },
 
   methods: {
@@ -121,10 +191,67 @@ const SignupView = {
       return this.$root.t(key);
     },
 
+    validateName() {
+      if (this.form.name === '') {
+        this.nameValid = null;
+        return;
+      }
+      
+      const name = this.form.name.trim();
+      this.nameValid = name.length >= 2;
+    },
+
+    validateEmail() {
+      if (this.form.email === '') {
+        this.emailValid = null;
+        return;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      this.emailValid = emailRegex.test(this.form.email.trim());
+    },
+
+    validatePassword() {
+      if (this.form.password === '') {
+        this.passwordValid = null;
+        this.validatePasswords(); // Update password match status
+        return;
+      }
+      
+      const password = this.form.password.trim();
+      this.passwordValid = password.length >= 6;
+      this.validatePasswords(); // Update password match status
+    },
+
+    validatePasswords() {
+      if (this.form.passwordConfirm === '') {
+        this.passwordsMatch = null;
+        return;
+      }
+      
+      // Trim whitespace untuk memastikan perbandingan yang akurat
+      const password = this.form.password.trim();
+      const passwordConfirm = this.form.passwordConfirm.trim();
+      
+      this.passwordsMatch = password === passwordConfirm;
+    },
+
+    validateAllFields() {
+      this.validateName();
+      this.validateEmail();
+      this.validatePassword();
+      this.validatePasswords();
+      
+      return this.nameValid && this.emailValid && this.passwordValid && this.passwordsMatch;
+    },
+
     async handleSignup() {
-      // Validate passwords match
-      if (this.form.password !== this.form.passwordConfirm) {
-        this.error = this.t('passwordMismatch');
+      // Clear previous error
+      this.error = null;
+      
+      // Validate all fields
+      if (!this.validateAllFields()) {
+        this.error = this.t('formValidationFailed') || 'Mohon periksa kembali semua field';
         return;
       }
 
@@ -133,9 +260,10 @@ const SignupView = {
 
       try {
         const response = await apiClient.auth.signup({
-          name: this.form.name,
-          email: this.form.email,
-          password: this.form.password
+          name: this.form.name.trim(),
+          email: this.form.email.trim(),
+          password: this.form.password.trim(),
+          passwordConfirm: this.form.passwordConfirm.trim()
         });
         
         // Store token and user data

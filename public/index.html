@@ -76,12 +76,37 @@
       .active\:scale-95:active {
         transform: scale(0.95);
       }
+
+      /* Notification Transitions - Enhanced */
+      .fade-enter-active {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .fade-leave-active {
+        transition: all 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+      }
+      .fade-enter-from {
+        transform: translateY(-20px) scale(0.9);
+        opacity: 0;
+      }
+      .fade-leave-to {
+        transform: translateY(-10px) scale(0.95);
+        opacity: 0;
+      }
+      .fade-move {
+        transition: transform 0.3s ease;
+      }
+      
+      /* Mobile notification adjustments */
+      @media (max-width: 640px) {
+        .fade-enter-from {
+          transform: translateY(-15px) scale(0.95);
+        }
+      }
     </style>
   </head>
   <body>
     <div id="app">
-      <!-- Router View - All pages will be rendered here -->
-      <router-view></router-view>
+      <!-- Vue app will render here -->
     </div>
 
     <!-- Vue Router CDN -->
@@ -100,6 +125,7 @@
     <script src="views/SignupView.js"></script>
     <script src="views/ForgotPasswordView.js"></script>
     <script src="views/ResetPasswordView.js"></script>
+    <script src="views/ReactivateView.js"></script>
     <script src="views/DashboardViewMobile.js"></script>
     <script src="views/ProfileView.js"></script>
     <script src="views/CategoriesView.js"></script>

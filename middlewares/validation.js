@@ -35,7 +35,7 @@ const validateCreateExpense = [
     .withMessage('Nama toko maksimal 200 karakter')
     .escape(),
   
-  body('item')
+  body('name')
     .optional()
     .trim()
     .isLength({ max: 200 })
@@ -307,20 +307,27 @@ const validateCreateQuickAddItem = [
     }),
 
   body('category')
-    .notEmpty()
-    .withMessage('Kategori tidak boleh kosong')
+    .optional()
     .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage('Kategori harus antara 1-100 karakter')
     .escape(),
 
-  body('paymentSource')
-    .notEmpty()
-    .withMessage('Sumber pembayaran tidak boleh kosong')
+  body('payment_source')
+    .optional()
     .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage('Sumber pembayaran harus antara 1-100 karakter')
     .escape(),
+
+  body('store')
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('Nama toko maksimal 200 karakter')
+    .escape()
+    .custom((value) => {
+      if (value && /<script|javascript:|on\w+=/i.test(value)) {
+        throw new Error('Nama toko mengandung karakter yang tidak diizinkan');
+      }
+      return true;
+    }),
 
   handleValidationErrors
 ];
@@ -365,21 +372,26 @@ const validateUpdateQuickAddItem = [
 
   body('category')
     .optional()
-    .notEmpty()
-    .withMessage('Kategori tidak boleh kosong')
     .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage('Kategori harus antara 1-100 karakter')
     .escape(),
 
-  body('paymentSource')
+  body('payment_source')
     .optional()
-    .notEmpty()
-    .withMessage('Sumber pembayaran tidak boleh kosong')
     .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage('Sumber pembayaran harus antara 1-100 karakter')
     .escape(),
+
+  body('store')
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('Nama toko maksimal 200 karakter')
+    .escape()
+    .custom((value) => {
+      if (value && /<script|javascript:|on\w+=/i.test(value)) {
+        throw new Error('Nama toko mengandung karakter yang tidak diizinkan');
+      }
+      return true;
+    }),
 
   handleValidationErrors
 ];

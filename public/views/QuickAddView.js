@@ -31,7 +31,6 @@ const QuickAddView = {
                 <input
                   v-model="itemForm.name"
                   type="text"
-                  required
                   class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                   :placeholder="t('itemPlaceholder')"
                 />
@@ -46,7 +45,6 @@ const QuickAddView = {
                   v-model="displayAmount"
                   @input="handleAmountInput"
                   type="text"
-                  required
                   class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                   :placeholder="t('amountPlaceholder')"
                 />
@@ -59,7 +57,6 @@ const QuickAddView = {
                 </label>
                 <select
                   v-model="itemForm.category"
-                  required
                   class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                 >
                   <option value="">{{ t('selectCategory') }}</option>
@@ -75,8 +72,7 @@ const QuickAddView = {
                   {{ t('paymentSource') }}
                 </label>
                 <select
-                  v-model="itemForm.paymentSource"
-                  required
+                  v-model="itemForm.payment_source"
                   class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                 >
                   <option value="">{{ t('selectPaymentSource') }}</option>
@@ -84,6 +80,19 @@ const QuickAddView = {
                     {{ source.name }}
                   </option>
                 </select>
+              </div>
+
+              <!-- Store -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {{ t('store') || 'Toko' }}
+                </label>
+                <input
+                  v-model="itemForm.store"
+                  type="text"
+                  class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
+                  :placeholder="t('storePlaceholder') || 'Masukkan nama toko (opsional)'"
+                />
               </div>
             </div>
 
@@ -144,14 +153,18 @@ const QuickAddView = {
                     <div class="font-semibold text-red-600 dark:text-red-400">
                       Rp {{ formatAmount(item.amount) }}
                     </div>
-                    <div class="flex items-center gap-3">
-                      <span class="flex items-center">
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <span v-if="item.category" class="flex items-center">
                         <i class="fas fa-tag mr-1.5 text-xs"></i>
                         {{ item.category }}
                       </span>
-                      <span class="flex items-center">
+                      <span v-if="item.payment_source" class="flex items-center">
                         <i class="fas fa-credit-card mr-1.5 text-xs"></i>
-                        {{ item.paymentSource }}
+                        {{ item.payment_source }}
+                      </span>
+                      <span v-if="item.store" class="flex items-center">
+                        <i class="fas fa-store mr-1.5 text-xs"></i>
+                        {{ item.store }}
                       </span>
                     </div>
                   </div>
@@ -216,7 +229,8 @@ const QuickAddView = {
         name: '',
         amount: 0,
         category: '',
-        paymentSource: ''
+        payment_source: '',
+        store: ''
       },
       displayAmount: '',
       editingItem: null,
@@ -320,7 +334,8 @@ const QuickAddView = {
         name: item.name,
         amount: item.amount,
         category: item.category,
-        paymentSource: item.paymentSource
+        payment_source: item.payment_source,
+        store: item.store || ''
       };
       this.displayAmount = this.formatAmount(item.amount);
       
@@ -338,7 +353,8 @@ const QuickAddView = {
         name: '',
         amount: 0,
         category: '',
-        paymentSource: ''
+        payment_source: '',
+        store: ''
       };
       this.displayAmount = '';
     },

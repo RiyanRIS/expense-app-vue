@@ -12,11 +12,18 @@ const QuickAddItemSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: true,
+    required: false,
+    default: ''
   },
-  paymentSource: {
+  payment_source: {
     type: String,
-    required: true,
+    required: false,
+    default: ''
+  },
+  store: {
+    type: String,
+    required: false,
+    default: ''
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

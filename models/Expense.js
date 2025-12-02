@@ -1,19 +1,38 @@
 const mongoose = require('mongoose');
 
 const ExpenseSchema = new mongoose.Schema({
-user: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'User',
-  required: true
-},
-date: { type: String, required: true },
-store: { type: String },
-item: { type: String },
-amount: { type: String },
-category: { type: String },
-payment_source: { type: String },
-input_date: { type: String },
-input_time: { type: String }
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  category: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  payment_source: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  store: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  date: { type: String },
+  input_date: { type: String },
+  input_time: { type: String }
 }, { 
   collection: 'expense',
   timestamps: true 

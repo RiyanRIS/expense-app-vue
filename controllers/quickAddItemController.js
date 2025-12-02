@@ -31,7 +31,7 @@ exports.getAllQuickAddItems = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.createQuickAddItem = asyncHandler(async (req, res) => {
-  const { name, amount, category, paymentSource } = req.body;
+  const { name, amount, category, payment_source, store } = req.body;
 
   if (!name || !amount) {
     throw new ValidationError("Name and amount are required");
@@ -46,8 +46,9 @@ exports.createQuickAddItem = asyncHandler(async (req, res) => {
   const newItem = new QuickAddItem({
     name,
     amount,
-    category,
-    paymentSource,
+    category: category || '',
+    payment_source: payment_source || '',
+    store: store || '',
     user: req.userId
   });
 

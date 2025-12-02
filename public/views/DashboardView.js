@@ -80,10 +80,13 @@ const DashboardView = {
             @touchstart="handleTouchStart($event, expense)"
             @touchmove="handleTouchMove"
             @touchend="handleTouchEnd"
-            class="relative"
+            class="relative overflow-hidden rounded-2xl"
           >
-            <!-- Swipe Actions Background -->
-            <div class="absolute inset-0 flex items-center justify-between px-6 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl">
+            <!-- Swipe Actions Background - Only show when swiping -->
+            <div 
+              v-if="swipedExpense === expense._id"
+              class="absolute inset-0 flex items-center justify-between px-6 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl"
+            >
               <i class="fas fa-trash text-white text-xl"></i>
               <i class="fas fa-trash text-white text-xl"></i>
             </div>
@@ -91,7 +94,7 @@ const DashboardView = {
             <!-- Expense Card -->
             <div
               :style="{ transform: swipedExpense === expense._id ? \`translateX(\${swipeOffset}px)\` : '' }"
-              class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-transform"
+              class="relative bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-transform"
               @click="selectExpense(expense)"
             >
               <div class="flex items-start justify-between">
@@ -105,7 +108,7 @@ const DashboardView = {
                     </span>
                   </div>
                   <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
-                    {{ expense.item }}
+                    {{ expense.name }}
                   </h3>
                   <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
                     <span class="flex items-center">
@@ -190,6 +193,9 @@ const DashboardView = {
                 >
                   <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
+                      <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                        {{ item.name }}
+                      </h3>
                       <div class="flex items-center space-x-2 mb-1">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
                           {{ item.category }}
@@ -197,13 +203,10 @@ const DashboardView = {
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
                           {{ item.payment_source }}
                         </span>
+                        <span v-if="item.store" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                          {{ item.store }}
+                        </span>
                       </div>
-                      <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
-                        {{ item.item }}
-                      </h3>
-                      <p v-if="item.store" class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ item.store }}
-                      </p>
                     </div>
                     <div class="ml-4">
                       <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400">
@@ -244,7 +247,7 @@ const DashboardView = {
           <div @click.stop class="relative w-full bg-white dark:bg-gray-800 rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto">
             <!-- Handle Bar -->
             <div class="flex justify-center pt-3 pb-2">
-              <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+              <div @click="closeExpenseModal" class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
             </div>
             
             <!-- Form Content -->
@@ -259,10 +262,10 @@ const DashboardView = {
                   <!-- Item Name -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {{ t('itemPlaceholder') }}
+                      {{ t('item') }}
                     </label>
                     <input
-                      v-model="formData.item"
+                      v-model="formData.name"
                       type="text"
                       :placeholder="t('itemPlaceholder')"
                       class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -273,11 +276,12 @@ const DashboardView = {
                   <!-- Amount -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {{ t('amountPlaceholder') }}
+                      {{ t('amount') }}
                     </label>
                     <input
-                      v-model="formData.amount"
-                      type="number"
+                      v-model="displayAmount"
+                      @input="handleAmountInput"
+                      type="text"
                       :placeholder="t('amountPlaceholder')"
                       class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       required
@@ -300,7 +304,7 @@ const DashboardView = {
                   <!-- Category -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {{ t('selectCategory') }}
+                      {{ t('category') }}
                     </label>
                     <select
                       v-model="formData.category"
@@ -388,6 +392,7 @@ const DashboardView = {
       saving: false,
       lastBackPress: 0,
       backPressTimeout: null,
+      displayAmount: '',
       formData: {
         item: '',
         amount: '',
@@ -555,6 +560,16 @@ const DashboardView = {
       return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
     },
 
+    formatAmount(amount) {
+      return new Intl.NumberFormat('id-ID').format(amount);
+    },
+
+    handleAmountInput(event) {
+      let value = event.target.value.replace(/\D/g, '');
+      this.formData.amount = parseInt(value) || 0;
+      this.displayAmount = this.formatAmount(this.formData.amount);
+    },
+
     formatDate(dateString) {
       const date = new Date(dateString);
       const options = { day: 'numeric', month: 'short', year: 'numeric' };
@@ -695,21 +710,23 @@ const DashboardView = {
     selectExpense(expense) {
       this.selectedExpense = expense;
       this.formData = {
-        item: expense.item,
+        name: expense.name,
         amount: expense.amount,
-        store: expense.store || '',
+        store: expense.store,
         category: expense.category,
         payment_source: expense.payment_source,
         date: expense.date
       };
+      this.displayAmount = this.formatAmount(expense.amount);
       this.showExpenseModal = true;
     },
 
     closeExpenseModal() {
       this.showExpenseModal = false;
       this.selectedExpense = null;
+      this.displayAmount = '';
       this.formData = {
-        item: '',
+        name: '',
         amount: '',
         store: '',
         category: '',
@@ -734,8 +751,9 @@ const DashboardView = {
 
     openNewExpenseForm() {
       this.selectedExpense = null;
+      this.displayAmount = '';
       this.formData = {
-        item: '',
+        name: '',
         amount: '',
         store: '',
         category: '',
@@ -749,11 +767,11 @@ const DashboardView = {
       this.saving = true;
       try {
         const expenseData = {
-          item: quickItem.item,
+          name: quickItem.name,
           amount: parseFloat(quickItem.amount),
           store: quickItem.store || '',
-          category: quickItem.category,
-          payment_source: quickItem.payment_source,
+          category: quickItem.category || '',
+          payment_source: quickItem.payment_source || '',
           date: new Date().toISOString().slice(0, 10)
         };
 

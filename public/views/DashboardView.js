@@ -1,5 +1,14 @@
 // Mobile-Optimized Dashboard View
 const DashboardView = {
+  components: {
+    'statistics-cards': StatisticsCards,
+    'filter-tabs': FilterTabs,
+    'expense-list': ExpenseList,
+    'quick-add-modal': QuickAddModal,
+    'expense-form-modal': ExpenseFormModal,
+    'delete-confirm-modal': DeleteConfirmModal
+  },
+
   template: `
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 pt-14">
       <mobile-top-bar></mobile-top-bar>
@@ -10,143 +19,36 @@ const DashboardView = {
           <i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i>
         </div>
 
-        <!-- Statistics Cards - Swipeable -->
-        <div class="overflow-x-auto hide-scrollbar -mx-4 px-4">
-          <div class="flex space-x-3 pb-2">
-            <!-- Total Today -->
-            <div class="flex-shrink-0 w-40 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl p-4 shadow-lg">
-              <div class="flex items-center justify-between mb-2">
-                <i class="fas fa-calendar-day text-white text-xl opacity-80"></i>
-                <span class="text-xs text-white opacity-75">{{ t('today') }}</span>
-              </div>
-              <p class="text-2xl font-bold text-white">{{ formatCurrency(totalToday) }}</p>
-              <p class="text-xs text-white opacity-75 mt-1">{{ expensesToday }} {{ t('items') }}</p>
-            </div>
+        <!-- Statistics Cards -->
+        <statistics-cards
+          :total-today="totalToday"
+          :expenses-today="expensesToday"
+          :total-month="totalMonth"
+          :expenses-month="expensesMonth"
+          :top-category="topCategory"
+          :top-category-amount="topCategoryAmount"
+          :top-payment-source="topPaymentSource"
+          :top-payment-amount="topPaymentAmount"
+        />
 
-            <!-- Total This Month -->
-            <div class="flex-shrink-0 w-40 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 shadow-lg">
-              <div class="flex items-center justify-between mb-2">
-                <i class="fas fa-calendar-alt text-white text-xl opacity-80"></i>
-                <span class="text-xs text-white opacity-75">{{ t('thisMonth') }}</span>
-              </div>
-              <p class="text-2xl font-bold text-white">{{ formatCurrency(totalMonth) }}</p>
-              <p class="text-xs text-white opacity-75 mt-1">{{ expensesMonth }} {{ t('items') }}</p>
-            </div>
+        <!-- Filter Tabs -->
+        <filter-tabs
+          :active-filter="filter"
+          :filter-options="filterOptions"
+          @update:active-filter="filter = $event"
+        />
 
-            <!-- Top Category -->
-            <div class="flex-shrink-0 w-40 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-4 shadow-lg">
-              <div class="flex items-center justify-between mb-2">
-                <i class="fas fa-tag text-white text-xl opacity-80"></i>
-                <span class="text-xs text-white opacity-75">{{ t('topCategory') }}</span>
-              </div>
-              <p class="text-base font-bold text-white truncate">{{ topCategory || '-' }}</p>
-              <p class="text-xs text-white opacity-75 mt-1">{{ formatCurrency(topCategoryAmount) }}</p>
-            </div>
-
-            <!-- Top Payment -->
-            <div class="flex-shrink-0 w-40 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 shadow-lg">
-              <div class="flex items-center justify-between mb-2">
-                <i class="fas fa-credit-card text-white text-xl opacity-80"></i>
-                <span class="text-xs text-white opacity-75">{{ t('topPayment') }}</span>
-              </div>
-              <p class="text-base font-bold text-white truncate">{{ topPaymentSource || '-' }}</p>
-              <p class="text-xs text-white opacity-75 mt-1">{{ formatCurrency(topPaymentAmount) }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filter Tabs - Touch Optimized -->
-        <div class="overflow-x-auto hide-scrollbar -mx-4 px-4">
-          <div class="flex space-x-2 pb-2">
-            <button
-              v-for="filterOption in filterOptions"
-              :key="filterOption.value"
-              @click="filter = filterOption.value"
-              class="flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all active:scale-95"
-              :class="filter === filterOption.value 
-                ? 'bg-indigo-600 text-white shadow-md' 
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'"
-            >
-              {{ filterOption.label }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Expenses List - Swipeable Items -->
-        <div class="space-y-3">
-          <div
-            v-for="expense in filteredExpenses"
-            :key="expense._id"
-            @touchstart="handleTouchStart($event, expense)"
-            @touchmove="handleTouchMove"
-            @touchend="handleTouchEnd"
-            class="relative overflow-hidden rounded-2xl"
-          >
-            <!-- Swipe Actions Background - Only show when swiping -->
-            <div 
-              v-if="swipedExpense === expense._id"
-              class="absolute inset-0 flex items-center justify-between px-6 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl"
-            >
-              <i class="fas fa-trash text-white text-xl"></i>
-              <i class="fas fa-trash text-white text-xl"></i>
-            </div>
-
-            <!-- Expense Card -->
-            <div
-              :style="{ transform: swipedExpense === expense._id ? \`translateX(\${swipeOffset}px)\` : '' }"
-              class="relative bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-transform"
-              @click="selectExpense(expense)"
-            >
-              <div class="flex items-start justify-between">
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center space-x-2 mb-1">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
-                      {{ expense.category }}
-                    </span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                      {{ expense.payment_source }}
-                    </span>
-                  </div>
-                  <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
-                    {{ expense.name }}
-                  </h3>
-                  <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
-                    <span class="flex items-center">
-                      <i class="far fa-calendar mr-1"></i>
-                      {{ formatDate(expense.date) }}
-                    </span>
-                    <span v-if="expense.store" class="flex items-center">
-                      <i class="far fa-building mr-1"></i>
-                      {{ expense.store }}
-                    </span>
-                  </div>
-                </div>
-                <div class="flex flex-col items-end ml-4">
-                  <p class="text-lg font-bold text-red-600 dark:text-red-400">
-                    {{ formatCurrency(expense.amount) }}
-                  </p>
-                  <button
-                    @click.stop="toggleExpenseMenu(expense._id)"
-                    class="mt-1 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 transition-all"
-                  >
-                    <i class="fas fa-ellipsis-v text-gray-400"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Empty State -->
-          <div v-if="filteredExpenses.length === 0" class="text-center py-16">
-            <i class="fas fa-receipt text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-            <p class="text-gray-500 dark:text-gray-400 text-lg font-medium">
-              {{ t('noExpenses') }}
-            </p>
-            <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">
-              {{ t('tapPlusToAdd') }}
-            </p>
-          </div>
-        </div>
+        <!-- Expenses List -->
+        <expense-list
+          :expenses="filteredExpenses"
+          :swiped-expense-id="swipedExpense"
+          :swipe-offset="swipeOffset"
+          @touchstart="handleTouchStart"
+          @touchmove="handleTouchMove"
+          @touchend="handleTouchEnd"
+          @select="selectExpense"
+          @menu="toggleExpenseMenu"
+        />
       </div>
 
       <!-- Quick Add FAB Button -->
@@ -158,250 +60,36 @@ const DashboardView = {
         <i class="fas fa-bolt text-white text-2xl"></i>
       </button>
 
-      <!-- Quick Add Bottom Sheet -->
-      <transition name="slide-up">
-        <div v-if="showQuickAddModal" class="fixed inset-0 z-[60] flex items-end">
-          <div @click="closeQuickAddModal" class="absolute inset-0 bg-black bg-opacity-50"></div>
-          <div @click.stop class="relative w-full bg-white dark:bg-gray-800 rounded-t-3xl shadow-2xl max-h-[70vh] overflow-y-auto">
-            <!-- Handle Bar -->
-            <div class="flex justify-center pt-3 pb-2">
-              <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-            </div>
-            
-            <!-- Quick Add Content -->
-            <div class="px-5 pb-8">
-              <div class="flex items-center justify-between mb-6">
-                <div>
-                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('quickAddItems') }}</h2>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('quickAddDescription') }}</p>
-                </div>
-                <button
-                  @click="$router.push('/quick-add')"
-                  class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <i class="fas fa-cog text-gray-600 dark:text-gray-400"></i>
-                </button>
-              </div>
+      <!-- Quick Add Modal -->
+      <quick-add-modal
+        :show="showQuickAddModal"
+        :quick-add-items="quickAddItems"
+        :saving="saving"
+        @close="closeQuickAddModal"
+        @use-item="useQuickAddItem"
+        @manage="$router.push('/quick-add')"
+      />
 
-              <!-- Quick Add Items List -->
-              <div v-if="quickAddItems.length > 0" class="space-y-3">
-                <button
-                  v-for="item in quickAddItems"
-                  :key="item._id"
-                  @click="useQuickAddItem(item)"
-                  class="w-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4 border-2 border-transparent hover:border-indigo-300 dark:hover:border-indigo-600 active:scale-98 transition-all text-left"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex-1 min-w-0">
-                      <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
-                        {{ item.name }}
-                      </h3>
-                      <div class="flex items-center space-x-2 mb-1">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
-                          {{ item.category }}
-                        </span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
-                          {{ item.payment_source }}
-                        </span>
-                        <span v-if="item.store" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                          {{ item.store }}
-                        </span>
-                      </div>
-                    </div>
-                    <div class="ml-4">
-                      <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                        {{ formatCurrency(item.amount) }}
-                      </p>
-                      <div class="flex items-center justify-end mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        <i class="fas fa-bolt mr-1"></i>
-                        <span>{{ t('use') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              </div>
-
-              <!-- Empty State -->
-              <div v-else class="text-center py-12">
-                <i class="fas fa-bolt text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-                <p class="text-gray-500 dark:text-gray-400 text-lg font-medium mb-2">
-                  {{ t('noQuickAddItems') }}
-                </p>
-                <button
-                  @click="$router.push('/quick-add')"
-                  class="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 active:scale-95 transition-all"
-                >
-                  <i class="fas fa-plus mr-2"></i>
-                  {{ t('createNew') }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
-
-      <!-- Bottom Sheet - Add/Edit Expense -->
-      <transition name="slide-up">
-        <div v-if="showExpenseModal" class="fixed inset-0 z-[60] flex items-end">
-          <div @click="closeExpenseModal" class="absolute inset-0 bg-black bg-opacity-50"></div>
-          <div @click.stop class="relative w-full bg-white dark:bg-gray-800 rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto">
-            <!-- Handle Bar -->
-            <div class="flex justify-center pt-3 pb-2">
-              <div @click="closeExpenseModal" class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-            </div>
-            
-            <!-- Form Content -->
-            <div class="px-5 pb-8">
-              <!-- Inline Expense Form -->
-              <div class="space-y-4 pt-4">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                  {{ selectedExpense ? t('edit') : t('createNew') }}
-                </h2>
-
-                <form @submit.prevent="saveExpense" class="space-y-4">
-                  <!-- Item Name -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {{ t('item') }}
-                    </label>
-                    <input
-                      v-model="formData.name"
-                      type="text"
-                      :placeholder="t('itemPlaceholder')"
-                      class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-
-                  <!-- Amount -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {{ t('amount') }}
-                    </label>
-                    <input
-                      v-model="displayAmount"
-                      @input="handleAmountInput"
-                      type="text"
-                      :placeholder="t('amountPlaceholder')"
-                      class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-
-                  <!-- Store (Optional) -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {{ t('storePlaceholder') }} ({{ t('optional') }})
-                    </label>
-                    <input
-                      v-model="formData.store"
-                      type="text"
-                      :placeholder="t('storePlaceholder')"
-                      class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <!-- Category -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {{ t('category') }}
-                    </label>
-                    <select
-                      v-model="formData.category"
-                      class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">{{ t('selectCategory') }}</option>
-                      <option v-for="cat in categories" :key="cat._id" :value="cat.name">
-                        {{ cat.name }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- Payment Source -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {{ t('selectPaymentSource') }}
-                    </label>
-                    <select
-                      v-model="formData.payment_source"
-                      class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">{{ t('selectPaymentSource') }}</option>
-                      <option v-for="source in paymentSources" :key="source._id" :value="source.name">
-                        {{ source.name }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- Action Buttons -->
-                  <div class="flex space-x-3 pt-4">
-                    <button
-                      type="button"
-                      @click="closeExpenseModal"
-                      class="flex-1 px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all"
-                    >
-                      {{ t('cancel') }}
-                    </button>
-                    <button
-                      type="submit"
-                      :disabled="saving"
-                      class="flex-1 px-6 py-3 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50"
-                    >
-                      {{ saving ? t('saving') : t('save') }}
-                    </button>
-                  </div>
-
-                  <!-- Delete Button (if editing) -->
-                  <button
-                    v-if="selectedExpense"
-                    type="button"
-                    @click="deleteCurrentExpense"
-                    class="w-full px-6 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-medium hover:bg-red-100 dark:hover:bg-red-900/30 active:scale-95 transition-all"
-                  >
-                    {{ t('delete') }}
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
+      <!-- Expense Form Modal -->
+      <expense-form-modal
+        :show="showExpenseModal"
+        :expense="selectedExpense"
+        :categories="categories"
+        :payment-sources="paymentSources"
+        :saving="saving"
+        @close="closeExpenseModal"
+        @save="saveExpense"
+        @delete="deleteCurrentExpense"
+      />
 
       <!-- Delete Confirmation Modal -->
-      <div 
-        v-if="showDeleteConfirmation" 
-        class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black bg-opacity-50"
-        @click.self="cancelDelete"
-      >
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full mx-4 transform transition-all">
-          <!-- Modal Header -->
-          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-              <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
-              {{ t('confirmDelete') || 'Konfirmasi Hapus' }}
-            </h3>
-          </div>
-
-          <!-- Modal Footer -->
-          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
-            <button
-              @click="cancelDelete"
-              class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-transform"
-            >
-              {{ t('cancel') || 'Batal' }}
-            </button>
-            <button
-              @click="confirmDelete"
-              :disabled="deleting"
-              class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 active:scale-95 transition-transform"
-            >
-              {{ deleting ? t('deleting') || 'Menghapus...' : t('delete') || 'Hapus' }}
-            </button>
-          </div>
-        </div>
-      </div>
+      <delete-confirm-modal
+        :show="showDeleteConfirmation"
+        :item="expenseToDelete"
+        :deleting="deleting"
+        @cancel="cancelDelete"
+        @confirm="confirmDelete"
+      />
 
       <mobile-bottom-nav v-if="!showExpenseModal"></mobile-bottom-nav>
     </div>
@@ -426,18 +114,9 @@ const DashboardView = {
       saving: false,
       lastBackPress: 0,
       backPressTimeout: null,
-      displayAmount: '',
       showDeleteConfirmation: false,
       expenseToDelete: null,
       deleting: false,
-      formData: {
-        item: '',
-        amount: '',
-        store: '',
-        category: '',
-        payment_source: '',
-        date: new Date().toISOString().slice(0, 10)
-      },
       filterOptions: [
         { value: 'all', label: this.t('all') || 'Semua' },
         { value: 'today', label: this.t('today') || 'Hari Ini' },
@@ -597,25 +276,7 @@ const DashboardView = {
       return this.$root.t(key);
     },
 
-    formatCurrency(amount) {
-      return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
-    },
 
-    formatAmount(amount) {
-      return new Intl.NumberFormat('id-ID').format(amount);
-    },
-
-    handleAmountInput(event) {
-      let value = event.target.value.replace(/\D/g, '');
-      this.formData.amount = parseInt(value) || 0;
-      this.displayAmount = this.formatAmount(this.formData.amount);
-    },
-
-    formatDate(dateString) {
-      const date = new Date(dateString);
-      const options = { day: 'numeric', month: 'short', year: 'numeric' };
-      return date.toLocaleDateString('id-ID', options);
-    },
 
     async loadData() {
       this.loading = true;
@@ -749,30 +410,12 @@ const DashboardView = {
 
     selectExpense(expense) {
       this.selectedExpense = expense;
-      this.formData = {
-        name: expense.name,
-        amount: expense.amount,
-        store: expense.store,
-        category: expense.category,
-        payment_source: expense.payment_source,
-        date: expense.date
-      };
-      this.displayAmount = this.formatAmount(expense.amount);
       this.showExpenseModal = true;
     },
 
     closeExpenseModal() {
       this.showExpenseModal = false;
       this.selectedExpense = null;
-      this.displayAmount = '';
-      this.formData = {
-        name: '',
-        amount: '',
-        store: '',
-        category: '',
-        payment_source: '',
-        date: new Date().toISOString().slice(0, 10)
-      };
       
       // Pop the history state if it was added by modal
       if (window.history.state?.modal === 'expense') {
@@ -791,15 +434,6 @@ const DashboardView = {
 
     openNewExpenseForm() {
       this.selectedExpense = null;
-      this.displayAmount = '';
-      this.formData = {
-        name: '',
-        amount: '',
-        store: '',
-        category: '',
-        payment_source: '',
-        date: new Date().toISOString().slice(0, 10)
-      };
       this.showExpenseModal = true;
     },
 
@@ -826,14 +460,9 @@ const DashboardView = {
       }
     },
 
-    async saveExpense() {
+    async saveExpense(expenseData) {
       this.saving = true;
       try {
-        const expenseData = {
-          ...this.formData,
-          amount: parseFloat(this.formData.amount)
-        };
-
         if (this.selectedExpense) {
           await apiClient.expenses.update(this.selectedExpense._id, expenseData);
         } else {

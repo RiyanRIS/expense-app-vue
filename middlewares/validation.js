@@ -494,6 +494,147 @@ const validatePushNotification = [
   handleValidationErrors
 ];
 
+/**
+ * Validasi untuk POST /api/incomes
+ */
+const validateCreateIncome = [
+  body('date')
+    .optional()
+    .isISO8601()
+    .withMessage('Format tanggal harus ISO8601 (YYYY-MM-DD)'),
+  
+  body('name')
+    .notEmpty()
+    .withMessage('Nama pemasukan tidak boleh kosong')
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('Nama pemasukan maksimal 200 karakter')
+    .escape(),
+  
+  body('amount')
+    .notEmpty()
+    .withMessage('Jumlah tidak boleh kosong')
+    .custom((value) => {
+      const num = parseFloat(value);
+      if (isNaN(num)) {
+        throw new Error('Jumlah harus berupa angka');
+      }
+      if (num < 0) {
+        throw new Error('Jumlah tidak boleh negatif');
+      }
+      if (num > 100000000) {
+        throw new Error('Jumlah maksimal 100.000.000');
+      }
+      return true;
+    }),
+  
+  body('category')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Kategori maksimal 100 karakter')
+    .escape(),
+  
+  body('source')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Sumber pemasukan maksimal 100 karakter')
+    .escape(),
+  
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Deskripsi maksimal 500 karakter')
+    .escape(),
+  
+  body('input_date')
+    .optional()
+    .isISO8601()
+    .withMessage('Format input_date harus ISO8601 (YYYY-MM-DD)'),
+  
+  body('input_time')
+    .optional()
+    .matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+    .withMessage('Format input_time harus HH:MM:SS'),
+  
+  handleValidationErrors
+];
+
+/**
+ * Validasi untuk PUT /api/incomes/:id
+ */
+const validateUpdateIncome = [
+  param('id')
+    .isMongoId()
+    .withMessage('ID income tidak valid'),
+  
+  body('date')
+    .optional()
+    .isISO8601()
+    .withMessage('Format tanggal harus ISO8601 (YYYY-MM-DD)'),
+  
+  body('name')
+    .optional()
+    .notEmpty()
+    .withMessage('Nama pemasukan tidak boleh kosong')
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('Nama pemasukan maksimal 200 karakter')
+    .escape(),
+  
+  body('amount')
+    .optional()
+    .custom((value) => {
+      const num = parseFloat(value);
+      if (isNaN(num)) {
+        throw new Error('Jumlah harus berupa angka');
+      }
+      if (num < 0) {
+        throw new Error('Jumlah tidak boleh negatif');
+      }
+      if (num > 100000000) {
+        throw new Error('Jumlah maksimal 100.000.000');
+      }
+      return true;
+    }),
+  
+  body('category')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Kategori maksimal 100 karakter')
+    .escape(),
+  
+  body('source')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Sumber pemasukan maksimal 100 karakter')
+    .escape(),
+  
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Deskripsi maksimal 500 karakter')
+    .escape(),
+  
+  handleValidationErrors
+];
+
+/**
+ * Validasi untuk DELETE /api/incomes/:id dan GET /api/incomes/:id
+ */
+const validateIncomeId = [
+  param('id')
+    .isMongoId()
+    .withMessage('ID income tidak valid'),
+  
+  handleValidationErrors
+];
+
 module.exports = {
   validateCreateExpense,
   validateUpdateExpense,
@@ -507,6 +648,9 @@ module.exports = {
   validateCreateQuickAddItem,
   validateUpdateQuickAddItem,
   validateQuickAddItemId,
+  validateCreateIncome,
+  validateUpdateIncome,
+  validateIncomeId,
   validateRestore,
   validateSubscribe,
   validateUnsubscribe,

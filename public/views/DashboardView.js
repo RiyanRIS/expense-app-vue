@@ -80,6 +80,7 @@ const DashboardView = {
         @close="closeExpenseModal"
         @save="saveExpense"
         @delete="deleteCurrentExpense"
+        @category-created="loadCategories"
       />
 
       <!-- Delete Confirmation Modal -->
@@ -300,6 +301,15 @@ const DashboardView = {
       }
     },
 
+    async loadCategories() {
+      try {
+        const categoriesRes = await apiClient.categories.getAll();
+        this.categories = categoriesRes.categories || [];
+      } catch (error) {
+        console.error('Failed to reload categories:', error);
+      }
+    },
+
     setupBackButtonHandler() {
       this.handleBackButton = (event) => {
         // If expense modal is open, close it
@@ -460,17 +470,30 @@ const DashboardView = {
       }
     },
 
-    async saveExpense(expenseData) {
+    async saveExpense(data) {
       this.saving = true;
       try {
+        const isIncome = data.type === 'income';
+        const apiEndpoint = isIncome ? apiClient.incomes : apiClient.expenses;
+        
+        // Remove type from data before sending
+        const { type, ...transactionData } = data;
+        
         if (this.selectedExpense) {
-          await apiClient.expenses.update(this.selectedExpense._id, expenseData);
+          // Check if editing existing transaction
+          const isEditingIncome = this.selectedExpense.source !== undefined;
+          const editEndpoint = isEditingIncome ? apiClient.incomes : apiClient.expenses;
+          await editEndpoint.update(this.selectedExpense._id, transactionData);
         } else {
-          await apiClient.expenses.create(expenseData);
+          // Creating new transaction
+          await apiEndpoint.create(transactionData);
         }
 
         await this.loadData();
-        this.$root.showNotification(this.t('expenseSaved'), 'success');
+        const message = isIncome 
+          ? (this.t('incomeSaved') || 'Pemasukan berhasil disimpan')
+          : this.t('expenseSaved');
+        this.$root.showNotification(message, 'success');
         this.closeExpenseModal();
       } catch (error) {
         this.$root.showNotification(error.message, 'error');

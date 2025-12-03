@@ -21,6 +21,32 @@ const CategoriesView = {
           </p>
         </div>
 
+        <!-- Type Filter Toggle -->
+        <div class="flex gap-2 p-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            @click="categoryType = 'expense'; fetchCategories();"
+            class="flex-1 py-2.5 rounded-lg font-medium transition-all"
+            :class="categoryType === 'expense' 
+              ? 'bg-red-500 text-white shadow-md' 
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+          >
+            <i class="fas fa-minus-circle mr-2"></i>
+            {{ t('expenseCategories') || 'Kategori Pengeluaran' }}
+          </button>
+          <button
+            type="button"
+            @click="categoryType = 'income'; fetchCategories();"
+            class="flex-1 py-2.5 rounded-lg font-medium transition-all"
+            :class="categoryType === 'income' 
+              ? 'bg-green-500 text-white shadow-md' 
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+          >
+            <i class="fas fa-plus-circle mr-2"></i>
+            {{ t('incomeCategories') || 'Kategori Pemasukan' }}
+          </button>
+        </div>
+
         <!-- Category Form Component -->
         <category-form
           :editing-category="editingCategory"
@@ -51,6 +77,7 @@ const CategoriesView = {
 
   data() {
     return {
+      categoryType: 'expense', // 'expense' or 'income'
       categories: [],
       editingCategory: null,
       loading: false,
@@ -80,7 +107,7 @@ const CategoriesView = {
     async fetchCategories() {
       this.loadingCategories = true;
       try {
-        const response = await apiClient.categories.getAll();
+        const response = await apiClient.categories.getAll(this.categoryType);
         this.categories = response.categories || [];
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -99,8 +126,8 @@ const CategoriesView = {
           await apiClient.categories.update(this.editingCategory.name, name);
           this.$root.showNotification(this.t('categoryUpdatedSuccessfully'), 'success');
         } else {
-          // Create new category
-          await apiClient.categories.create(name);
+          // Create new category with current type
+          await apiClient.categories.create(name, this.categoryType);
           this.$root.showNotification(this.t('categoryAddedSuccessfully'), 'success');
         }
         

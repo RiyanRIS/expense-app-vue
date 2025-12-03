@@ -56,20 +56,40 @@ exports.signup = asyncHandler(async (req, res) => {
   });
 
   // 4. Create default categories for the user
-  const defaultCategories = [
+  const defaultExpenseCategories = [
     'Makanan',
     'Transportasi',
     'Belanja',
     'Hiburan',
+    'Tagihan',
+    'Kesehatan',
     'Lainnya'
   ];
 
-  const categoryPromises = defaultCategories.map(categoryName =>
-    Category.create({
-      name: categoryName,
-      user: user._id
-    })
-  );
+  const defaultIncomeCategories = [
+    'Gaji',
+    'Bonus',
+    'Freelance',
+    'Investasi',
+    'Lainnya'
+  ];
+
+  const categoryPromises = [
+    ...defaultExpenseCategories.map(categoryName =>
+      Category.create({
+        name: categoryName,
+        user: user._id,
+        type: 'expense'
+      })
+    ),
+    ...defaultIncomeCategories.map(categoryName =>
+      Category.create({
+        name: categoryName,
+        user: user._id,
+        type: 'income'
+      })
+    )
+  ];
 
   // 5. Create default payment sources for the user
   const defaultPaymentSources = [
@@ -94,7 +114,8 @@ exports.signup = asyncHandler(async (req, res) => {
     userId: user._id,
     email: user.email,
     name: user.name,
-    defaultCategories: defaultCategories.length,
+    defaultExpenseCategories: defaultExpenseCategories.length,
+    defaultIncomeCategories: defaultIncomeCategories.length,
     defaultPaymentSources: defaultPaymentSources.length
   });
 

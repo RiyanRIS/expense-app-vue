@@ -180,25 +180,31 @@ const apiClient = {
 
   // Categories endpoints
   categories: {
-    async getAll() {
-      return apiClient.request(`${API_BASE_URL}/api/categories`, {
+    async getAll(type = null) {
+      const url = type 
+        ? `${API_BASE_URL}/api/categories?type=${type}`
+        : `${API_BASE_URL}/api/categories`;
+      return apiClient.request(url, {
         headers: apiClient.getHeaders()
       });
     },
 
-    async create(name) {
+    async create(name, type = 'expense') {
       return apiClient.request(`${API_BASE_URL}/api/categories`, {
         method: 'POST',
         headers: apiClient.getHeaders(),
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name, type })
       });
     },
 
-    async update(oldName, newName) {
+    async update(oldName, newName, type = null) {
+      const data = { name: newName };
+      if (type) data.type = type;
+      
       return apiClient.request(`${API_BASE_URL}/api/categories/${oldName}`, {
         method: 'PUT',
         headers: apiClient.getHeaders(),
-        body: JSON.stringify({ name: newName })
+        body: JSON.stringify(data)
       });
     },
 
@@ -268,6 +274,44 @@ const apiClient = {
 
     async delete(id) {
       return apiClient.request(`${API_BASE_URL}/api/quick-add-items/${id}`, {
+        method: 'DELETE',
+        headers: apiClient.getHeaders()
+      });
+    }
+  },
+
+  // Incomes endpoints
+  incomes: {
+    async getAll() {
+      return apiClient.request(`${API_BASE_URL}/api/incomes`, {
+        headers: apiClient.getHeaders()
+      });
+    },
+
+    async getById(id) {
+      return apiClient.request(`${API_BASE_URL}/api/incomes/${id}`, {
+        headers: apiClient.getHeaders()
+      });
+    },
+
+    async create(incomeData) {
+      return apiClient.request(`${API_BASE_URL}/api/incomes`, {
+        method: 'POST',
+        headers: apiClient.getHeaders(),
+        body: JSON.stringify(incomeData)
+      });
+    },
+
+    async update(id, incomeData) {
+      return apiClient.request(`${API_BASE_URL}/api/incomes/${id}`, {
+        method: 'PUT',
+        headers: apiClient.getHeaders(),
+        body: JSON.stringify(incomeData)
+      });
+    },
+
+    async delete(id) {
+      return apiClient.request(`${API_BASE_URL}/api/incomes/${id}`, {
         method: 'DELETE',
         headers: apiClient.getHeaders()
       });

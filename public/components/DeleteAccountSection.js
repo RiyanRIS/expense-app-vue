@@ -6,7 +6,7 @@ const DeleteAccountSection = {
     error: String
   },
   
-  emits: ['delete', 'cancel', 'clear-error'],
+  emits: ['confirm-delete', 'cancel', 'clear-error', 'show-modal'],
   
   data() {
     return {
@@ -26,7 +26,7 @@ const DeleteAccountSection = {
           {{ t('deleteAccountWarning') || 'Menghapus akun akan menghapus semua data Anda secara permanen. Tindakan ini tidak dapat dibatalkan.' }}
         </p>
         <button
-          @click="$emit('delete')"
+          @click="$emit('show-modal')"
           class="w-full bg-red-600 text-white py-3 px-4 rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 font-medium active:scale-95 transition-transform"
         >
           <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -105,7 +105,7 @@ const DeleteAccountSection = {
     
     handleConfirm() {
       if (this.password) {
-        this.$emit('delete', this.password);
+        this.$emit('confirm-delete', this.password);
       }
     },
     

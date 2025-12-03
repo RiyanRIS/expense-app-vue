@@ -47,7 +47,8 @@ const ProfileView = {
           :show="showDeleteModal"
           :loading="deleteLoading"
           :error="deleteError"
-          @delete="handleDeleteAccount"
+          @show-modal="showDeleteModal = true"
+          @confirm-delete="handleDeleteAccount"
           @cancel="cancelDeleteAccount"
           @clear-error="deleteError = null"
         />
@@ -165,8 +166,6 @@ const ProfileView = {
           password: password
         });
         
-        console.log('Delete account response:', response);
-        
         // Close modal first to remove overlay
         this.showDeleteModal = false;
         
@@ -188,16 +187,10 @@ const ProfileView = {
         this.$root.currentUser = null;
         
         // Redirect to login after showing messages (extended time)
-        setTimeout(() => {
-          this.$router.push('/login');
-        }, 3500);
+        this.$router.push('/login');
         
       } catch (error) {
-        console.error('Delete account error:', error);
         this.deleteError = error.message || this.t('failedToDeleteAccount') || 'Gagal menghapus akun';
-        
-        // Show error notification
-        this.$root.showNotification(this.deleteError, 'error');
       } finally {
         this.deleteLoading = false;
       }

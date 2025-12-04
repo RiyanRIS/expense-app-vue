@@ -27,6 +27,7 @@ const DeleteAccountSection = {
         </p>
         <button
           @click="$emit('show-modal')"
+          v-haptic:strong
           class="w-full bg-red-600 text-white py-3 px-4 rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 font-medium active:scale-95 transition-transform"
         >
           <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -81,6 +82,7 @@ const DeleteAccountSection = {
           <div class="flex space-x-3">
             <button
               @click="handleCancel"
+              v-haptic:light
               class="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 py-3 px-4 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 font-medium transition-colors"
             >
               {{ t('cancel') || 'Batal' }}
@@ -88,6 +90,7 @@ const DeleteAccountSection = {
             <button
               @click="handleConfirm"
               :disabled="loading || !password"
+              v-haptic:delete
               class="flex-1 bg-red-600 text-white py-3 px-4 rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 font-medium transition-colors"
             >
               {{ loading ? (t('deleting') || 'Menghapus...') : (t('deleteAccount') || 'Hapus Akun') }}

@@ -40,6 +40,7 @@ const CategoryForm = {
           <button
             type="submit"
             :disabled="loading"
+            v-haptic:success
             class="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 font-medium active:scale-95 transition-transform"
           >
             {{ loading ? t('saving') : (editingCategory ? t('save') : t('createNew')) }}
@@ -48,6 +49,7 @@ const CategoryForm = {
             v-if="editingCategory"
             type="button"
             @click="$emit('cancel')"
+            v-haptic:light
             class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-transform"
           >
             {{ t('cancel') }}

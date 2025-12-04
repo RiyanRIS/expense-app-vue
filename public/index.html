@@ -96,6 +96,28 @@
         transition: transform 0.3s ease;
       }
       
+      /* Shake animation for error notifications */
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+      }
+      
+      /* Pulse animation for success notifications */
+      @keyframes pulse-scale {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+      }
+      
+      /* Apply animations based on notification type */
+      .notification-error {
+        animation: shake 0.5s ease-in-out;
+      }
+      
+      .notification-success {
+        animation: pulse-scale 0.4s ease-in-out;
+      }
+      
       /* Mobile notification adjustments */
       @media (max-width: 640px) {
         .fade-enter-from {

@@ -26,6 +26,7 @@ const CategoriesView = {
           <button
             type="button"
             @click="categoryType = 'expense'; fetchCategories();"
+            v-haptic:medium
             class="flex-1 py-2.5 rounded-lg font-medium transition-all"
             :class="categoryType === 'expense' 
               ? 'bg-red-500 text-white shadow-md' 
@@ -37,6 +38,7 @@ const CategoriesView = {
           <button
             type="button"
             @click="categoryType = 'income'; fetchCategories();"
+            v-haptic:medium
             class="flex-1 py-2.5 rounded-lg font-medium transition-all"
             :class="categoryType === 'income' 
               ? 'bg-green-500 text-white shadow-md' 

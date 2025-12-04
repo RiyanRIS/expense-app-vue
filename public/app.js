@@ -18,8 +18,8 @@ const app = createApp({
             :key="notification.id"
             :class="[
               'mx-auto max-w-md w-full bg-white dark:bg-gray-800 shadow-xl rounded-2xl border pointer-events-auto transform transition-all duration-300',
-              notification.type === 'success' ? 'border-green-200 dark:border-green-700' : '',
-              notification.type === 'error' ? 'border-red-200 dark:border-red-700' : '',
+              notification.type === 'success' ? 'border-green-200 dark:border-green-700 notification-success' : '',
+              notification.type === 'error' ? 'border-red-200 dark:border-red-700 notification-error' : '',
               notification.type === 'warning' ? 'border-yellow-200 dark:border-yellow-700' : '',
               notification.type === 'info' ? 'border-blue-200 dark:border-blue-700' : ''
             ]"
@@ -145,6 +145,23 @@ const app = createApp({
       
       this.notifications.push(notification);
       
+      // Haptic feedback (vibration) for notifications
+      if ('vibrate' in navigator) {
+        if (type === 'error') {
+          // Strong vibration pattern for errors
+          navigator.vibrate([100, 50, 100, 50, 100]);
+        } else if (type === 'warning') {
+          // Medium vibration for warnings
+          navigator.vibrate([80, 40, 80]);
+        } else if (type === 'success') {
+          // Light vibration for success
+          navigator.vibrate([50, 30, 50]);
+        } else {
+          // Single light vibration for info
+          navigator.vibrate(40);
+        }
+      }
+      
       // Auto remove after 5 seconds (extended for delete account flow)
       setTimeout(() => {
         this.removeNotification(id);
@@ -155,6 +172,13 @@ const app = createApp({
       const index = this.notifications.findIndex(n => n.id === id);
       if (index > -1) {
         this.notifications.splice(index, 1);
+      }
+    },
+
+    // Haptic feedback helper for button interactions
+    vibrate(pattern = 30) {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(pattern);
       }
     },
 
@@ -195,6 +219,35 @@ const app = createApp({
 // Register global components
 app.component('mobile-top-bar', MobileTopBar);
 app.component('mobile-bottom-nav', MobileBottomNav);
+
+// Register global directive for haptic feedback
+app.directive('haptic', {
+  mounted(el, binding) {
+    // Default vibration pattern
+    let pattern = 30;
+    
+    // Custom patterns based on button type
+    if (binding.arg === 'light') {
+      pattern = 20;
+    } else if (binding.arg === 'medium') {
+      pattern = 40;
+    } else if (binding.arg === 'strong') {
+      pattern = 60;
+    } else if (binding.arg === 'delete') {
+      pattern = [50, 30, 50]; // Double vibration for destructive actions
+    } else if (binding.arg === 'success') {
+      pattern = [30, 20, 30]; // Gentle double for confirmations
+    } else if (binding.value) {
+      pattern = binding.value;
+    }
+    
+    el.addEventListener('click', () => {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(pattern);
+      }
+    });
+  }
+});
 
 // Use router
 app.use(router);

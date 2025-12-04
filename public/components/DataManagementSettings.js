@@ -30,6 +30,7 @@ const DataManagementSettings = {
           <button
             @click="$emit('export')"
             :disabled="exporting"
+            v-haptic:medium
             class="px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 active:scale-95 transition-transform text-sm font-medium whitespace-nowrap"
           >
             <i class="fas fa-download mr-1.5"></i>
@@ -58,6 +59,7 @@ const DataManagementSettings = {
             <button
               @click="$refs.fileInput.click()"
               :disabled="importing"
+              v-haptic:medium
               class="px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50 active:scale-95 transition-transform text-sm font-medium whitespace-nowrap"
             >
               <i class="fas fa-upload mr-1.5"></i>
@@ -78,6 +80,7 @@ const DataManagementSettings = {
           </div>
           <button
             @click="$emit('clear-cache')"
+            v-haptic:light
             class="px-4 py-2.5 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700 active:scale-95 transition-transform text-sm font-medium whitespace-nowrap"
           >
             <i class="fas fa-broom mr-1.5"></i>

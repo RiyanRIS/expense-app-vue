@@ -276,6 +276,7 @@ const ExpenseFormModal = {
                 <div class="flex space-x-3 pt-4">
                   <button
                     type="button"
+                    v-haptic:light
                     @click="$emit('close')"
                     class="flex-1 px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all"
                   >
@@ -283,6 +284,7 @@ const ExpenseFormModal = {
                   </button>
                   <button
                     type="submit"
+                    v-haptic:success
                     :disabled="saving"
                     class="flex-1 px-6 py-3 rounded-xl text-white font-medium active:scale-95 transition-all disabled:opacity-50"
                     :class="transactionType === 'expense' 
@@ -296,6 +298,7 @@ const ExpenseFormModal = {
                 <!-- Delete Button (if editing) -->
                 <button
                   v-if="expense"
+                  v-haptic:delete
                   type="button"
                   @click="$emit('delete')"
                   class="w-full px-6 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-medium hover:bg-red-100 dark:hover:bg-red-900/30 active:scale-95 transition-all"

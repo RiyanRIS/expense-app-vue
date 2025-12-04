@@ -41,6 +41,7 @@ const AppearanceSettings = {
           </div>
           <button
             @click="$emit('toggle-dark-mode')"
+            v-haptic:light
             class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             :class="darkMode ? 'bg-indigo-600' : 'bg-gray-200'"
           >

@@ -57,6 +57,10 @@ const translations = {
     item: "Nama Barang",
     amount: "Jumlah",
     category: "Kategori",
+    expense: "Pengeluaran",
+    income: "Pemasukan",
+    expenseCategories: "Kategori Pengeluaran",
+    incomeCategories: "Kategori Pemasukan",
     paymentSource: "Sumber Dana",
     date: "Tanggal",
     store: "Toko",
@@ -130,6 +134,7 @@ const translations = {
     quickAddDescription: "Buat template pengeluaran untuk transaksi yang sering dilakukan",
     noQuickAddItems: "Belum ada item Tambah Cepat.",
     quickAddItemsList: "Daftar Item Tambah Cepat",
+    confirmDeleteQuickAdd: "Apakah Anda yakin ingin menghapus item Tambah Cepat ini?",
     failedToLoadQuickAddItems: "Gagal memuat item Tambah Cepat",
     quickAddItemUpdatedSuccessfully: "Item Tambah Cepat berhasil diperbarui",
     quickAddItemDeletedSuccessfully: "Item Tambah Cepat berhasil dihapus",
@@ -282,6 +287,10 @@ const translations = {
     item: "Item Name",
     amount: "Amount",
     category: "Category",
+    expense: "Expense",
+    income: "Income",
+    expenseCategories: "Expense Categories",
+    incomeCategories: "Income Categories",
     paymentSource: "Payment Source",
     date: "Date",
     store: "Store",
@@ -383,6 +392,7 @@ const translations = {
     
     // Quick Add
     noQuickAddItems: "No Quick Add items yet.",
+    confirmDeleteQuickAdd: "Are you sure you want to delete this Quick Add item?",
     use: "Use",
     useTemplate: "Use Template",
     

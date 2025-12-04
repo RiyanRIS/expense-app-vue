@@ -44,6 +44,7 @@ const QuickAddView = {
           :show="showDeleteConfirmation"
           :item="itemToDelete"
           :deleting="deleting"
+          item-type="quickAdd"
           @cancel="cancelDelete"
           @confirm="confirmDelete"
         />

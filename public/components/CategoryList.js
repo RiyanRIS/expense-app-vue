@@ -41,15 +41,6 @@ const CategoryList = {
               <span class="text-gray-900 dark:text-white font-medium truncate">
                 {{ category.name }}
               </span>
-              <span 
-                v-if="category.type"
-                class="px-2 py-0.5 text-xs font-medium rounded-full flex-shrink-0"
-                :class="category.type === 'expense' 
-                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' 
-                  : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'"
-              >
-                {{ category.type === 'expense' ? (t('expense') || 'Pengeluaran') : (t('income') || 'Pemasukan') }}
-              </span>
             </div>
           </div>
 

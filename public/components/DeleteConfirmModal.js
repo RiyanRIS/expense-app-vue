@@ -3,7 +3,12 @@ const DeleteConfirmModal = {
   props: {
     show: Boolean,
     item: Object,
-    deleting: Boolean
+    deleting: Boolean,
+    message: String,
+    itemType: {
+      type: String,
+      default: 'expense' // 'expense', 'category', 'paymentSource', 'quickAdd'
+    }
   },
   
   emits: ['cancel', 'confirm'],
@@ -26,9 +31,11 @@ const DeleteConfirmModal = {
         <!-- Modal Body -->
         <div v-if="item" class="px-6 py-4">
           <p class="text-gray-600 dark:text-gray-400 mb-4">
-            {{ t('confirmDeleteExpense') || 'Apakah Anda yakin ingin menghapus pengeluaran ini?' }}
+            {{ message || getDefaultMessage() }}
           </p>
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-2">
+          
+          <!-- Expense Details -->
+          <div v-if="itemType === 'expense'" class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('item') }}:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ item.name }}</span>
@@ -46,8 +53,53 @@ const DeleteConfirmModal = {
               <span class="text-sm text-gray-900 dark:text-white">{{ item.payment_source }}</span>
             </div>
             <div v-if="item.store" class="flex items-center justify-between">
-              <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('store') || 'Toko' }}:</span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('store') }}:</span>
               <span class="text-sm text-gray-900 dark:text-white">{{ item.store }}</span>
+            </div>
+          </div>
+
+          <!-- Category Details -->
+          <div v-else-if="itemType === 'category'" class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+            <div class="flex items-center justify-center">
+              <i class="fas fa-tag text-3xl text-indigo-600 dark:text-indigo-400 mr-3"></i>
+              <div>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.name }}</p>
+                <p v-if="item.type" class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ item.type === 'expense' ? t('expense') : t('income') }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Source Details -->
+          <div v-else-if="itemType === 'paymentSource'" class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+            <div class="flex items-center justify-center">
+              <i class="fas fa-wallet text-3xl text-green-600 dark:text-green-400 mr-3"></i>
+              <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.name }}</p>
+            </div>
+          </div>
+
+          <!-- Quick Add Item Details -->
+          <div v-else-if="itemType === 'quickAdd'" class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('item') }}:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ item.name }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('amount') }}:</span>
+              <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400">{{ formatCurrency(item.amount) }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('category') }}:</span>
+              <span class="text-sm text-gray-900 dark:text-white">{{ item.category }}</span>
+            </div>
+          </div>
+
+          <!-- Generic Item Details (fallback) -->
+          <div v-else class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+            <div class="flex items-center justify-center">
+              <i class="fas fa-exclamation-circle text-3xl text-yellow-600 dark:text-yellow-400 mr-3"></i>
+              <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.name || item.title }}</p>
             </div>
           </div>
         </div>
@@ -81,6 +133,16 @@ const DeleteConfirmModal = {
     
     formatCurrency(amount) {
       return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+    },
+
+    getDefaultMessage() {
+      const messages = {
+        expense: this.t('confirmDeleteExpense') || 'Apakah Anda yakin ingin menghapus pengeluaran ini?',
+        category: this.t('confirmDeleteCategory') || 'Apakah Anda yakin ingin menghapus kategori ini?',
+        paymentSource: this.t('confirmDeletePaymentSource') || 'Apakah Anda yakin ingin menghapus sumber pembayaran ini?',
+        quickAdd: this.t('confirmDeleteQuickAdd') || 'Apakah Anda yakin ingin menghapus item ini?'
+      };
+      return messages[this.itemType] || this.t('confirmDelete') || 'Apakah Anda yakin ingin menghapus item ini?';
     }
   }
 };

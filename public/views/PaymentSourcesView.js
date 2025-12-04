@@ -42,6 +42,7 @@ const PaymentSourcesView = {
           :show="showDeleteConfirmation"
           :item="sourceToDelete"
           :deleting="deleting"
+          item-type="paymentSource"
           @cancel="cancelDelete"
           @confirm="confirmDelete"
         />

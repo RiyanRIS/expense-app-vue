@@ -33,7 +33,7 @@ const CategoriesView = {
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
           >
             <i class="fas fa-minus-circle mr-2"></i>
-            {{ t('expenseCategories') || 'Kategori Pengeluaran' }}
+            {{ t('expense') || 'Kategori Pengeluaran' }}
           </button>
           <button
             type="button"
@@ -45,7 +45,7 @@ const CategoriesView = {
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
           >
             <i class="fas fa-plus-circle mr-2"></i>
-            {{ t('incomeCategories') || 'Kategori Pemasukan' }}
+            {{ t('income') || 'Kategori Pemasukan' }}
           </button>
         </div>
 
@@ -70,6 +70,7 @@ const CategoriesView = {
           :show="showDeleteConfirmation"
           :item="categoryToDelete"
           :deleting="deleting"
+          item-type="category"
           @cancel="cancelDelete"
           @confirm="confirmDelete"
         />

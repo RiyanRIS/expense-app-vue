@@ -4,7 +4,8 @@ const SettingsView = {
     'appearance-settings': AppearanceSettings,
     'data-management-settings': DataManagementSettings,
     'notification-settings': NotificationSettings,
-    'about-section': AboutSection
+    'about-section': AboutSection,
+    'update-app-modal': UpdateAppModal
   },
 
   template: `
@@ -36,7 +37,7 @@ const SettingsView = {
           :importing="importing"
           @export="exportData"
           @import="importData"
-          @clear-cache="clearCache"
+          @update-app="updateApp"
         />
 
         <!-- Notification Settings Component -->
@@ -48,6 +49,14 @@ const SettingsView = {
 
         <!-- About Section Component -->
         <about-section />
+
+        <!-- Update App Modal -->
+        <update-app-modal
+          :show="showUpdateModal"
+          :updating="updating"
+          @cancel="showUpdateModal = false"
+          @confirm="confirmUpdateApp"
+        />
       </div>
     </div>
   `,
@@ -59,7 +68,9 @@ const SettingsView = {
       notificationsEnabled: false,
       notificationLoading: false,
       exporting: false,
-      importing: false
+      importing: false,
+      showUpdateModal: false,
+      updating: false
     };
   },
 
@@ -218,41 +229,57 @@ const SettingsView = {
       }
     },
 
-    clearCache() {
-      const confirmed = confirm(
-        this.t('confirmClearCache') || 'Yakin ingin menghapus cache? Aplikasi akan dimuat ulang.'
-      );
-      
-      if (!confirmed) return;
+    async updateApp() {
+      this.showUpdateModal = true;
+    },
+
+    async confirmUpdateApp() {
+      this.updating = true;
 
       try {
-        // Clear localStorage except authentication
-        const token = localStorage.getItem('token');
-        const user = localStorage.getItem('user');
-        
-        localStorage.clear();
-        
-        if (token) localStorage.setItem('token', token);
-        if (user) localStorage.setItem('user', user);
+        this.$root.showNotification(
+          this.t('updatingApp') || 'Sedang memperbarui...',
+          'info'
+        );
 
-        // Clear sessionStorage
-        sessionStorage.clear();
+        // Update service worker cache
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.getRegistration();
+          
+          if (registration) {
+            // Force service worker to update
+            await registration.update();
+            
+            // Skip waiting and activate new service worker
+            if (registration.waiting) {
+              registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+            
+            // Clear all caches
+            const cacheNames = await caches.keys();
+            await Promise.all(
+              cacheNames.map(cacheName => caches.delete(cacheName))
+            );
+          }
+        }
 
         this.$root.showNotification(
-          this.t('cacheCleared') || 'Cache berhasil dihapus',
+          this.t('appUpdated') || 'Aplikasi berhasil diperbarui',
           'success'
         );
 
-        // Reload page
+        // Reload page to apply updates
         setTimeout(() => {
-          window.location.reload();
+          window.location.reload(true);
         }, 1000);
       } catch (error) {
-        console.error('Clear cache error:', error);
+        console.error('Update app error:', error);
         this.$root.showNotification(
-          this.t('failedToClearCache') || 'Gagal menghapus cache',
+          this.t('failedToUpdateApp') || 'Gagal memperbarui aplikasi',
           'error'
         );
+        this.updating = false;
+        this.showUpdateModal = false;
       }
     }
   }

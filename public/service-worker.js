@@ -122,6 +122,11 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "sync-expenses") {
     event.waitUntil(syncPendingExpenses());
   }
+  
+  // Handle skip waiting for app updates
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("push", (event) => {

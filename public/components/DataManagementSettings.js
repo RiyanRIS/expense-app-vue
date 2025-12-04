@@ -5,7 +5,7 @@ const DataManagementSettings = {
     importing: Boolean
   },
   
-  emits: ['export', 'import', 'clear-cache'],
+  emits: ['export', 'import', 'update-app'],
   
   template: `
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -68,23 +68,23 @@ const DataManagementSettings = {
           </div>
         </div>
 
-        <!-- Clear Cache -->
+        <!-- Update App -->
         <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
           <div class="flex-1 min-w-0 mr-3">
             <h4 class="text-sm font-medium text-gray-900 dark:text-white">
-              {{ t('clearCache') }}
+              {{ t('updateApp') || 'Perbarui Aplikasi' }}
             </h4>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              {{ t('clearCacheDescription') || 'Hapus data cache lokal aplikasi' }}
+              {{ t('updateAppDescription') || 'Perbarui cache dengan versi terbaru dari server' }}
             </p>
           </div>
           <button
-            @click="$emit('clear-cache')"
-            v-haptic:light
-            class="px-4 py-2.5 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700 active:scale-95 transition-transform text-sm font-medium whitespace-nowrap"
+            @click="$emit('update-app')"
+            v-haptic:medium
+            class="px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 active:scale-95 transition-transform text-sm font-medium whitespace-nowrap"
           >
-            <i class="fas fa-broom mr-1.5"></i>
-            {{ t('clear') }}
+            <i class="fas fa-sync-alt mr-1.5"></i>
+            {{ t('update') || 'Perbarui' }}
           </button>
         </div>
       </div>

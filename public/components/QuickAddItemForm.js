@@ -16,7 +16,9 @@ const QuickAddItemForm = {
       category: '',
       payment_source: '',
       store: '',
-      displayAmount: ''
+      displayAmount: '',
+      showCategorySuggestions: false,
+      categorySuggestions: []
     };
   },
   
@@ -76,19 +78,37 @@ const QuickAddItemForm = {
           </div>
 
           <!-- Category -->
-          <div>
+          <div class="relative">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {{ t('category') }}
             </label>
-            <select
+            <input
               v-model="category"
+              type="text"
+              @input="handleCategoryInput"
+              @focus="handleCategoryFocus"
+              @blur="hideCategorySuggestions"
+              :placeholder="t('selectCategory') || 'Pilih atau ketik kategori baru'"
               class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
+              autocomplete="off"
+              required
+            />
+            <!-- Autocomplete Dropdown -->
+            <div
+              v-if="showCategorySuggestions && categorySuggestions.length > 0"
+              class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl shadow-lg max-h-48 overflow-y-auto"
             >
-              <option value="">{{ t('selectCategory') }}</option>
-              <option v-for="cat in categories" :key="cat._id || cat.name" :value="cat.name">
-                {{ cat.name }}
-              </option>
-            </select>
+              <button
+                v-for="suggestion in categorySuggestions"
+                :key="suggestion._id"
+                type="button"
+                @mousedown.prevent="selectCategory(suggestion.name)"
+                class="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition-colors"
+              >
+                <i class="fas fa-tag text-indigo-600 dark:text-indigo-400 mr-2"></i>
+                {{ suggestion.name }}
+              </button>
+            </div>
           </div>
 
           <!-- Payment Source -->
@@ -158,6 +178,35 @@ const QuickAddItemForm = {
       this.amount = parseInt(value) || 0;
       this.displayAmount = this.formatAmount(this.amount);
     },
+
+    handleCategoryInput(event) {
+      const input = event.target.value.toLowerCase();
+      if (input.length > 0) {
+        this.categorySuggestions = this.categories.filter(cat =>
+          cat.name.toLowerCase().includes(input)
+        );
+        this.showCategorySuggestions = true;
+      } else {
+        this.categorySuggestions = [...this.categories];
+        this.showCategorySuggestions = true;
+      }
+    },
+
+    handleCategoryFocus() {
+      this.categorySuggestions = [...this.categories];
+      this.showCategorySuggestions = true;
+    },
+
+    hideCategorySuggestions() {
+      setTimeout(() => {
+        this.showCategorySuggestions = false;
+      }, 200);
+    },
+
+    selectCategory(categoryName) {
+      this.category = categoryName;
+      this.showCategorySuggestions = false;
+    },
     
     handleSubmit() {
       this.$emit('submit', {
@@ -180,6 +229,8 @@ const QuickAddItemForm = {
       this.payment_source = '';
       this.store = '';
       this.displayAmount = '';
+      this.showCategorySuggestions = false;
+      this.categorySuggestions = [];
     }
   }
 };

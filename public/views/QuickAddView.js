@@ -120,13 +120,38 @@ const QuickAddView = {
       this.loading = true;
 
       try {
+        // Format category name to ucfirst
+        const formattedCategory = this.ucFirst(itemData.category);
+        
+        // Check if category exists
+        const categoryExists = this.categories.some(
+          cat => cat.name.toLowerCase() === formattedCategory.toLowerCase()
+        );
+
+        // Create category if it doesn't exist
+        if (!categoryExists && formattedCategory) {
+          try {
+            await apiClient.categories.create(formattedCategory, 'expense');
+            await this.fetchCategories(); // Refresh categories list
+          } catch (error) {
+            console.error('Failed to create category:', error);
+            // Continue even if category creation fails
+          }
+        }
+
+        // Update itemData with formatted category
+        const formattedItemData = {
+          ...itemData,
+          category: formattedCategory
+        };
+
         if (this.editingItem) {
           // Update existing item
-          await apiClient.quickAddItems.update(this.editingItem._id, itemData);
+          await apiClient.quickAddItems.update(this.editingItem._id, formattedItemData);
           this.$root.showNotification(this.t('quickAddItemUpdatedSuccessfully') || 'Item berhasil diperbarui!', 'success');
         } else {
           // Create new item
-          await apiClient.quickAddItems.create(itemData);
+          await apiClient.quickAddItems.create(formattedItemData);
           this.$root.showNotification(this.t('quickAddItemAddedSuccessfully') || 'Item berhasil ditambahkan!', 'success');
         }
         
@@ -140,6 +165,11 @@ const QuickAddView = {
       } finally {
         this.loading = false;
       }
+    },
+
+    ucFirst(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     },
 
     startEdit(item) {

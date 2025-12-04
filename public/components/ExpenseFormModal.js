@@ -200,7 +200,6 @@ const ExpenseFormModal = {
                     <select
                       v-model="formData.payment_source"
                       class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      :required="transactionType === 'expense'"
                     >
                       <option value="">{{ t('selectPaymentSource') }}</option>
                       <option v-for="source in paymentSources" :key="source._id" :value="source.name">

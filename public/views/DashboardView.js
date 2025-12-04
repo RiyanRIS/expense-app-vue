@@ -476,8 +476,31 @@ const DashboardView = {
         const isIncome = data.type === 'income';
         const apiEndpoint = isIncome ? apiClient.incomes : apiClient.expenses;
         
-        // Remove type from data before sending
-        const { type, ...transactionData } = data;
+        // Format category name to ucfirst
+        const formattedCategory = this.ucFirst(data.category);
+        
+        // Check if category exists
+        const categoryExists = this.categories.some(
+          cat => cat.name.toLowerCase() === formattedCategory.toLowerCase()
+        );
+
+        // Create category if it doesn't exist
+        if (!categoryExists && formattedCategory) {
+          try {
+            const categoryType = isIncome ? 'income' : 'expense';
+            await apiClient.categories.create(formattedCategory, categoryType);
+            await this.loadCategories(); // Refresh categories list
+          } catch (error) {
+            console.error('Failed to create category:', error);
+            // Continue even if category creation fails
+          }
+        }
+
+        // Remove type from data before sending and add formatted category
+        const { type, ...transactionData } = {
+          ...data,
+          category: formattedCategory
+        };
         
         if (this.selectedExpense) {
           // Check if editing existing transaction
@@ -500,6 +523,11 @@ const DashboardView = {
       } finally {
         this.saving = false;
       }
+    },
+
+    ucFirst(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     },
 
     async deleteCurrentExpense() {

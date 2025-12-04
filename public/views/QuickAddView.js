@@ -100,7 +100,7 @@ const QuickAddView = {
 
     async fetchCategories() {
       try {
-        const response = await apiClient.categories.getAll();
+        const response = await apiClient.categories.getAll('expense');
         this.categories = response.categories || [];
       } catch (error) {
         console.error('Failed to fetch categories:', error);

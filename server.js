@@ -70,7 +70,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 app.use(morgan('combined', { stream: morganStream })); // File logging untuk semua environment
 
-app.use(express.static(path.join(__dirname, "public")));
+// Serve frontend dari dist/ (production build) atau public/ (development)
+const isDevelopment = process.env.NODE_ENV === 'development';
+const frontendPath = isDevelopment ? path.join(__dirname, "public") : path.join(__dirname, "dist");
+app.use(express.static(frontendPath));
+
+logger.info(`Frontend serving from: ${frontendPath}`, { isDevelopment });
 
 const DB_USERNAME = process.env.DB_USERNAME;
 const DB_PASSWORD = process.env.DB_PASSWORD;
@@ -109,6 +114,9 @@ mongoose
 
 // ================== AUTH ROUTES ==================
 // Public routes
+app.get("/api", (req, res) => {
+  res.json({ message: "API is working" });
+});
 app.post("/api/auth/signup", authController.signup);
 app.post("/api/auth/login", authController.login);
 app.post("/api/auth/forgot-password", authController.forgotPassword);
@@ -455,6 +463,17 @@ app.post("/api/push-notification", protect, validatePushNotification, asyncHandl
     throw error;
   }
 }));
+
+// SPA Fallback - redirect 404 ke index.html untuk frontend routing
+app.get('*', (req, res) => {
+  const indexPath = path.join(frontendPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      logger.error('Error serving index.html', { error: err.message });
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+});
 
 // 404 Handler - harus sebelum error handler
 app.use(notFoundHandler);

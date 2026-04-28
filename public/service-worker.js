@@ -2,10 +2,8 @@ const CACHE_NAME = "expense-app-cache-v1";
 const urlsToCache = [
   "/",
   "/index.html",
-  "/app.js",
   "/manifest.json",
   "/plugins/tailwindcss/tailwindcss.js",
-  "/plugins/vue/vue.global.js",
   "/plugins/fontawesome/css/all.min.css",
 ];
 

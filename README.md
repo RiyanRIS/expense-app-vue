@@ -1,20 +1,184 @@
-# Aplikasi Pengelola Pengeluaran (Expense App)
+# Expense View - Aplikasi Pengelola Pengeluaran
 
-Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun dengan Node.js, Express, dan MongoDB sebagai backend, serta Vue.js sebagai frontend. Aplikasi ini juga diimplementasikan sebagai Progressive Web App (PWA) yang dapat di}
-}}}}}}
+Full-stack application untuk mengelola pengeluaran dengan backend Express + MongoDB dan frontend Vue 3 SFC menggunakan Vite. Diimplementasikan sebagai Progressive Web App (PWA) dengan support offline dan push notifications.
+
+---
+
+## 🏗️ Struktur Proyek (Backend + Frontend Terintegrasi)
+
+```
+expense-app-vue/
+├── src/                      # Frontend Vue source code
+│   ├── main.js              # Entry point aplikasi Vue
+│   ├── App.vue              # Root component
+│   └── components/          # Vue SFC per fitur
+├── public/                   # Asset statis browser
+│   ├── icons/               # Icon files
+│   ├── plugins/             # Tailwind CSS & FontAwesome
+│   ├── manifest.json        # PWA manifest
+│   ├── service-worker.js    # Offline support
+│   └── services/            # Frontend API layer
+├── dist/                    # Frontend build output (Vite build)
+├── models/                  # MongoDB schemas
+├── controllers/             # Business logic
+├── middlewares/             # Auth, validation, error handling
+├── config/                  # Logger configuration
+├── server.js                # Express + Static serving
+├── vite.config.js           # Vite configuration
+└── package.json
 ```
 
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap
-## 📚 Dokumentasi Lengkap dan mendukung fungsionalitas offline.
+---
+
+## 🚀 Development vs Production
+
+### Development Mode (npm run dev)
+- Vite dev server dengan hot reload
+- Frontend: `src/` directory
+- Backend: Express server
+
+```bash
+npm run dev     # Vite dev server (http://localhost:5173)
+node server.js # Express backend (http://localhost:3000)
+```
+
+### Production Mode (node server.js)
+1. Build frontend terlebih dahulu:
+   ```bash
+   npm run build    # Output: dist/ folder
+   ```
+
+2. Jalankan server:
+   ```bash
+   NODE_ENV=production node server.js
+   ```
+
+**Server behavior:**
+- Serve frontend static dari `dist/`
+- Handle `/api/**` untuk backend routes
+- Fallback `*` → `dist/index.html` (SPA routing)
+
+---
+
+## 📦 Teknologi
+
+### Frontend
+- **Vue 3** - Framework UI
+- **Vite** - Build tool & dev server
+- **Tailwind CSS** - Styling
+- **FontAwesome** - Icons
+
+### Backend
+- **Express.js** - Web framework
+- **MongoDB** - Database
+- **Mongoose** - ODM
+- **JWT** - Authentication
+- **bcryptjs** - Password hashing
+- **web-push** - Push notifications
+- **Winston** - Logging
+
+---
+
+## 🔧 NPM Scripts
+
+```bash
+npm run dev      # Development: Vite hot reload
+npm run build    # Production: Build frontend ke dist/
+npm run preview  # Preview hasil build
+npm start        # Jalankan server.js (backend)
+```
+
+---
+
+## ⚙️ Environment Variables
+
+Buat file `.env` di root:
+
+```env
+# Database
+DB_USERNAME=your_mongo_user
+DB_PASSWORD=your_mongo_pass
+DB_CLUSTER=your_cluster
+DB_NAME=expense_app
+
+# Server
+PORT=3000
+NODE_ENV=development
+
+# Notifications
+VAPID_PUBLIC_KEY=your_key
+VAPID_PRIVATE_KEY=your_key
+```
+
+---
+
+## 🎯 Key Features
+
+- ✅ JWT Authentication & Authorization
+- ✅ Expense tracking dengan filtering & statistics
+- ✅ Category & Payment source management
+- ✅ Backup & Restore data
+- ✅ Offline support via Service Worker + IndexedDB
+- ✅ Push notifications
+- ✅ Dark mode + Multi-language
+- ✅ Responsive mobile-first design
+
+---
+
+## 📝 Deployment Notes
+
+### Single Server Architecture
+Proyek ini dirancang untuk deployed sebagai **satu server** dengan struktur:
+- Frontend static di `/` (dari `dist/`)
+- Backend API di `/api/` (Express routes)
+- SPA fallback untuk routing
+
+Keuntungan:
+- No CORS issues
+- Simple deployment
+- Easy to scale
+
+### Production Checklist
+- [ ] Set `NODE_ENV=production`
+- [ ] Build frontend: `npm run build`
+- [ ] Ensure `.env` properly configured
+- [ ] Check MongoDB connection
+- [ ] Verify VAPID keys for push notifications
+- [ ] Enable logging to files
+
+---
+
+## 🔍 Architecture Note for AI
+
+**Frontend Structure:**
+- Components live in `src/components/*.vue`
+- Services (API layer) in `src/services/*.js`
+- Main app logic in `src/App.vue`
+
+**Backend Structure:**
+- API routes defined in `server.js`
+- Business logic in `controllers/`
+- Data validation in `middlewares/validation.js`
+- Error handling in `middlewares/errorHandler.js`
+
+**Integration Point:**
+- Frontend calls `/api/**` endpoints
+- Backend serves static files for frontend
+- SPA fallback routes unmatched paths to `index.html`
+
+---
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+# Aplikasi Pengelola Pengeluaran (Expense App)
+
+Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun dengan Node.js, Express, dan MongoDB sebagai backend, serta Vue.js sebagai frontend. Aplikasi ini juga diimplementasikan sebagai Progressive Web App (PWA) yang dapat di
 
 ## ✨ Fitur
 
 ### 🔐 **Authentication & Authorization**
+
 - **JWT-based Authentication**: Sistem login dan registrasi dengan JSON Web Tokens
 - **User Registration**: Pendaftaran akun baru dengan validasi email dan password
 - **Secure Login**: Login dengan email dan password yang di-hash
@@ -23,41 +187,48 @@ Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun denga
 - **User Data Isolation**: Setiap user hanya dapat mengakses data mereka sendiri
 
 ### 👤 **Profile Management**
+
 - **Update Profile**: Mengubah nama dan foto profil
 - **Change Password**: Mengubah password dengan validasi keamanan
 - **Password History**: Mencegah penggunaan ulang password lama
 - **Forgot Password**: Reset password via email (demo mode)
 
 ### 📊 **Expense Management**
+
 - **Pencatatan Pengeluaran**: Mencatat detail pengeluaran seperti tanggal, toko, item, jumlah, kategori, dan sumber pembayaran
 - **Quick Add Items**: Template pengeluaran untuk entri cepat
 - **Expense Filtering**: Filter berdasarkan tanggal (hari ini, kemarin, minggu ini, bulan ini)
 - **Expense Statistics**: Total pengeluaran hari ini, bulan ini, kategori terbanyak, dll.
 
 ### 📁 **Category & Payment Management**
+
 - **Manajemen Kategori**: Menambah, mengedit, dan menghapus kategori pengeluaran
 - **Manajemen Sumber Pembayaran**: Menambah, mengedit, dan menghapus sumber pembayaran
 - **Default Data**: Kategori dan sumber pembayaran default untuk user baru
 
 ### 💾 **Data Management**
+
 - **Backup & Restore**: Backup data ke file JSON dan restore
 - **Offline Support**: IndexedDB untuk penyimpanan offline
 - **Data Synchronization**: Sinkronisasi otomatis saat online
 - **Cache Management**: Clear cache dan reload aplikasi
 
 ### 🎨 **User Interface**
+
 - **🌓 Dark Mode**: Mode gelap adaptif mengikuti preferensi sistem
 - **🌍 Multi-Language**: Support Bahasa Indonesia & English
 - **📱 Mobile-First**: Desain responsif untuk perangkat mobile
 - **🎨 Theme Customization**: Berbagai pilihan warna tema
 
 ### 🔔 **Notifications & PWA**
+
 - **Push Notifications**: Notifikasi push untuk pengingat dan alert
 - **Progressive Web App**: Dapat diinstal ke layar utama
 - **Service Worker**: Cache untuk akses offline
 - **Web App Manifest**: Metadata aplikasi untuk PWA
 
 ### 🔒 **Security & Validation**
+
 - **Input Validation**: express-validator untuk semua endpoints
 - **Error Logging**: Winston + Morgan untuk comprehensive logging
 - **CORS Protection**: Cross-Origin Resource Sharing
@@ -66,6 +237,7 @@ Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun denga
 ## 🛠️ Teknologi yang Digunakan
 
 **Backend:**
+
 - **Node.js v14+**: Lingkungan runtime JavaScript
 - **Express.js**: Framework web untuk Node.js
 - **MongoDB + Mongoose**: Database NoSQL dengan ODM
@@ -79,6 +251,7 @@ Aplikasi ini adalah aplikasi pengelola pengeluaran sederhana yang dibangun denga
 - **cors**: Cross-Origin Resource Sharing
 
 **Frontend:**
+
 - **Vue.js 3**: Framework JavaScript progresif
 - **Tailwind CSS**: Framework CSS utilitas-first
 - **Font Awesome**: Library ikon

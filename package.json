@@ -1,12 +1,16 @@
 {
   "name": "crud-catatan-belanja",
   "version": "1.0.0",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
@@ -15,11 +19,21 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.0.0",
     "morgan": "^1.10.0",
+    "pinia": "^3.0.4",
+    "sweetalert2": "^11.26.24",
+    "vue": "^3.4.4",
+    "vue-router": "^4.6.4",
     "web-push": "^3.6.7",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.0"
+    "@tailwindcss/postcss": "^4.2.4",
+    "@vitejs/plugin-vue": "^4.4.1",
+    "autoprefixer": "^10.5.0",
+    "nodemon": "^2.0.0",
+    "postcss": "^8.5.12",
+    "tailwindcss": "^4.2.4",
+    "vite": "^5.4.1"
   }
 }

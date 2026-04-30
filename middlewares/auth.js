@@ -1,8 +1,7 @@
-const jwt = require('jsonwebtoken');
-const { asyncHandler } = require('./errorHandler');
-const { UnauthorizedError, ForbiddenError } = require('./errorHandler');
-const User = require('../models/User');
-const { logger } = require('../config/logger');
+import jwt from 'jsonwebtoken';
+import { asyncHandler, UnauthorizedError, ForbiddenError } from './errorHandler.js';
+import User from '../models/User.js';
+import logger from '../config/logger.js';
 
 /**
  * Authentication Middleware
@@ -273,7 +272,7 @@ const sendTokenResponse = (user, statusCode, res, additionalData = {}) => {
     });
 };
 
-module.exports = {
+export {
   generateToken,
   verifyToken,
   protect,

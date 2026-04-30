@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const QuickAddItemSchema = new mongoose.Schema({
   name: {
@@ -31,4 +31,4 @@ const QuickAddItemSchema = new mongoose.Schema({
 // Compound index untuk unique name per user
 QuickAddItemSchema.index({ name: 1, user: 1 }, { unique: true });
 
-module.exports = mongoose.model('QuickAddItem', QuickAddItemSchema);
+export default mongoose.model('QuickAddItem', QuickAddItemSchema);

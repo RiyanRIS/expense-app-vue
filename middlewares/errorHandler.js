@@ -1,4 +1,4 @@
-const { logger } = require('../config/logger');
+import logger from '../config/logger.js';
 
 /**
  * Custom Error Classes
@@ -264,8 +264,7 @@ const handleSIGTERM = (server) => {
   });
 };
 
-module.exports = {
-  // Custom Error Classes
+export {
   AppError,
   ValidationError,
   NotFoundError,
@@ -273,13 +272,11 @@ module.exports = {
   ForbiddenError,
   ConflictError,
   DatabaseError,
-  
-  // Middleware
+
   asyncHandler,
   notFoundHandler,
   errorHandler,
-  
-  // Process Handlers
+
   handleUnhandledRejection,
   handleUncaughtException,
   handleSIGTERM

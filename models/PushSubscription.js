@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const pushSubscriptionSchema = new mongoose.Schema({
   endpoint: { type: String, required: true, unique: true },
@@ -9,4 +9,4 @@ const pushSubscriptionSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("PushSubscription", pushSubscriptionSchema);
+export default mongoose.model("PushSubscription", pushSubscriptionSchema);

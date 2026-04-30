@@ -1,3 +1,5 @@
+import { useAuthStore } from "../stores/auth";
+
 let authToken = null;
 
 export function setAuthToken(token) {
@@ -38,6 +40,13 @@ export async function apiRequest(url, method = "GET", body = null) {
     payload = await response.json();
   } catch (err) {
     payload = null;
+  }
+
+  if (response.status === 401) {
+    clearAuthToken();
+    useAuthStore().relogin();
+    window.location.href = "/login";
+    return;
   }
 
   if (!response.ok) {

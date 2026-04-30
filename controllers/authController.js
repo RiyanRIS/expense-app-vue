@@ -1,15 +1,11 @@
-const User = require('../models/User');
-const Category = require('../models/Category');
-const PaymentSource = require('../models/PaymentSource');
-const { asyncHandler } = require('../middlewares/errorHandler');
-const {
-  ValidationError,
-  UnauthorizedError,
-  ConflictError,
-  NotFoundError
-} = require('../middlewares/errorHandler');
-const { sendTokenResponse } = require('../middlewares/auth');
-const { logger } = require('../config/logger');
+import User from '../models/User.js';
+import Category from '../models/Category.js';
+import PaymentSource from '../models/PaymentSource.js';
+import { asyncHandler, ValidationError, UnauthorizedError, ConflictError, NotFoundError } from '../middlewares/errorHandler.js';
+import { sendTokenResponse } from '../middlewares/auth.js';
+import logger from '../config/logger.js';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 /**
  * Auth Controller
@@ -21,7 +17,7 @@ const { logger } = require('../config/logger');
  * @route   POST /api/auth/signup
  * @access  Public
  */
-exports.signup = asyncHandler(async (req, res) => {
+export const signup = asyncHandler(async (req, res) => {
   const { name, email, password, passwordConfirm } = req.body;
 
   // 1. Validate input
@@ -106,7 +102,7 @@ exports.signup = asyncHandler(async (req, res) => {
  * @route   POST /api/auth/login
  * @access  Public
  */
-exports.login = asyncHandler(async (req, res) => {
+export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // 1. Validate input
@@ -163,7 +159,7 @@ exports.login = asyncHandler(async (req, res) => {
  * @route   POST /api/auth/logout
  * @access  Private
  */
-exports.logout = asyncHandler(async (req, res) => {
+export const logout = asyncHandler(async (req, res) => {
   // Clear cookie
   res.cookie('token', 'none', {
     expires: new Date(Date.now() + 10 * 1000),
@@ -186,7 +182,7 @@ exports.logout = asyncHandler(async (req, res) => {
  * @route   GET /api/auth/me
  * @access  Private
  */
-exports.getMe = asyncHandler(async (req, res) => {
+export const getMe = asyncHandler(async (req, res) => {
   // User is already attached to req by protect middleware
   const user = await User.findById(req.user._id);
 
@@ -215,7 +211,7 @@ exports.getMe = asyncHandler(async (req, res) => {
  * @route   PUT /api/auth/profile
  * @access  Private
  */
-exports.updateProfile = asyncHandler(async (req, res) => {
+export const updateProfile = asyncHandler(async (req, res) => {
   const { name, avatar } = req.body;
 
   // Fields to update
@@ -260,7 +256,7 @@ exports.updateProfile = asyncHandler(async (req, res) => {
  * @route   PUT /api/auth/change-password
  * @access  Private
  */
-exports.changePassword = asyncHandler(async (req, res) => {
+export const changePassword = asyncHandler(async (req, res) => {
   const { newPassword, newPasswordConfirm } = req.body;
 
   // 1. Validate input
@@ -321,7 +317,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
  * @route   POST /api/auth/forgot-password
  * @access  Public
  */
-exports.forgotPassword = asyncHandler(async (req, res) => {
+export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   // 1. Validate input
@@ -374,7 +370,7 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
  * @route   POST /api/auth/reset-password/:token
  * @access  Public
  */
-exports.resetPassword = asyncHandler(async (req, res) => {
+export const resetPassword = asyncHandler(async (req, res) => {
   const { password, passwordConfirm } = req.body;
   const { token } = req.params;
 
@@ -430,7 +426,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
  * @route   DELETE /api/auth/account
  * @access  Private
  */
-exports.deleteAccount = asyncHandler(async (req, res) => {
+export const deleteAccount = asyncHandler(async (req, res) => {
   const { password } = req.body;
 
   // 1. Verify password
@@ -477,7 +473,7 @@ exports.deleteAccount = asyncHandler(async (req, res) => {
  * @route   GET /api/auth/users
  * @access  Private/Admin
  */
-exports.getAllUsers = asyncHandler(async (req, res) => {
+export const getAllUsers = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
@@ -508,7 +504,7 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
  * @route   GET /api/auth/stats
  * @access  Private/Admin
  */
-exports.getUserStats = asyncHandler(async (req, res) => {
+export const getUserStats = asyncHandler(async (req, res) => {
   const stats = await User.getStats();
 
   res.status(200).json({

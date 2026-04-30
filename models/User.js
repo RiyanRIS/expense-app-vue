@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 /**
  * User Model untuk Authentication
@@ -135,8 +136,6 @@ UserSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
  * @returns {string} - Plain text reset token
  */
 UserSchema.methods.createPasswordResetToken = function() {
-  const crypto = require('crypto');
-  
   // Generate random token
   const resetToken = crypto.randomBytes(32).toString('hex');
   
@@ -222,4 +221,4 @@ UserSchema.index({ email: 1 });
 UserSchema.index({ status: 1 });
 UserSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('User', UserSchema);
+export default mongoose.model('User', UserSchema);

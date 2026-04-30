@@ -1,23 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from './stores/auth.js';
-import AuthView from './components/AuthView.vue';
-import HomeView from './components/HomeView.vue';
-import CreateExpenseView from './components/CreateExpenseView.vue';
-import ExpenseDetailView from './components/ExpenseDetailView.vue';
-import ExpenseEditView from './components/ExpenseEditView.vue';
-import SettingsView from './components/SettingsView.vue';
-import ProfileView from './components/ProfileView.vue';
-import ChangePasswordView from './components/ChangePasswordView.vue';
-import ForgotPasswordView from './components/ForgotPasswordView.vue';
-import CategoryView from './components/CategoryView.vue';
-import PaymentSourceView from './components/PaymentSourceView.vue';
-import BackupRestoreView from './components/BackupRestoreView.vue';
-import QuickAddView from './components/QuickAddView.vue';
+import AuthLoginView from './views/AuthLoginView.vue';
+import AuthSignupView from './views/AuthSignupView.vue';
+import HomeView from './views/HomeView.vue';
+import CreateExpenseView from './views/CreateExpenseView.vue';
+import ExpenseDetailView from './views/ExpenseDetailView.vue';
+import ExpenseEditView from './views/ExpenseEditView.vue';
+import SettingsView from './views/SettingsView.vue';
+import ProfileView from './views/ProfileView.vue';
+import ChangePasswordView from './views/ChangePasswordView.vue';
+import ForgotPasswordView from './views/ForgotPasswordView.vue';
+import CategoryView from './views/CategoryView.vue';
+import PaymentSourceView from './views/PaymentSourceView.vue';
+import BackupRestoreView from './views/BackupRestoreView.vue';
+import QuickAddView from './views/QuickAddView.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
-  { path: '/login', component: AuthView, props: { mode: 'login' }, meta: { requiresGuest: true } },
-  { path: '/signup', component: AuthView, props: { mode: 'signup' }, meta: { requiresGuest: true } },
+  { path: '/login', component: AuthLoginView, meta: { requiresGuest: true } },
+  { path: '/signup', component: AuthSignupView, meta: { requiresGuest: true } },
   { path: '/home', component: HomeView, meta: { requiresAuth: true } },
   { path: '/create', component: CreateExpenseView, meta: { requiresAuth: true } },
   { path: '/detail/:id', component: ExpenseDetailView, meta: { requiresAuth: true } },
@@ -40,6 +41,7 @@ const router = createRouter({
 // Navigation Guard
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
+  authStore.checkAuth();
   const isAuthenticated = authStore.isAuthenticated;
 
   if (to.meta.requiresAuth && !isAuthenticated) {

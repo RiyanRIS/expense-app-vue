@@ -1,4 +1,4 @@
-const { body, param, validationResult } = require('express-validator');
+import { body, param, validationResult } from 'express-validator';
 
 /**
  * Middleware untuk menangani hasil validasi
@@ -482,7 +482,7 @@ const validatePushNotification = [
   handleValidationErrors
 ];
 
-module.exports = {
+export {
   validateCreateExpense,
   validateUpdateExpense,
   validateExpenseId,

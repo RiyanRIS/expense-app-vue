@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const PaymentSourceSchema = new mongoose.Schema({
   name: {
@@ -18,4 +18,4 @@ const PaymentSourceSchema = new mongoose.Schema({
 // Compound index untuk unique name per user
 PaymentSourceSchema.index({ name: 1, user: 1 }, { unique: true });
 
-module.exports = mongoose.model('PaymentSource', PaymentSourceSchema);
+export default mongoose.model('PaymentSource', PaymentSourceSchema);

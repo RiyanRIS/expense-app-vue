@@ -1,6 +1,6 @@
-const winston = require('winston');
-const DailyRotateFile = require('winston-daily-rotate-file');
-const path = require('path');
+import winston from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import path from 'path';
 
 /**
  * Winston Logger Configuration
@@ -82,7 +82,7 @@ const httpFileTransport = new DailyRotateFile({
 });
 
 // Buat logger instance
-const logger = winston.createLogger({
+export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: customFormat,
   transports: [
@@ -122,7 +122,7 @@ const httpLogger = winston.createLogger({
 });
 
 // Stream untuk Morgan middleware
-const morganStream = {
+export const morganStream = {
   write: (message) => {
     httpLogger.info(message.trim());
   }
@@ -179,7 +179,4 @@ logger.logDatabase = (operation, collection, data = {}) => {
   });
 };
 
-module.exports = {
-  logger,
-  morganStream
-};
+export default logger;

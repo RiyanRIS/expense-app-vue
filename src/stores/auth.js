@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import { loginUser, registerUser, logoutUser, updateProfile, changePassword as changePasswordService } from './services/authService.js';
-import { showToast } from './services/utilityService.js';
+import { showToast } from '../services/utilityService.js';
+import { loginUser } from '../services/authService.js';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -11,45 +11,18 @@ export const useAuthStore = defineStore('auth', {
     authError: null,
   }),
   actions: {
-    async login(credentials) {
-      this.authLoading = true;
-      this.authError = null;
-      try {
-        const data = await loginUser(credentials);
-        this.authToken = data.token;
-        this.currentUser = data.user;
-        this.isAuthenticated = true;
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        showToast('Login berhasil!', 'success');
-        return true;
-      } catch (error) {
-        this.authError = error.message;
-        showToast(error.message, 'error');
-        return false;
-      } finally {
-        this.authLoading = false;
-      }
-    },
-    async signup(userData) {
-      this.authLoading = true;
-      this.authError = null;
-      try {
-        const data = await registerUser(userData);
-        this.authToken = data.token;
-        this.currentUser = data.user;
-        this.isAuthenticated = true;
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        showToast('Pendaftaran berhasil!', 'success');
-        return true;
-      } catch (error) {
-        this.authError = error.message;
-        showToast(error.message, 'error');
-        return false;
-      } finally {
-        this.authLoading = false;
-      }
+    async login(loginForm) {
+        try{
+            const data = await loginUser(loginForm);
+            this.authToken = data.token;
+            this.currentUser = data.user;
+            this.isAuthenticated = true;
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+        } catch (error) {
+            this.authError = error.message || 'Login gagal';
+            showToast(this.authError, 'error');
+        }
     },
     logout() {
       this.authToken = null;
@@ -58,6 +31,13 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       showToast('Logout berhasil!', 'info');
+    },
+    relogin() {
+      this.authToken = null;
+      this.currentUser = null;
+      this.isAuthenticated = false;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
     checkAuth() {
       const token = localStorage.getItem('token');
